@@ -111,6 +111,9 @@ class Tree(Struct):
         """Append a new key, value pair"""
         self._data.append((key, value))
 
+    def insert(self, i, key, value):
+        self._data.insert(i, (key, value))
+
     def __setitem__(self, key, value):
         """Replaces the first item with the key if it exists; otherwise appends it"""
         for i, (oldKey, oldValue) in enumerate(self._data):
@@ -140,6 +143,22 @@ class Tree(Struct):
         """Update this Tree with another Tree or dict"""
         for key, value in other.items():
             self[key] = value
+
+    def deleteWalk(self, query):
+        """Delete all items with the key recursively"""
+        toRemove = []
+        for key, value in self._data:
+            if match(key, query):
+                toRemove.append((key, value))
+
+        for item in toRemove:
+            self._data.remove(item)
+
+        for key, value in self._data:
+            if isinstance(value, Tree):
+                value.deleteWalk(query)
+
+        # TODO: option to prune empty subtrees?
 
     # string output methods
     def __repr__(self):
