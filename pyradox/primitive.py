@@ -21,8 +21,8 @@ def makeTokenString(value):
         if value: return 'yes'
         else: return 'no'
     elif isinstance(value, str):
-        #quote string if contains non-alphanumerics
-        if re.search(value, "\W"):
+        #quote string if contains non-alphanumerics or is empty
+        if len(value) == 0 or re.search(value, "\W"):
             return '"%s"' % value
         else:
             return value
