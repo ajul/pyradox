@@ -3,6 +3,13 @@ import pyradox.struct
 import re
 import os
 
+class ParseError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
 def parseFile(filename, verbose=False):
     """Parse a single file and return a Tree."""
     f = open(filename)
@@ -93,7 +100,7 @@ def lexLine(line, filename, lineNumber):
                 break
         else:
             # default: show error and end line processing
-            raise SyntaxError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
+            raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
     return result
 
 def parse(tokenData, filename, startPos = 0):
@@ -124,17 +131,17 @@ def parseAsList(tokenData, filename, startPos = 0):
         if valueType == "end":
             if startPos == 0:
                 # top level cannot be ended
-                raise SyntaxError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
+                raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
             else:
                 return result, pos
         elif valueType in primitiveValues.keys():
             value = primitiveValues[valueType](valueString)
             # nested lists possible?
         else:
-            raise SyntaxError('%s, line %d: Error: Invalid value type %s. Only primitives are allowed in lists.' % (filename, keyLineNumber + 1, valueType))
+            raise ParseError('%s, line %d: Error: Invalid value type %s. Only primitives are allowed in lists.' % (filename, keyLineNumber + 1, valueType))
         result.append(value)
     if startPos > 0:
-        raise SyntaxError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
+        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
     else:
         return result
         
@@ -149,17 +156,17 @@ def parseAsTree(tokenData, filename, startPos = 0):
         if keyType == "end":
             if startPos == 0:
                 # top level cannot be ended
-                raise SyntaxError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
+                raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
             else:
                 return result, pos
         elif keyType in primitiveKeys.keys():
             key = primitiveKeys[keyType](keyString)
         else:
             #invalid key
-            raise SyntaxError('%s, line %d: Error: Token type %s is not valid key.' % (filename, keyLineNumber + 1, keyType))
+            raise ParseError('%s, line %d: Error: Token type %s is not valid key.' % (filename, keyLineNumber + 1, keyType))
 
         if pos >= len(tokenData):
-            raise SyntaxError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
+            raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
 
         # read equals sign
         equalsType, _, equalsLineNumber = tokenData[pos]
@@ -169,7 +176,7 @@ def parseAsTree(tokenData, filename, startPos = 0):
             print('%s, line %d: Warning: Expected equals sign after key "%s".' % (filename, equalsLineNumber + 1, keyString))
 
         if pos >= len(tokenData):
-            raise SyntaxError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
+            raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
 
         # read value
         valueType, valueString, valueLineNumber = tokenData[pos]
@@ -180,10 +187,10 @@ def parseAsTree(tokenData, filename, startPos = 0):
             # value is a dict, recurse
             value, pos = parse(tokenData, filename, pos)
         else:
-            raise SyntaxError('%s, line %d: Error: Invalid value type %s after key "%s".' % (filename, keyLineNumber + 1, valueType, keyString))
+            raise ParseError('%s, line %d: Error: Invalid value type %s after key "%s".' % (filename, keyLineNumber + 1, valueType, keyString))
         result.append(key, value)
     if startPos > 0:
-        raise SyntaxError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
+        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
     else:
         return result
 
