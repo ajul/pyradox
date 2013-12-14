@@ -151,12 +151,10 @@ def computeGroupCost(groupName, tree):
     groupValue = 0.0
     # if "start" not in tree.keys(): groupValue += 2.0 # compensate for lack of traditions
 
-    #print("== %s ==" %groupName)
     for ideaName, bonuses in tree.items():
         if ideaName in ("category", "trigger", "ai_will_do", "important", "free"): continue
         for bonusType, bonusValue in bonuses.items():
             bonusCost = computeBonusCost(bonusType, bonusValue)
-            # if "USA" in groupName: print('%s %s %0.2f' % (bonusType, bonusValue, bonusCost))
             groupValue += bonusCost
     return groupValue
     
