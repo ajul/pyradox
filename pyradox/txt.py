@@ -149,9 +149,8 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
             value, pos = parse(tokenData, filename, pos)
         elif valueType in primitiveValues.keys():
             value = primitiveValues[valueType](valueString)
-            # nested lists possible?
         else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s. Only primitives are allowed in lists.' % (filename, keyLineNumber + 1, valueType))
+            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, keyLineNumber + 1, valueType))
         result.append(value)
     if isTopLevel:
         return result
@@ -165,18 +164,20 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
     while pos < len(tokenData):
         # read key
         keyType, keyString, keyLineNumber = tokenData[pos]
-        pos += 1
         if keyType == "end":
+            pos += 1
             if startPos == 0:
                 # top level cannot be ended
                 raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
             else:
                 return result, pos
         elif keyType in primitiveKeys.keys():
+            pos += 1
             key = primitiveKeys[keyType](keyString)
         else:
             #invalid key
-            raise ParseError('%s, line %d: Error: Token type %s is not valid key.' % (filename, keyLineNumber + 1, keyType))
+            print('%s, line %d: Warning: Token "%s" is not valid key. Omitting corresponding value.' % (filename, keyLineNumber + 1, keyString))
+            key = None
 
         if pos >= len(tokenData):
             raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
@@ -186,7 +187,8 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         if equalsType == "equals":
             pos += 1
         else:
-            print('%s, line %d: Warning: Expected equals sign after key "%s".' % (filename, equalsLineNumber + 1, keyString))
+            if key is not None:
+                print('%s, line %d: Warning: Expected equals sign after key "%s".' % (filename, equalsLineNumber + 1, keyString))
 
         if pos >= len(tokenData):
             raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
@@ -201,7 +203,8 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             value, pos = parse(tokenData, filename, pos)
         else:
             raise ParseError('%s, line %d: Error: Invalid value type %s after key "%s".' % (filename, keyLineNumber + 1, valueType, keyString))
-        result.append(key, value)
+        if key is not None:
+            result.append(key, value)
     if isTopLevel:
         return result
     else:
