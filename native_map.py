@@ -35,7 +35,7 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
     m = re.match('\d+', filename)
     provinceID = int(m.group(0))
 
-    if 'native_size' in data and 'owner' not in data:
+    if 'native_size' in data:
         nativeSizeColormap[provinceID] = colormapMinMax(data['native_size'] * 100, minNativeSize, maxNativeSize)
     elif 'base_tax' in data:
         nativeSizeColormap[provinceID] = (127, 127, 127)

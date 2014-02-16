@@ -17,7 +17,7 @@ tradeGoodIcons = {}
 tree = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'tradegoods', '00_tradegoods.txt'))
 for idx, tradeGood in enumerate(tree.keys()):
     tradeGoodIcons[tradeGood] = resourceImages[idx]
-    #resourceImages[idx].save('out/tradegoods/trade_good_%s.png' % tradeGood)
+    resourceImages[idx].save('out/tradegoods/trade_good_%s.png' % tradeGood)
 
 colormap = {}
 iconmap = {}

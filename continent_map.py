@@ -6,7 +6,7 @@ import pyradox.txt
 import pyradox.worldmap
 from PIL import Image
 
-drawIDs = True
+drawIDs = False
 
 colorDefs = collections.OrderedDict([
     ('europe', (127, 255, 255)),        #cyan

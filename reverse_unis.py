@@ -5,33 +5,50 @@ import pyradox.primitive
 import pyradox.txt
 import pyradox.yml
 
+import ideaoptions
+
+# format: idea -> tree
+existingIdeas = {}
+
 # format: bonus -> [(title, value)...]
 bonusSources = {}
+
+localizationSources = ['powers_and_ideas', 'nw2']
 
 def addBonus(bonus, title, value):
     if bonus not in bonusSources:
         bonusSources[bonus] = []
-    bonusSources[bonus].append((title, value))
+    bonusSources[bonus].append((value, title))
+
+def valueString(bonus, value):
+    if ideaoptions.isPercentBonus(bonus):
+        return '%0.1f%%' % (value * 100.0)
+    else:
+        return pyradox.primitive.makeTokenString(value)
 
 def processIdeaGroup(key, tree):
     if 'free' not in tree or not tree['free']: return # free groups only
     
-    igName = pyradox.yml.getLocalization(key, 'powers_and_ideas')
+    igName = pyradox.yml.getLocalization(key, localizationSources)
     
     traditions = tree['start']
-    title = pyradox.yml.getLocalization('%s_start' % key, 'powers_and_ideas') or key
+    title = pyradox.yml.getLocalization('%s_start' % key, localizationSources) or key
     for bonus, value in traditions.items():
         addBonus(bonus, title, value)
 
     ambitions = tree['bonus']
-    title = pyradox.yml.getLocalization('%s_bonus' % key, 'powers_and_ideas') or key
+    title = pyradox.yml.getLocalization('%s_bonus' % key, localizationSources) or key
     for bonus, value in ambitions.items():
         addBonus(bonus, title, value)
 
     idx = 1
     for idea, bonuses in tree.items():
         if idea in ('start', 'bonus', 'free', 'trigger'): continue
-        ideaName = pyradox.yml.getLocalization(idea, 'powers_and_ideas')
+        if idea in existingIdeas:
+            bonuses = existingIdeas[idea]
+        else:
+            existingIdeas[idea] = bonuses
+        ideaName = pyradox.yml.getLocalization(idea, localizationSources)
         title = '%s %d: %s' % (igName, idx, ideaName)
         for bonus, value in bonuses.items():
             addBonus(bonus, title, value)
@@ -41,9 +58,9 @@ def makeWikiTable(bonus):
     result = '{|class = "wikitable sortable"\n'
     result += '! width="400px" | Idea !! Modifier \n'
 
-    for title, value in bonusSources[bonus]:
+    for value, title in bonusSources[bonus]:
         result += '|-\n'
-        result += '| %s || %s \n' % (title, pyradox.primitive.makeTokenString(value))
+        result += '| %s || %s \n' % (title, valueString(bonus, value))
     result += '|}\n'
     return result
 
@@ -53,7 +70,7 @@ for _, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'],
 
 wikiPage = ''
 for bonus in sorted(bonusSources.keys()):
-    sources = ['EU4', 'text', 'modifers', 'powers_and_ideas']
+    sources = ['EU4', 'text', 'modifers', 'powers_and_ideas', 'nw2']
     bonusTitle = (
         pyradox.yml.getLocalization('modifier_%s' % bonus, sources)
         or pyradox.yml.getLocalization('yearly_%s' % bonus, sources)
@@ -73,10 +90,17 @@ f.close()
 wikiTemplate = '<includeonly>{{#switch: {{lc:{{{1}}}}}\n'
 
 for bonus in sorted(bonusSources.keys()):
-    wikiTemplate += '| %s = \n' % bonus
-    for title, value in bonusSources[bonus]:
-        wikiFormatString = '{{#ifeq:{{{3|}}}|%%|%+d%%|%+s}}' % (value * 100.0, value)
-        wikiTemplate += '{{{2|*}}} %s: {{green|%s}}\n' % (title, wikiFormatString)
+    wikiTemplate += '| %s =   ' % bonus
+    reverse = not ideaoptions.isReversed(bonus)
+    prevValue = None
+    for value, title in sorted(bonusSources[bonus], reverse=reverse):
+        if value != prevValue:
+            prevValue = value
+            wikiTemplate = wikiTemplate[:-2]
+            wikiTemplate += '\n{{{2|*}}} %s: ' % valueString(bonus, value)
+        wikiTemplate += title + ', '
+
+    wikiTemplate = wikiTemplate[:-2] + '\n'
 
 wikiTemplate += '| default (invalid bonus type {{lc:{{{1}}}}})\n'
 wikiTemplate += '}}</includeonly><noinclude>{{template doc}}</noinclude>'

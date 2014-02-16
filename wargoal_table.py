@@ -32,7 +32,7 @@ def rightColumns(wargoal, poData):
 
     result += '|'
     for offer, value in poData.items():
-        if offer[:3] == 'po_':
+        if offer[:3] == 'po_' and value is True:
             result += '\n* %s' % pyradox.format.humanString(offer[3:], True)
     result += '\n'
     return result

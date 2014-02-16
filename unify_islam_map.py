@@ -1,6 +1,4 @@
 import os
-import re
-import collections
 import pyradox.config
 import pyradox.txt
 import pyradox.worldmap
@@ -14,4 +12,3 @@ for provinceID in unifyRequirements.findAll('owns_or_vassal_of'):
 provinceMap = pyradox.worldmap.ProvinceMap()
 out = provinceMap.generateImage(colormap)
 out.save('out/unify_islam_map.png')
-
