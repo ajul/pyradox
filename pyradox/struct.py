@@ -215,7 +215,7 @@ class List(list, Struct):
         return self.prettyprint(0)
 
     def prettyprint(self, level = 0, indentString = '    '):
-        result = ''
+        result = indentString * level
         for value in self:
             if isinstance(value, Struct):
                 result += '{\n'
@@ -224,6 +224,7 @@ class List(list, Struct):
             else:
                 result += pyradox.primitive.makeTokenString(value)
                 result += ' '
+        result += "\n"
         return result
 
     def copy(self):
