@@ -11,7 +11,7 @@ def makeString(tokenString):
     """
     Converts a token string to a string by dequoting it.
     """
-    return re.sub(r'^"|"$', r'', tokenString)
+    return re.sub(r'^"(.*)"$', r'\1', tokenString)
 
 def makeTokenString(value):
     """

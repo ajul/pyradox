@@ -57,7 +57,7 @@ tokenTypes = (
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
     ('int', r'-?\d+\b'),
     ('bool', r'(yes|no)\b'),
-    ('str', r'".*?"|[^#=\{\}\s]+\b'), # do escape characters exist?
+    ('str', r'".*?"|[^#=\{\}\s]+'), # do escape characters exist?
     )
 
 primitiveKeys = {
@@ -105,23 +105,34 @@ def lexLine(line, filename, lineNumber):
 
 def parse(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
+    isTopLevel = (startPos == 0)
+    # if starting position is 0, check for extra token at beginning
+    if startPos == 0 and len(tokenData) >= 3 and tokenData[2][0] == 'equals':
+        tokenType, tokenString, lineNumber = tokenData[0]
+        print('%s, line %d: Skipping header token "%s".' % (filename, lineNumber + 1, tokenString))
+        startPos = 1 # skip first token
     # determine whether is tree or list
     pos = startPos
     isEmpty = True
-    while pos < len(tokenData):
+    level = 0
+    while pos < len(tokenData) and level >= 0:
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
-        if tokenType == "equals":
-            return parseAsTree(tokenData, filename, startPos)
-        elif tokenType == "end":
-            break
-        elif tokenType in primitiveValues.keys():
+        if tokenType == "end":
+            level -= 1
+        else:
             isEmpty = False
+        
+            if tokenType == "begin":
+                level += 1
+            elif tokenType == "equals":
+                # parse as tree if equals sign detected at current level
+                if level == 0: return parseAsTree(tokenData, filename, startPos, isTopLevel)
     
-    if isEmpty: return parseAsTree(tokenData, filename, startPos) # empty defaults to tree
-    else: return parseAsList(tokenData, filename, startPos)
+    if isEmpty: return parseAsTree(tokenData, filename, startPos, isTopLevel) # empty defaults to tree
+    else: return parseAsList(tokenData, filename, startPos, isTopLevel)
     
-def parseAsList(tokenData, filename, startPos = 0):
+def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
     """Parse a list from the tokenData."""
     result = pyradox.struct.List()
     pos = startPos
@@ -134,18 +145,20 @@ def parseAsList(tokenData, filename, startPos = 0):
                 raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
             else:
                 return result, pos
+        elif valueType == "begin":
+            value, pos = parse(tokenData, filename, pos)
         elif valueType in primitiveValues.keys():
             value = primitiveValues[valueType](valueString)
             # nested lists possible?
         else:
             raise ParseError('%s, line %d: Error: Invalid value type %s. Only primitives are allowed in lists.' % (filename, keyLineNumber + 1, valueType))
         result.append(value)
-    if startPos > 0:
-        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
-    else:
+    if isTopLevel:
         return result
+    else:
+        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
         
-def parseAsTree(tokenData, filename, startPos = 0):
+def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
     """Parse a Tree from the tokenData."""
     result = pyradox.struct.Tree()
     pos = startPos
@@ -184,14 +197,15 @@ def parseAsTree(tokenData, filename, startPos = 0):
         if valueType in primitiveValues.keys():
             value = primitiveValues[valueType](valueString)
         elif valueType == "begin":
-            # value is a dict, recurse
+            # value is a dict or list, recurse
             value, pos = parse(tokenData, filename, pos)
         else:
             raise ParseError('%s, line %d: Error: Invalid value type %s after key "%s".' % (filename, keyLineNumber + 1, valueType, keyString))
         result.append(key, value)
-    if startPos > 0:
-        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
-    else:
+    if isTopLevel:
         return result
+    else:
+        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
+        
 
 
