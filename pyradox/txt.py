@@ -47,11 +47,11 @@ def parseMerge(dirname, verbose=False):
 
 tokenTypes = (
     # keysymbols
-    ('comment', r'#'),
     ('whitespace', r'\s+'),
     ('equals', r'='),
     ('begin', r'\{'),
     ('end', r'\}'),
+    ('comment', r'#.*'),
     # primitives
     ('date', r'\d{,4}\.\d{,2}\.\d{,2}\b'),
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
