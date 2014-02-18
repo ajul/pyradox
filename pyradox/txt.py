@@ -2,8 +2,16 @@ import pyradox.primitive
 import pyradox.struct
 import re
 import os
+import warnings
 
 class ParseError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+class ParseWarning(Warning):
     def __init__(self, message):
         self.message = message
 
@@ -175,7 +183,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             key = primitiveKeys[keyType](keyString)
         else:
             #invalid key
-            print('%s, line %d: Warning: Token "%s" is not valid key. Omitting corresponding value.' % (filename, keyLineNumber + 1, keyString))
+            warnings.warn(ParseWarning('%s, line %d: Warning: Token "%s" is not valid key. Omitting corresponding value.' % (filename, keyLineNumber + 1, keyString)))
             key = None
 
         if pos >= len(tokenData):
@@ -187,7 +195,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             pos += 1
         else:
             if key is not None:
-                print('%s, line %d: Warning: Expected equals sign after key "%s".' % (filename, equalsLineNumber + 1, keyString))
+                warnings.warn(ParseWarning('%s, line %d: Warning: Expected equals sign after key "%s".' % (filename, equalsLineNumber + 1, keyString)))
 
         if pos >= len(tokenData):
             raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))

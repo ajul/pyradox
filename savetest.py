@@ -3,6 +3,7 @@ import re
 import collections
 import pyradox.txt
 import time
+import warnings
 
 def parseFile(filename):
     """Parse a single file and return a Tree."""
@@ -20,6 +21,7 @@ def parseFile(filename):
     print('Parsed in %ss.' % (parseTime - lexTime))
     return result
 
-savetree = parseFile('in/testsave.eu4')
+warnings.simplefilter("ignore", pyradox.txt.ParseWarning)
+savetree = parseFile('in/thebloke.eu4')
 print(savetree["checksum"])
 
