@@ -60,6 +60,8 @@ tokenTypes = (
     ('str', r'".*?"|[^#=\{\}\s]+'), # do escape characters exist?
     )
 
+tokenTypes = tuple((x, re.compile(y)) for x, y, in tokenTypes)
+
 primitiveKeys = {
     'date' : pyradox.primitive.Date,
     'int' : int,
@@ -85,7 +87,7 @@ def lexLine(line, filename, lineNumber):
     while pos < len(line):
         # test vs keysymbols
         for tokenType, pattern in tokenTypes:
-            m = re.match(pattern, line[pos:])
+            m = pattern.match(line[pos:])
             if m is not None:
                 tokenString = m.group(0)
                 if tokenType == 'comment': return result
