@@ -60,7 +60,13 @@ tokenTypes = (
     ('str', r'".*?"|[^#=\{\}\s]+'), # do escape characters exist?
     )
 
-tokenTypes = tuple((x, re.compile(y)) for x, y, in tokenTypes)
+omnibusPattern = ''
+for tokenType, p in tokenTypes:
+    omnibusPattern += '(?P<' + tokenType + '>' + p + ')'
+    omnibusPattern += '|'
+omnibusPattern += '(.*)'
+
+omnibusPattern = re.compile(omnibusPattern)
 
 primitiveKeys = {
     'date' : pyradox.primitive.Date,
@@ -85,20 +91,16 @@ def lexLine(line, filename, lineNumber):
     """Lex a single line."""
     pos = 0
     while pos < len(line):
-        # test vs keysymbols
-        for tokenType, pattern in tokenTypes:
-            m = pattern.match(line[pos:])
-            if m is not None:
-                tokenString = m.group(0)
-                if tokenType == 'comment': return result
-                if tokenType != 'whitespace':
-                    # print((tokenType, tokenString, lineNumber)) # debug
-                    yield tokenType, tokenString, lineNumber
-                pos += len(tokenString)
-                break
-        else:
-            # default: show error and end line processing
-            raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
+        m = omnibusPattern.match(line[pos:])
+        tokenString = m.group(0)
+        tokenType = m.lastgroup
+        if tokenType == 'comment': return result
+        elif tokenType is None: raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
+        elif tokenType != 'whitespace':
+            # print((tokenType, tokenString, lineNumber)) # debug
+            yield tokenType, tokenString, lineNumber
+        
+        pos += len(tokenString)
 
 def parse(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
