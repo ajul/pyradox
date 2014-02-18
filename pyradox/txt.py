@@ -16,7 +16,7 @@ def parseFile(filename, verbose=False):
     fileLines = f.readlines()
     f.close()
     if verbose: print('Parsing file %s.' % filename)
-    tokenData = lex(fileLines, filename)
+    tokenData = list(lex(fileLines, filename))
     return parse(tokenData, filename)
     
 def parseDir(dirname, verbose=False):
@@ -76,32 +76,27 @@ primitiveValues = {
 
 def lex(fileLines, filename):
     """Lexer. Given the contents of a file, produces a list of (tokenType, tokenString, lineNumber)."""
-    result = []
     for lineNumber, line in enumerate(fileLines):
-        result += lexLine(line, filename, lineNumber)
-    return result
+        yield from lexLine(line, filename, lineNumber)
 
 def lexLine(line, filename, lineNumber):
     """Lex a single line."""
-    result = []
     pos = 0
     while pos < len(line):
         # test vs keysymbols
-        success = 0
         for tokenType, pattern in tokenTypes:
             m = re.match(pattern, line[pos:])
             if m is not None:
                 tokenString = m.group(0)
                 if tokenType == 'comment': return result
                 if tokenType != 'whitespace':
-                    result.append((tokenType, tokenString, lineNumber))
                     # print((tokenType, tokenString, lineNumber)) # debug
+                    yield tokenType, tokenString, lineNumber
                 pos += len(tokenString)
                 break
         else:
             # default: show error and end line processing
             raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
-    return result
 
 def parse(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
