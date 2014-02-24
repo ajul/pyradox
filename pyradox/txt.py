@@ -99,18 +99,8 @@ primitiveValues = {
 def lex(fileLines, filename):
     """Lexer. Given the contents of a file, produces a list of (tokenType, tokenString, lineNumber)."""
     for lineNumber, line in enumerate(fileLines):
-        for x in lexLine(line, filename, lineNumber): yield x
-
-def lexLine(line, filename, lineNumber):
-    """Lex a single line."""
-    for m in omnibusPattern.finditer(line):
-        tokenString = m.group(0)
-        tokenType = m.lastgroup
-        if tokenType == 'comment': return
-        elif tokenType is None: raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, tokenString))
-        elif tokenType != 'whitespace':
-            # print((tokenType, tokenString, lineNumber)) # debug
-            yield tokenType, tokenString, lineNumber
+        for x in ((m.lastgroup, m.group(0), lineNumber) for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace', 'comment')):
+            yield x
 
 def parseTokens(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
