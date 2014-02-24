@@ -1,5 +1,5 @@
 Requires: 
-* Python 3.3
+* Unicode-default Python. This includes the primary CPython 3 and IronPython, but NOT the primary CPython 2.
 * pyradox.worldmap requires PIL
 * pyraodx.yml requires PyYAML
 
