@@ -93,7 +93,7 @@ primitiveValues = {
 def lex(fileLines, filename):
     """Lexer. Given the contents of a file, produces a list of (tokenType, tokenString, lineNumber)."""
     for lineNumber, line in enumerate(fileLines):
-        yield from lexLine(line, filename, lineNumber)
+        for x in lexLine(line, filename, lineNumber): yield x
 
 def lexLine(line, filename, lineNumber):
     """Lex a single line."""
@@ -102,7 +102,7 @@ def lexLine(line, filename, lineNumber):
         m = omnibusPattern.match(line[pos:])
         tokenString = m.group(0)
         tokenType = m.lastgroup
-        if tokenType == 'comment': return result
+        if tokenType == 'comment': return
         elif tokenType is None: raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
         elif tokenType != 'whitespace':
             # print((tokenType, tokenString, lineNumber)) # debug

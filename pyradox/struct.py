@@ -41,7 +41,7 @@ class Tree(Struct):
 
     def __iter__(self):
         """Iterator over the keys of this tree."""
-        yield from self.keys()
+        for x in self.keys(): yield x
         
     def __len__(self):
         """Number of key-value pairs."""
@@ -87,7 +87,7 @@ class Tree(Struct):
             if match(key, query):
                 yield value
             if isinstance(value, Tree):
-                yield from value.findWalk(query)
+                for x in value.findWalk(query): yield x
 
     def containsValueWalk(self, query):
         """Returns true iff the query appears as a value anywhere in the tree."""
