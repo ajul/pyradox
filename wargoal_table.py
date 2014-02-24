@@ -4,9 +4,9 @@ import collections
 import pyradox.config
 import pyradox.format
 import pyradox.image
-import pyradox.txt
+import pyradox
 
-tree = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'wargoal_types', '00_wargoal_types.txt'))
+tree = pyradox.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'wargoal_types', '00_wargoal_types.txt'))
 
 def leftColumns(wargoal, data, side = None):
     result = '|-\n'

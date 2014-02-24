@@ -18,6 +18,12 @@ class ParseWarning(Warning):
     def __str__(self):
         return self.message
 
+def parse(s, filename=""):
+    """Parse a string."""
+    lines = s.splitlines()
+    tokenData = list(lex(lines, filename))
+    return parseTokens(tokenData, filename)
+
 def parseFile(filename, verbose=False):
     """Parse a single file and return a Tree."""
     f = open(filename)
@@ -25,7 +31,7 @@ def parseFile(filename, verbose=False):
     f.close()
     if verbose: print('Parsing file %s.' % filename)
     tokenData = list(lex(fileLines, filename))
-    return parse(tokenData, filename)
+    return parseTokens(tokenData, filename)
     
 def parseDir(dirname, verbose=False):
     """Given a directory, iterate over the content of the .txt files in that directory as Trees"""
@@ -110,7 +116,7 @@ def lexLine(line, filename, lineNumber):
         
         pos += len(tokenString)
 
-def parse(tokenData, filename, startPos = 0):
+def parseTokens(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
     isTopLevel = (startPos == 0)
     # if starting position is 0, check for extra token at beginning
@@ -153,7 +159,7 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
             else:
                 return result, pos
         elif valueType == "begin":
-            value, pos = parse(tokenData, filename, pos)
+            value, pos = parseTokens(tokenData, filename, pos)
         elif valueType in primitiveValues.keys():
             value = primitiveValues[valueType](valueString)
         else:
@@ -207,7 +213,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             value = primitiveValues[valueType](valueString)
         elif valueType == "begin":
             # value is a dict or list, recurse
-            value, pos = parse(tokenData, filename, pos)
+            value, pos = parseTokens(tokenData, filename, pos)
         else:
             raise ParseError('%s, line %d: Error: Invalid value type %s after key "%s".' % (filename, keyLineNumber + 1, valueType, keyString))
         if key is not None:
