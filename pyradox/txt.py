@@ -78,7 +78,7 @@ omnibusPattern = ''
 for tokenType, p in tokenTypes:
     omnibusPattern += '(?P<' + tokenType + '>' + p + ')'
     omnibusPattern += '|'
-omnibusPattern += '(.*)'
+omnibusPattern += '(.+)'
 
 omnibusPattern = re.compile(omnibusPattern)
 
@@ -103,18 +103,14 @@ def lex(fileLines, filename):
 
 def lexLine(line, filename, lineNumber):
     """Lex a single line."""
-    pos = 0
-    while pos < len(line):
-        m = omnibusPattern.match(line[pos:])
+    for m in omnibusPattern.finditer(line):
         tokenString = m.group(0)
         tokenType = m.lastgroup
         if tokenType == 'comment': return
-        elif tokenType is None: raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, line[pos:]))
+        elif tokenType is None: raise ParseError('%s, line %d: Error: Unrecognized token "%s".' % (filename, lineNumber + 1, tokenString))
         elif tokenType != 'whitespace':
             # print((tokenType, tokenString, lineNumber)) # debug
             yield tokenType, tokenString, lineNumber
-        
-        pos += len(tokenString)
 
 def parseTokens(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
