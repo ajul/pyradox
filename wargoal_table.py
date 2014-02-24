@@ -5,7 +5,6 @@ import pyradox.config
 import pyradox.format
 import pyradox.image
 import pyradox.txt
-import pyradox.worldmap
 
 tree = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'wargoal_types', '00_wargoal_types.txt'))
 

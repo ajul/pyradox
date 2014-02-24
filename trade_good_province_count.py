@@ -3,7 +3,6 @@ import re
 import collections
 import pyradox.config
 import pyradox.txt
-import pyradox.worldmap
 import pyradox.primitive
 import pyradox.image
 from PIL import Image
