@@ -5,7 +5,6 @@ import pyradox.config
 import pyradox.txt
 import pyradox.primitive
 import pyradox.image
-from PIL import Image
 
 startDate = pyradox.primitive.Date('1444.11.11')
 

@@ -57,7 +57,7 @@ class Date(DateBase):
     Date(year=1444, month=1, day=1)
     """
     def __new__(cls, *args, **kwargs):
-        return super().__new__(cls, *clampDayArgs(args), **kwargs)
+        return DateBase.__new__(cls, *clampDayArgs(args), **kwargs)
     
     def __repr__(self):
         return '%d.%d.%d' % (self.year, self.month, self.day)
@@ -108,7 +108,7 @@ class Duration(DurationBase):
             if 'years' not in kwargs: kwargs['years'] = 0
             if 'months' not in kwargs: kwargs['months'] = 0
             if 'days' not in kwargs: kwargs['days'] = 0
-        return super().__new__(cls, *dateArgs(args), **kwargs)
+        return DurationBase.__new__(cls, *dateArgs(args), **kwargs)
 
 # unit test
 if __name__ == "__main__":
