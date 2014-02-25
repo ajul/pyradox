@@ -21,16 +21,16 @@ class ParseWarning(Warning):
 def parse(s, filename=""):
     """Parse a string."""
     lines = s.splitlines()
-    tokenData = list(lex(lines, filename))
+    tokenData = lex(lines, filename)
     return parseTokens(tokenData, filename)
 
 def parseFile(filename, verbose=False):
     """Parse a single file and return a Tree."""
     f = open(filename)
-    fileLines = f.readlines()
+    lines = f.readlines()
     f.close()
     if verbose: print('Parsing file %s.' % filename)
-    tokenData = list(lex(fileLines, filename))
+    tokenData = lex(lines, filename)
     return parseTokens(tokenData, filename)
     
 def parseDir(dirname, verbose=False):
@@ -97,10 +97,15 @@ primitiveValues = {
     }
 
 def lex(fileLines, filename):
+    return list(lexIter(fileLines, filename))
+
+def lexIter(fileLines, filename):
     """Lexer. Given the contents of a file, produces a list of (tokenType, tokenString, lineNumber)."""
-    for lineNumber, line in enumerate(fileLines):
-        for x in ((m.lastgroup, m.group(0), lineNumber) for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace', 'comment')):
-            yield x
+    return (
+        (m.lastgroup, m.group(0), lineNumber)
+        for lineNumber, line in enumerate(fileLines)
+        for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace', 'comment')
+        )
 
 def parseTokens(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
@@ -138,16 +143,16 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
     while pos < len(tokenData):
         valueType, valueString, valueLineNumber = tokenData[pos]
         pos += 1
-        if valueType == "end":
-            if startPos == 0:
+        if valueType in primitiveValues.keys():
+            value = primitiveValues[valueType](valueString)
+        elif valueType == "end":
+            if isTopLevel:
                 # top level cannot be ended
                 raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
             else:
                 return result, pos
         elif valueType == "begin":
             value, pos = parseTokens(tokenData, filename, pos)
-        elif valueType in primitiveValues.keys():
-            value = primitiveValues[valueType](valueString)
         else:
             raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, keyLineNumber + 1, valueType))
         result.append(value)
@@ -163,16 +168,16 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
     while pos < len(tokenData):
         # read key
         keyType, keyString, keyLineNumber = tokenData[pos]
-        if keyType == "end":
+        if keyType in primitiveKeys.keys():
+            pos += 1
+            key = primitiveKeys[keyType](keyString)
+        elif keyType == "end":
             pos += 1
             if startPos == 0:
                 # top level cannot be ended
                 raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
             else:
                 return result, pos
-        elif keyType in primitiveKeys.keys():
-            pos += 1
-            key = primitiveKeys[keyType](keyString)
         else:
             #invalid key
             warnings.warn(ParseWarning('%s, line %d: Warning: Token "%s" is not valid key. Omitting corresponding value.' % (filename, keyLineNumber + 1, keyString)))
