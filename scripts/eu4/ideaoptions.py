@@ -1,11 +1,11 @@
-import os
-import pyradox.config
-import pyradox.format
-import pyradox.primitive
-import pyradox.txt
-import pyradox.yml
+intValues = (
+    1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 33, 40, 50, 60, 75, 100, 150, 200,
+    )
 
-undefinedBonuses = set()
+floatValues = (
+    0.002, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.075, 0.1, 0.15, 0.2, 0.25, 0.3, 0.33, 0.4, 0.5, 0.6, 0.66, 0.75,
+    1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0,
+    )
 
 # comments refer to normal value
 bonusData = (
@@ -38,7 +38,7 @@ bonusData = (
     ("discovered_relations_impact", -0.25, (-0.1, -0.25)),
     ("embargo_efficiency",          1/3, (0.1, 0.33)),
     ("enemy_core_creation",         1.0, (0.5, 2.0)),
-    ("extra_manpower_at_religious_war", 1.0, (True, True)), # bool
+    ("extra_manpower_at_religious_war", 2.0, (True, True)), # bool
     ("fabricate_claims_time",       -0.25, (-0.1, -0.25)),
     ("free_leader_pool",            1, (1, 1)),
     ("galley_cost",                 -0.2, (-0.1, -0.33)),
@@ -66,7 +66,7 @@ bonusData = (
     ("hostile_attrition",           1.0, (0.5, 1.0)),
     ("idea_claim_colonies",         1.0, (True, True)), # bool
     ("idea_cost",                   -0.1, (-0.05, -0.1)),
-    ("imperial_authority",          0.1, (0.05, 0.1)), #split between 0.1 and 0.05
+    ("imperial_authority",          0.1, (0.05, 0.25)), #split between 0.1 and 0.05
     ("infantry_cost",               -0.2, (-0.1, -0.33)), #OP?
     ("infantry_power",              0.1, (0.05, 0.25)), # limit to 0.25
     ("inflation_action_cost",       -0.15, (-0.05, -0.25)),
@@ -101,7 +101,7 @@ bonusData = (
     ("naval_morale",                0.2, (0.1, 0.5)),
     ("navy_tradition",              0.5, (0.25, 1.0)),
     ("navy_tradition_decay",        -0.01, (-0.005, -0.01)),
-    ("no_cost_for_reinforcing",     1.0, (True, True)), # bool
+    ("no_cost_for_reinforcing",     2.0, (True, True)), # bool
     ("no_religion_penalty",         1.0, (True, True)), # bool
     ("overseas_income",             0.2, (0.1, 0.3)), #0.1 or 0.2?
     ("papal_influence",             2, (1, 5)), # 2 or 3?
@@ -118,7 +118,7 @@ bonusData = (
     ("reduced_native_attacks",      1.0, (True, True)), # bool
     ("reduced_stab_impacts",        1.0, (True, True)), # bool
     ("reinforce_speed",             0.2, (0.1, 0.3)), # 0.15 to 0.30?
-    ("relations_decay_of_me",       0.3, (0.1, 0.3)), # exclude Religious +100%
+    ("relations_decay_of_me",       0.3, (0.1, 0.5)),
     ("religious_unity",             1/3, (0.2, 0.5)),
     ("republican_tradition",        0.005, (0.005, 0.01)), # cost adjusted upwards
     ("sea_repair",                  1.0, (True, True)), # bool
@@ -140,58 +140,122 @@ bonusData = (
 
 bonusTypes, bonusNormalValues, bonusRanges = zip(*bonusData)
 
-baseBonusValues = dict(zip(bonusTypes, bonusNormalValues))
+nonPercentFloats = set([
+    "army_tradition",
+    "hostile_attrition",
+    "inflation_reduction",
+    "legitimacy",
+    # "republican_tradition",
+    "navy_tradition",
+    "prestige",
+    ])
 
-def computeBonusCost(bonusType, bonusValue):
-    if bonusType in baseBonusValues:
-        baseBonusValue = baseBonusValues[bonusType]
-        if isinstance(bonusValue, bool): bonusValue = 1.0
-        result = bonusValue / baseBonusValue
-        if result < 0.0: print("Warning: bonus cost for %s below 0." % bonusType) 
-        return result
+def isPercentBonus(bonusName):
+    if bonusName in nonPercentFloats: return False
+    idx = bonusTypes.index(bonusName)
+    lowerBound = bonusRanges[idx][0]
+    return isinstance(lowerBound, float)
+
+def isReversed(bonusName):
+    idx = bonusTypes.index(bonusName)
+    return bonusNormalValues[idx] < 0.0
+
+disallowPositiveDuplicates = set([
+    "hostile_attrition",
+    ])
+
+allowNegativeDuplicates = set([
+    "artillery_cost",
+    "cavalry_cost",
+    "global_regiment_cost",
+    "global_revolt_risk",
+    "infantry_cost",
+    "war_exhaustion",
+    ])
+
+def allowDuplicate(bonusType):
+    normalValue = bonusNormalValues[bonusTypes.index(bonusType)]
+    if normalValue > 0: return bonusType not in disallowPositiveDuplicates
+    else: return bonusType in allowNegativeDuplicates
+
+def generateOptions(bonusTypeIndex):
+    bonusType, normalValue, valueRange = bonusData[bonusTypeIndex]
+
+    if normalValue > 0:
+        sign = 1
     else:
-        if bonusType not in undefinedBonuses:
-            print("Undefined bonus %s" % bonusType)
-            undefinedBonuses.add(bonusType)
-        return 1.0
-
-def computeGroupCost(groupName, tree):
-    groupValue = 0.0
-    # if "start" not in tree.keys(): groupValue += 2.0 # compensate for lack of traditions
-
-    for ideaName, bonuses in tree.items():
-        if ideaName in ("category", "trigger", "ai_will_do", "important", "free"): continue
-        for bonusType, bonusValue in bonuses.items():
-            bonusCost = computeBonusCost(bonusType, bonusValue)
-            groupValue += bonusCost
-    return groupValue
+        sign = -1
     
-result = []
+    if valueRange[0] is None:
+        options = ["(none): 0.00 point(s)"]
+        values = [None]
+        costs = [0.0]
+    elif isinstance(valueRange[0], bool):
+        cost = 1.0 / normalValue
+        options = ["yes: %0.2f point(s)" % (cost,)]
+        values = [True]
+        costs = [cost]
+    elif isinstance(valueRange[0], int):
+        options = []
+        values = []
+        costs = []
 
-for _, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
-    for groupName, tree in data.items():
-        if "start" not in tree.keys(): continue
-        result.append((computeGroupCost(groupName, tree), groupName))
+        for value in intValues:
+            if value < valueRange[0] * sign: continue
+            if value > valueRange[1] * sign: continue
+            
+            cost = value / normalValue * sign
+            options.append("%+d: %0.2f point(s)" % (value * sign, cost))
+            values.append(value * sign)
+            costs.append(cost)
 
-result.sort(reverse=True)
-for i, (cost, groupName) in enumerate(result):
-    print("|-\n| %s || %0.2f || %d" % (groupName, cost, i+1))
+        # negative option
+        negValue = -values[0]
+        negCost = -costs[0]
+        negOption = "%+d: %0.2f point(s)" % (negValue, negCost)
+        options = [negOption] + options
+        values = [negValue] + values
+        costs = [negCost] + costs
+            
+    else: # float
+        options = []
+        values = []
+        costs = []
 
-# cannot into relevant: less than 7
-# cannot into stronk: 7 to 9
-# normal: 9 to 11
-# stronk: 11 to 13
-# stronker: 13 to 15
-# uberstronk: 15 or more
+        for value in floatValues:
+            if value < valueRange[0] * sign: continue
+            if value > valueRange[1] * sign: continue
 
-# top picks
-# * republican tradition
-# * missionary strength
-# * discipline
-# * infantry power
-# * land morale
-# * diplomatic reputation
-# * tech cost
-# * core cost
-# * stability cost
-# * advisor pool?
+            cost = value / normalValue * sign
+
+            if bonusType in nonPercentFloats:
+                options.append("%+0.3f: %0.2f point(s)" % (value * sign, cost))
+            else:
+                options.append("%+0.1f%%: %0.2f point(s)" % (value * sign * 100.0, cost))
+            values.append(value * sign)
+            costs.append(cost)
+
+        # negative option
+        negValue = -values[0]
+        negCost = -costs[0] * 0.5 # only returns half points
+        if bonusType in nonPercentFloats:
+            negOption = "%+0.3f: %0.2f point(s)" % (negValue, negCost)
+        else:
+            negOption = "%+0.1f%%: %0.2f point(s)" % (negValue * 100.0, negCost)
+        options = [negOption] + options
+        values = [negValue] + values
+        costs = [negCost] + costs
+
+    return options, values, costs
+
+def getClosestValueIndex(values, target):
+    if values[0] is True or values[0] is None: return 0
+    
+    difference = abs(values[0] - target)
+    result = 0
+    for i, value in enumerate(values):
+        currDifference = abs(value - target)
+        if currDifference < difference:
+            difference = currDifference
+            result = i
+    return result

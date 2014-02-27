@@ -1,3 +1,4 @@
+import initpath
 import os
 import pyradox.config
 import pyradox.txt
