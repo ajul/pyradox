@@ -1,4 +1,4 @@
-import initpath
+import _initpath
 import os
 import re
 import io
