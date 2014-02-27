@@ -3,9 +3,9 @@ Requires:
 * pyradox.worldmap requires PIL
 * pyraodx.yml requires PyYAML
 
-Some scripts are in the root directory. Make sure they actually run before using them as a base, though, I tend to break things after a while. I recommend looking at:
-* country_table: Creates a wikitable showing country stats in EU4's 1444 start date.
-* military_tech: Shows how to parse a single file.
+Some scripts are in /scripts/<gamename>. Make sure they actually run before using them as a base, though, I tend to break things after a while. I recommend looking at:
+* scripts/eu4/country_table.py: Creates a wikitable showing country stats in EU4's 1444 start date.
+* scripts/eu4/military_tech.py: Shows how to parse a single file.
 
 Module summary:
 
