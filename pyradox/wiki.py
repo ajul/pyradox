@@ -1,20 +1,12 @@
 import pyradox.format
 
-def makeWikiString(value):
-    if isinstance(value, float):
-        return "%0.3f" % value
-    elif value is None:
-        return ""
-    else:
-        return str(value)
-
 def makeWikitable(tree, columnSpecs, filterFunction = None):
     # columnSpecs: [(header, content) ...]
     # each key, value pair produces a row
     # content can be one of the following:
     # * a function f -> f(key, value)
     # * None -> pyradox.format.humanString(key, True)
-    # * a subkey sk -> value[sk]
+    # * a format string s -> s % value
 
     result = '{|class = "wikitable sortable"\n'
     # header
@@ -32,7 +24,10 @@ def makeWikitable(tree, columnSpecs, filterFunction = None):
             elif columnSpec is None:
                 result += pyradox.format.humanString(key, True)
             else:
-                result += makeWikiString(value[columnSpec])
+                try:
+                    result += columnSpec % value
+                except TypeError:
+                    pass
             result += '\n'
     result += '|}\n'
     return result
