@@ -14,6 +14,7 @@ def capitalizeFirst(s):
     else: return s
 
 def humanString(s, capFirst = False):
+    s = str(s)
     s = re.sub(r'\.txt', r'', s)
     s = re.sub(r'([a-z])([A-Z])', r'\1 \2', s)
     s = re.sub(r'_', r' ', s)
