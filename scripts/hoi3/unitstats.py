@@ -114,8 +114,8 @@ baseColumns = {
         ("Surface Det.", "%(surface_detection).2f"),
         ("Air Det.", "%(air_detection).2f"),
 
-        ("Speed", "%(maximum_speed).2f"),
-        ("Range", "%(range).2f"),
+        ("Speed", "%(maximum_speed)d"),
+        ("Range", "%(range)d"),
         ("Supply Cons.", "%(supply_consumption).3f"),
         ("Fuel Cons.", "%(fuel_consumption).3f"),
         )
@@ -126,16 +126,54 @@ derivedColumns = {
         ("Unit", None),
         ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
         ("Soft Att./kICd", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Soft Att./MP", lambda k, v: '%0.3f' % (v["soft_attack"] / v["build_cost_manpower"])),
+        ("Soft Att./Cons.", lambda k, v: '%0.3f' % (v["soft_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+        
+        ("Hard Att./kICd", lambda k, v: '%0.3f' % (1000 * v["hard_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Hard Att./MP", lambda k, v: '%0.3f' % (v["hard_attack"] / v["build_cost_manpower"])),
+        ("Hard Att./Cons.", lambda k, v: '%0.3f' % (v["hard_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     "naval" : (
         ("Unit", None),
         ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
+        
         ("Sea Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sea Att./MP", lambda k, v: '%0.3f' % (v["sea_attack"] / v["build_cost_manpower"])),
+        ("Sea Att./Cons.", lambda k, v: '%0.3f' % (v["sea_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+
+        ("Air Att./kICd", lambda k, v: '%0.3f' % (1000 * v["air_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Air Att./MP", lambda k, v: '%0.3f' % (v["air_attack"] / v["build_cost_manpower"])),
+        ("Air Att./Cons.", lambda k, v: '%0.3f' % (v["air_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+
+        ("Sub Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sub_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sub Att./MP", lambda k, v: '%0.3f' % (v["sub_attack"] / v["build_cost_manpower"])),
+        ("Sub Att./Cons.", lambda k, v: '%0.3f' % (v["sub_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     "air" : (
         ("Unit", None),
         ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
         ("Soft Att./kICd", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Soft Att./MP", lambda k, v: '%0.3f' % (v["soft_attack"] / v["build_cost_manpower"])),
         ("Soft Att./Cons.", lambda k, v: '%0.3f' % (v["soft_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+        
+        ("Hard Att./kICd", lambda k, v: '%0.3f' % (1000 * v["hard_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Hard Att./MP", lambda k, v: '%0.3f' % (v["hard_attack"] / v["build_cost_manpower"])),
+        ("Hard Att./Cons.", lambda k, v: '%0.3f' % (v["hard_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+
+        ("Strat. Att./kICd", lambda k, v: '%0.3f' % (1000 * v["strategic_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Strat. Att./MP", lambda k, v: '%0.3f' % (v["strategic_attack"] / v["build_cost_manpower"])),
+        ("Strat. Att./Cons.", lambda k, v: '%0.3f' % (v["strategic_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+        
+        ("Air Att./kICd", lambda k, v: '%0.3f' % (1000 * v["air_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Air Att./MP", lambda k, v: '%0.3f' % (v["air_attack"] / v["build_cost_manpower"])),
+        ("Air Att./Cons.", lambda k, v: '%0.3f' % (v["air_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+        
+        ("Sea Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sea Att./MP", lambda k, v: '%0.3f' % (v["sea_attack"] / v["build_cost_manpower"])),
+        ("Sea Att./Cons.", lambda k, v: '%0.3f' % (v["sea_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
+
+        ("Sub Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sub_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sub Att./MP", lambda k, v: '%0.3f' % (v["sub_attack"] / v["build_cost_manpower"])),
+        ("Sub Att./Cons.", lambda k, v: '%0.3f' % (v["sub_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     }

@@ -11,6 +11,6 @@ terrainBMP = os.path.join(pyradox.config.basedirs['EU4'], 'map', 'terrain.bmp')
 terrainMap = Image.open(terrainBMP).convert('RGB')
 
 provinceMap = pyradox.worldmap.ProvinceMap()
-provinceMap.overlayEdgesOnImage(terrainMap)
+provinceMap.overlayEdges(terrainMap)
 terrainMap.save('out/terrain_map.png')
 

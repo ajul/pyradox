@@ -20,7 +20,10 @@ def makeWikitable(tree, columnSpecs, filterFunction = None):
         for _, columnSpec in columnSpecs:
             result += '| '
             if callable(columnSpec):
-                result += columnSpec(key, value)
+                try:
+                    result += columnSpec(key, value)
+                except ZeroDivisionError:
+                    pass
             elif columnSpec is None:
                 result += pyradox.format.humanString(key, True)
             else:

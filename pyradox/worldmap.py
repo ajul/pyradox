@@ -1,5 +1,6 @@
 import csv
 import os
+import collections
 import pyradox.config
 import pyradox.txt
 from PIL import Image, ImageFilter, ImageChops, ImageFont, ImageDraw
@@ -38,14 +39,16 @@ def generateEdgeImage(image, edgeWidth=1):
     
 
 class ProvinceMap():
-    def __init__(self, basedir = pyradox.config.defaultBasedir):
+    def __init__(self, basedir = pyradox.config.defaultBasedir, flipY = False):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
         provincesBMP = os.path.join(basedir, 'map', 'provinces.bmp')
         definitionCSV = os.path.join(basedir, 'map', 'definition.csv')
         defaultMAP = os.path.join(basedir, 'map', 'default.map')
         
-
         self.provinceImage = Image.open(provincesBMP)
+
+        if flipY:
+            self.provinceImage = self.provinceImage.transpose(Image.FLIP_TOP_BOTTOM)
 
         csvReader = csv.reader(open(definitionCSV), delimiter = ';')
         self.provinceColorFromID = {}
@@ -82,9 +85,15 @@ class ProvinceMap():
         self.positions = {}
         maxY = self.provinceImage.size[1] # use image coords
         for provinceID, data in positionsTree.items():
-            positionData = data['position']
-            self.positions[provinceID] = (positionData[2], maxY - positionData[3]) # second pair is unit position
-
+            if "position" in data:
+                positionData = data['position']
+                # second pair is unit position
+                self.positions[provinceID] = (positionData[2], maxY - positionData[3]) 
+                
+            elif "text_position" in data:
+                positionData = data['text_position']
+                self.positions[provinceID] = (positionData['x'], maxY - positionData['y']) 
+                
     def isWaterProvince(self, provinceID):
         """ Return true iff province is a water province """
         return provinceID in self.waterProvinces
@@ -128,7 +137,7 @@ class ProvinceMap():
         """
 
         # precompute map
-        mergedMap = {}
+        mergedMap = collections.defaultdict(lambda: defaultWaterColor)
         for provinceID, provinceColor in self.provinceColorFromID.items():
             if provinceID in colormap.keys():
                 mergedMap[provinceColor] = colormap[provinceID]
