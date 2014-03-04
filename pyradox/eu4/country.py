@@ -6,7 +6,7 @@ import pyradox.struct
 import pyradox.txt
 import pyradox.yml
 
-parseCountries, getCountries = pyradox.load.loadFunctions('EU4', 'countries', ('history', 'countries'), False)
+parseCountries, getCountries = pyradox.load.loadFunctions('EU4', 'countries', ('history', 'countries'))
 
 def getCountryName(tag):
     """

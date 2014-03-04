@@ -1,3 +1,3 @@
 import pyradox.load
 
-parseUnits, getUnits = pyradox.load.loadFunctions('HoI3', 'units', 'units', True)
+parseUnits, getUnits = pyradox.load.loadFunctions('HoI3', 'units', 'units', mode="merge")

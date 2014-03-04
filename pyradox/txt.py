@@ -38,7 +38,7 @@ def parseDir(dirname, verbose=False):
     for filename in os.listdir(dirname):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
-            root, ext = os.path.splitext(fullpath)
+            _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
                 yield filename, parseFile(fullpath, verbose)
 
@@ -48,11 +48,20 @@ def parseMerge(dirname, verbose=False):
     for filename in os.listdir(dirname):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
-            root, ext = os.path.splitext(fullpath)
+            _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
                 tree = parseFile(fullpath, verbose)
                 result += tree
     return result
+
+def parseWalk(dirname, verbose=False):
+    """Given a directory, recursively iterate over the content of the .txt files in that directory as Trees"""
+    for root, dirs, files in os.walk(dirname):
+        for filename in files:
+            fullpath = os.path.join(root, filename)
+            _, ext = os.path.splitext(fullpath)
+            if ext == ".txt":
+                yield filename, parseFile(fullpath, verbose)
 
 # open questions:
 # what characters are allowed in key strings?
@@ -147,8 +156,9 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
             value = primitiveValues[valueType](valueString)
         elif valueType == "end":
             if isTopLevel:
-                # top level cannot be ended
-                raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
+                # top level cannot be ended, warn
+                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket.' % (filename, keyLineNumber + 1)))
+                continue
             else:
                 return result, pos
         elif valueType == "begin":
@@ -173,9 +183,10 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             key = primitiveKeys[keyType](keyString)
         elif keyType == "end":
             pos += 1
-            if startPos == 0:
-                # top level cannot be ended
-                raise ParseError('%s, line %d: Error: Cannot end top level with closing bracket.' % (filename, keyLineNumber + 1))
+            if isTopLevel:
+                # top level cannot be ended, warn
+                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket.' % (filename, keyLineNumber + 1)))
+                continue
             else:
                 return result, pos
         else:

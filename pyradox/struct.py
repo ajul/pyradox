@@ -61,7 +61,6 @@ class Tree(Struct):
         return self._data[query][1]
 
     def indexOf(self, query):
-        """Return the first index of a key or None if not found"""
         for i, (key, value) in enumerate(self._data):
             if match(key, query): return i
         return None
@@ -72,9 +71,15 @@ class Tree(Struct):
             if match(key, query): return value
         return None
 
+    def findLast(self, query):
+        """Return the last value corresponding to a key or None if not found"""
+        for key, value in reversed(self._data):
+            if match(key, query): return value
+        return None
+
     def __getitem__(self, query):
         """Return the first value corresponding to a key or None if not found"""
-        return self.find(query)
+        return self.findLast(query)
 
     def findAll(self, query):
         """Iterator over all values whose key matches the query""" 
@@ -112,6 +117,7 @@ class Tree(Struct):
         self._data.append((key, value))
 
     def insert(self, i, key, value):
+        """Insert a new key, value pair at a numeric position"""
         self._data.insert(i, (key, value))
 
     def __setitem__(self, key, value):
@@ -125,6 +131,7 @@ class Tree(Struct):
 
     def __delitem__(self, key):
         """Delete an item from the tree"""
+        # TODO: delete all?
         idx = self.indexOf(key)
         if idx is not None: del self._data[idx]
 

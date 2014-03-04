@@ -11,6 +11,10 @@ def colormapBlueRed(x):
     """Given x between 0 and 1, interpolates between blue and red."""
     return linearTosRGB((x, 0.0, 1.0 - x))
 
+def colormapRedGreen(x):
+    """Given x between 0 and 1, interpolates between red and green."""
+    return linearTosRGB((1.0 - x, x, 0.0))
+
 def getStripSquare(image, idx):
     """gets the idxth square from a horizontal strip of images"""
     squareSize = image.size[1]

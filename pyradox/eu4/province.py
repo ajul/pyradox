@@ -5,7 +5,7 @@ import pyradox.load
 import pyradox.txt
 import pyradox.struct
 
-parseProvinces, getProvinces = pyradox.load.loadFunctions('EU4', 'provinces', ('history', 'provinces'), False)
+parseProvinces, getProvinces = pyradox.load.loadFunctions('EU4', 'provinces', ('history', 'provinces'))
 
 def getProvinceName(provinceID):
     """

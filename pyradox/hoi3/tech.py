@@ -1,6 +1,6 @@
 import pyradox.load
 
-parseTechs, getTechs = pyradox.load.loadFunctions('HoI3', 'technologies', 'technologies', True)
+parseTechs, getTechs = pyradox.load.loadFunctions('HoI3', 'technologies', 'technologies', mode="merge")
 
 def getTechLevel(tech, year):
     if year < tech["start_year"]: return 0
