@@ -1,7 +1,7 @@
 Requires: 
 * Unicode-default Python. This includes the default CPython 3, IronPython, and probably Jython, but NOT the default CPython 2.
 * pyradox.worldmap requires PIL (or Pillow).
-* pyraodx.yml requires PyYAML.
+* pyradox.yml requires PyYAML.
 
 Some scripts are in /scripts/<gamename>. Make sure they actually run before using them as a base, though, I tend to break things after a while. I recommend looking at:
 * scripts/eu4/country_table.py: Creates a wikitable showing country stats in EU4's 1444 start date.

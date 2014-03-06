@@ -92,7 +92,10 @@ class ProvinceMap():
                 
             elif "text_position" in data:
                 positionData = data['text_position']
-                self.positions[provinceID] = (positionData['x'], maxY - positionData['y']) 
+                self.positions[provinceID] = (positionData['x'], maxY - positionData['y'])
+            elif "building_position" in data:
+                _, positionData = data['building_position'].at(0)
+                self.positions[provinceID] = (positionData['x'], maxY - positionData['y'])
                 
     def isWaterProvince(self, provinceID):
         """ Return true iff province is a water province """
