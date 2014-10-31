@@ -7,15 +7,15 @@ import pyradox.txt
 import pyradox.worldmap
 
 colorDefs = collections.OrderedDict([
-    #('default', (127, 127, 127)),
-    #('tropical' , (255, 63, 63)),       # light red
-    #('arid' , (255, 255, 127)),         # light yellow
-    #('arctic' , (127, 127, 255)),       # light blue
+    ('default', (127, 127, 127)),
+    ('tropical' , (255, 63, 63)),       # light red
+    ('arid' , (255, 255, 127)),         # light yellow
+    ('arctic' , (127, 127, 255)),       # light blue
 
-    ('default', (0, 63, 0)),            #
-    ('mild_winter', (0, 191, 0)),       # green
-    ('normal_winter', (63, 255, 63)),   # light green
-    ('severe_winter', (191, 255, 191)), # pale green
+    #('default', (0, 63, 0)),            #
+    #('mild_winter', (0, 191, 0)),       # green
+    #('normal_winter', (63, 255, 63)),   # light green
+    #('severe_winter', (191, 255, 191)), # pale green
     ])
 
 legend = ''
@@ -49,6 +49,6 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
         
 provinceMap = pyradox.worldmap.ProvinceMap()
 out = provinceMap.generateImage(colormap)
-out.save('out/winter_map.png')
+out.save('out/climate_map.png')
 
 

@@ -14,7 +14,7 @@ existingIdeas = {}
 # format: bonus -> [(title, value)...]
 bonusSources = {}
 
-localizationSources = ['powers_and_ideas', 'nw2']
+localizationSources = ['powers_and_ideas', 'nw2', 'res_publica']
 
 def addBonus(bonus, title, value):
     if bonus not in bonusSources:
@@ -22,20 +22,29 @@ def addBonus(bonus, title, value):
     bonusSources[bonus].append((value, title))
 
 def valueString(bonus, value):
-    if ideaoptions.isPercentBonus(bonus):
-        return '%0.1f%%' % (value * 100.0)
+    if ideaoptions.isBeneficial(bonus, value):
+        color = "green"
     else:
-        return pyradox.primitive.makeTokenString(value)
+        color = "red"
+    if ideaoptions.isPercentBonus(bonus):
+        return '{{%s|%+0.1f%%}}' % (color, value * 100.0)
+    elif isinstance(value, int):
+        return '{{%s|%+d}}'% (color, value)
+    elif isinstance(value, float):
+        return '{{%s|%+0.2f}}'% (color, value)
+    else:
+        return '{{%s|%s}}' % (color, pyradox.primitive.makeTokenString(value))
 
 def processIdeaGroup(key, tree):
-    if 'free' not in tree or not tree['free']: return # free groups only
+    # if 'free' not in tree or not tree['free']: return # free groups only
     
     igName = pyradox.yml.getLocalization(key, localizationSources)
-    
-    traditions = tree['start']
-    title = pyradox.yml.getLocalization('%s_start' % key, localizationSources) or key
-    for bonus, value in traditions.items():
-        addBonus(bonus, title, value)
+
+    if 'start' in tree:
+        traditions = tree['start']
+        title = pyradox.yml.getLocalization('%s_start' % key, localizationSources) or key
+        for bonus, value in traditions.items():
+            addBonus(bonus, title, value)
 
     ambitions = tree['bonus']
     title = pyradox.yml.getLocalization('%s_bonus' % key, localizationSources) or key
@@ -44,7 +53,7 @@ def processIdeaGroup(key, tree):
 
     idx = 1
     for idea, bonuses in tree.items():
-        if idea in ('start', 'bonus', 'free', 'trigger'): continue
+        if idea in ('start', 'bonus', 'free', 'trigger', 'ai_will_do', 'category', 'important'): continue
         if idea in existingIdeas:
             bonuses = existingIdeas[idea]
         else:
@@ -56,22 +65,27 @@ def processIdeaGroup(key, tree):
         idx += 1
 
 def makeWikiTable(bonus):
-    result = '{|class = "wikitable sortable"\n'
-    result += '! width="400px" | Idea !! Modifier \n'
+    result = '<table class = "wikitable sortable">\n'
+    result += '    <tr><th width="400px">Idea</th><th>Modifier</th></tr>\n'
 
     for value, title in bonusSources[bonus]:
-        result += '|-\n'
-        result += '| %s || %s \n' % (title, valueString(bonus, value))
-    result += '|}\n'
+        result += '    <tr><td>%s</td><td>%s</td></tr>\n' % (title, valueString(bonus, value))
+    result += '</table>\n'
     return result
 
 for _, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
     for key, tree in data.items():
         processIdeaGroup(key, tree)
 
+for bonus in ideaoptions.bonusTypes:
+    if bonus not in bonusSources.keys():
+        print(bonus)
+
+print()
+
 wikiPage = ''
 for bonus in sorted(bonusSources.keys()):
-    sources = ['EU4', 'text', 'modifers', 'powers_and_ideas', 'nw2']
+    sources = ['EU4', 'text', 'modifers', 'powers_and_ideas', 'nw2', 'res_publica']
     bonusTitle = (
         pyradox.yml.getLocalization('modifier_%s' % bonus, sources)
         or pyradox.yml.getLocalization('yearly_%s' % bonus, sources)
@@ -113,7 +127,7 @@ f.close()
 wikiTemplate = '<includeonly>{{#switch: {{lc:{{{1}}}}}\n'
 
 for bonus in sorted(bonusSources.keys()):
-    wikiTemplate += '| %s = %s' % (bonus, makeWikiTable(bonus).replace('|', '{{!}}'))
+    wikiTemplate += '| %s = %s' % (bonus, makeWikiTable(bonus))
 
 wikiTemplate += '| default (invalid bonus type {{lc:{{{1}}}}})\n'
 wikiTemplate += '}}</includeonly><noinclude>{{template doc}}</noinclude>'
