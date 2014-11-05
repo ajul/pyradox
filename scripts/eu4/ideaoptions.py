@@ -49,6 +49,7 @@ bonusData = (
     ("free_leader_pool",            1, (1, 1)),
     ("galley_cost",                 -0.2, (-0.1, -0.33)),
     ("galley_power",                0.2, (0.1, 0.5)), #?
+    ("global_autonomy",             -0.05, (-0.05, -0.05)),
     ("global_colonial_growth",      25, (10, 50)), #?
     ("global_foreign_trade_power",  0.2, (0.05, 0.25)), # cost adjusted downwards
     ("global_manpower_modifier",    1/3, (0.05, 1.0)), # 0.2 to 0.5?
@@ -59,7 +60,7 @@ bonusData = (
     ("global_prov_trade_power_modifier", 0.2, (0.05, 0.25)),
     ("global_regiment_cost",        -0.1, (-0.05, -0.1)), #Poland only
     ("global_regiment_recruit_speed", -0.2, (-0.1, -0.25)), # Prussia only
-    ("global_revolt_risk",          -1, (-1, -2)),
+   
     ("global_ship_cost",            -0.1, (-0.05, -0.1)),
     ("global_ship_recruit_speed",   -0.1, (-0.05, -0.1)),
     ("global_ship_repair",          0.2, (0.05, 0.33)),
@@ -69,6 +70,7 @@ bonusData = (
     ("global_trade_goods_size",     0.1, (0.05, 0.2)),
     ("global_trade_income_modifier", 0.1, (0.05, 0.2)),
     ("global_trade_power",          0.1, (0.05, 0.2)),
+    ("global_unrest",               -1, (-1, -2)),
     ("heavy_ship_cost",             -0.2, (-0.1, -0.33)), # unused
     ("heavy_ship_power",            0.1, (0.05, 0.25)),
     ("heir_chance",                 0.5, (0.25, 1.0)),
@@ -107,6 +109,7 @@ bonusData = (
     ("mercenary_cost",              -0.25, (-0.1, -0.25)),
     ("merchants",                   1, (1, 1)),
     ("merchant_steering_to_inland", 20, (10, 25)),
+    ("migration_cooldown",          -0.2, (-0.05, -0.2)),
     ("mil_tech_cost_modifier",      -0.1, (-0.05, -0.2)),
     ("missionaries",                1, (1, 1)),
     ("monthly_fervor_increase",     0.25, (0.1, 0.5)), 
@@ -127,6 +130,8 @@ bonusData = (
     ("prestige_from_naval",         1.0, (0.5, 1.0)), # Offensive only
     ("privateer_efficiency",        0.2, (0.1, 0.33)),
     ("production_efficiency",       0.1, (0.05, 0.2)),
+    ("province_trade_power_modifier", 0.15, (0.05, 0.2)),
+    ("province_warscore_cost",      -0.2, (-0.05, -0.2)),
     ("range",                       0.25, (0.1, 0.33)), # 0.25 or 0.33?
     ("rebel_support_efficiency",    0.25, (0.1, 0.5)),
     ("recover_army_morale_speed",   0.05, (0.02, 0.1)),
@@ -164,6 +169,7 @@ nonPercentFloats = set([
     "army_tradition",
     "hostile_attrition",
     "inflation_reduction",
+    "interest",
     "legitimacy",
     # "republican_tradition",
     "navy_tradition",

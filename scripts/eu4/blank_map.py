@@ -3,8 +3,10 @@ import os
 import re
 import collections
 import pyradox.config
+import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
+
         
 provinceMap = pyradox.worldmap.ProvinceMap()
 
@@ -16,6 +18,4 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
         colormap[provinceID] = (255, 255, 255)
 
 out = provinceMap.generateImage(colormap, defaultLandColor=(63, 63, 63))
-out.save('out/blank_map.png')
-
-
+pyradox.image.saveUsingPalette(out, 'out/blank_map.png')

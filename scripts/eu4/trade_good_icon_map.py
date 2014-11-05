@@ -47,7 +47,7 @@ provinceMap.overlayIcons(maxSizeMap, iconmap)
 # maxSizeMap.save('out/trade_good_icon_map_max.png')
 
 doubleSizeMap = maxSizeMap.resize((baseMap.size[0] * 2, baseMap.size[1] * 2), Image.ANTIALIAS)
-doubleSizeMap.save('out/trade_good_icon_map_double.png')
+doubleSizeMap.save('out/trade_good_icon_map_double.png', optimize = True)
 
 regularSizeMap = maxSizeMap.resize((baseMap.size[0], baseMap.size[1]), Image.ANTIALIAS)
-regularSizeMap.save('out/trade_good_icon_map.png')
+regularSizeMap.save('out/trade_good_icon_map.png', optimize = True)

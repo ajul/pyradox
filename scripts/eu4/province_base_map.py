@@ -10,7 +10,7 @@ import pyradox.worldmap
 
 maxBaseTax = 15
 minBaseTax = 1.0
-maxManpower = 10
+maxManpower = 8
 minManpower = 0.5
 gamma = 1.0 # give more contrast to lower numbers
 
@@ -66,8 +66,8 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
         manpowerColormap[provinceID] = manpowerColor(0)
         
 provinceMap = pyradox.worldmap.ProvinceMap()
-provinceMap.generateImage(baseTaxColormap).save('out/base_tax_map.png')
-provinceMap.generateImage(manpowerColormap).save('out/base_manpower_map.png')
+pyradox.image.saveUsingPalette(provinceMap.generateImage(baseTaxColormap), 'out/base_tax_map.png')
+pyradox.image.saveUsingPalette(provinceMap.generateImage(manpowerColormap), 'out/base_manpower_map.png')
 
 
 

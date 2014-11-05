@@ -6,10 +6,11 @@ import pyradox.config
 import pyradox.txt
 import pyradox.primitive
 import pyradox.image
+import pyradox.struct
 
 startDate = pyradox.primitive.Date('1444.11.11')
 
-counts = {} # province counts
+counts = pyradox.struct.Tree() # province counts
 
 # parse all files in a directory, producing instances of pyradox.struct.Tree
 for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces')):
@@ -24,4 +25,4 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
     if tradeGood not in counts: counts[tradeGood] = 1
     else: counts[tradeGood] += 1
         
-print([(key, counts[key]) for key in sorted(counts.keys())])
+print([(key, counts[key]) for key in counts.keys()])

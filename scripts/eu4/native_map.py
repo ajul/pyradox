@@ -42,7 +42,7 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
         nativeSizeColormap[provinceID] = (127, 127, 127)
         
 provinceMap = pyradox.worldmap.ProvinceMap()
-provinceMap.generateImage(nativeSizeColormap).save('out/native_population_map.png')
+pyradox.image.saveUsingPalette(provinceMap.generateImage(nativeSizeColormap), 'out/native_population_map.png')
 
 
 

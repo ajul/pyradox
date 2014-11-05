@@ -14,7 +14,7 @@ existingIdeas = {}
 # format: bonus -> [(title, value)...]
 bonusSources = {}
 
-localizationSources = ['powers_and_ideas', 'nw2', 'res_publica']
+localizationSources = ['powers_and_ideas', 'nw2', 'res_publica', "aow"]
 
 def addBonus(bonus, title, value):
     if bonus not in bonusSources:
@@ -22,6 +22,7 @@ def addBonus(bonus, title, value):
     bonusSources[bonus].append((value, title))
 
 def valueString(bonus, value):
+    if bonus not in ideaoptions.bonusTypes: print(bonus)
     if ideaoptions.isBeneficial(bonus, value):
         color = "green"
     else:
@@ -79,20 +80,20 @@ for _, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'],
 
 for bonus in ideaoptions.bonusTypes:
     if bonus not in bonusSources.keys():
-        print(bonus)
+        print("No sources:" + bonus)
 
 print()
 
 wikiPage = ''
 for bonus in sorted(bonusSources.keys()):
-    sources = ['EU4', 'text', 'modifers', 'powers_and_ideas', 'nw2', 'res_publica']
+    sources = ['EU4', 'text', 'modifers', 'powers_and_ideas', 'nw2', 'res_publica', "aow"]
     bonusTitle = (
         pyradox.yml.getLocalization('modifier_%s' % bonus, sources)
         or pyradox.yml.getLocalization('yearly_%s' % bonus, sources)
         or pyradox.yml.getLocalization(bonus, sources)
         )
     if not bonusTitle:
-        print(bonus)
+        print("Missing title:" + bonus)
         bonusTitle = pyradox.format.humanTitle(bonus)
     
     wikiPage += '==[[File:%s.png]] %s ==\n' % (bonus, bonusTitle)

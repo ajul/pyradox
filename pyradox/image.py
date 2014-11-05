@@ -1,3 +1,5 @@
+from PIL import Image
+
 def linearTosRGB(x):
     # using floats, returns int
     def component(c):
@@ -32,3 +34,7 @@ def splitStrip(image):
         subImage.load()
         result.append(subImage)
     return result
+
+def saveUsingPalette(image, filename, colors = 256):
+    """save image using palette and optimization"""
+    image.convert("P", dither = Image.NONE, palette = Image.ADAPTIVE, colors = colors).save(filename, optimize = True)
