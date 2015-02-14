@@ -182,6 +182,7 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
     
     # End of file reached.
     if isTopLevel:
+        result.endComments = preComments
         return result
     else:
         raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, prevLineNumber + 1))
@@ -275,6 +276,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             
     # End of file reached.
     if isTopLevel:
+        result.endComments = preComments
         return result
     else:
         raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, prevLineNumber + 1))

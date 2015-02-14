@@ -25,6 +25,7 @@ list = {
 foo # line comment in list
 # list end comment
 } # line comment
+# file end comment
 """)
 
 print(result)

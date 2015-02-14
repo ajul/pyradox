@@ -40,17 +40,33 @@ for continent, provinces in pyradox.txt.parseFile(os.path.join(pyradox.config.ba
         else:
             continentMap[provinceID] = continent
 
+continentProvinceCount = {}
+continentBaseTax = {}
+continentManpower = {}
+for continent in colorDefs.keys():
+    continentProvinceCount[continent] = 0
+    continentBaseTax[continent] = 0
+    continentManpower[continent] = 0
+    
 colormap = {}
 for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
     provinceID = int(m.group(0))
     if 'base_tax' not in data: continue # skip wastelands
     if provinceID in continentMap:
-        colormap[provinceID] = colorDefs[continentMap[provinceID]]
+        continent = continentMap[provinceID]
+        continentProvinceCount[continent] += 1
+        continentBaseTax[continent] += data['base_tax']
+        if 'manpower' in data: continentManpower[continent] += data['manpower']
+        colormap[provinceID] = colorDefs[continent]
     else:
         print('Missing continent for province %d' % provinceID)
         colormap[provinceID] = colorDefs['default']
-        
+
+print(continentProvinceCount)
+print(continentBaseTax)
+print(continentManpower)
+
 provinceMap = pyradox.worldmap.ProvinceMap()
 out = provinceMap.generateImage(colormap)
 

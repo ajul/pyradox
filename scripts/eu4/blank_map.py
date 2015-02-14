@@ -6,7 +6,6 @@ import pyradox.config
 import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
-
         
 provinceMap = pyradox.worldmap.ProvinceMap()
 
