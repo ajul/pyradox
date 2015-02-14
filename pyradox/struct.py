@@ -66,9 +66,15 @@ class Tree(Struct):
         """Iterator over the values of this tree."""
         for item in self._data: yield item.value
 
-    def items(self):
-        """Iterator over (key, value) pairs of this tree."""
-        for item in self._data: yield item.key, item.value
+    def items(self, comments = False):
+        """
+        Iterator over (key, value) pairs of this tree.
+        If comments = True, comments are emitted also.
+        """
+        if comments:
+            for item in self._data: yield item.key, item.value, item.preComments, item.lineComment
+        else:
+            for item in self._data: yield item.key, item.value
         
     def comments(self):
         """Iterator over (key, value) pairs of this tree."""
@@ -103,35 +109,38 @@ class Tree(Struct):
     def valueAt(self, i):
         """Return the ith value."""
         return self._data[i].value
-        
-    def setLineCommentAt(self, i, lineComment):
-        self._data[i].lineComment = lineComment
-        
-    def setPreCommentsAt(self, i, preComments):
-        self._data[i].preComments = preComments
 
     def indexOf(self, key):
         for i, item in enumerate(self._data):
             if match(key, item.key): return i
         return None
         
+    def _find(self, *args, **kwargs):
+        """Internal single find function. Returns a _Item or None."""
+        it = self._findAll(*args, **kwargs)
+        return next(it, None)
+        
+    def _findAll(self, key, reverse = False, recurse = False):
+        """Internal iterative find function. Iterates over _Items."""
+        it = self._data
+        if reverse: it = reversed(it)
+        for item in it:
+            if match(key, item.key): yield item
+            if recurse and isinstance(item.value, Tree):
+                for subitem in item.value._findAll(key, reverse = reverse, recurse = recurse): yield subitem
+        
     def find(self, *args, **kwargs):
         """Return the first or last value corresponding to a key or None if not found"""
         it = self.findAll(*args, **kwargs)
         return next(it, None)
 
-    def findAll(self, key, reverse = False, recurse = False):
+    def findAll(self, key, *args, **kwargs):
         """Return all values corresponding to a key or None if not found"""
-        it = self._data
-        if reverse: it = reversed(it)
-        for item in it:
-            if match(key, item.key): yield item.value
-            if recurse and isinstance(item.value, Tree):
-                for result in item.value.findWalk(key, reverse = reverse, recurse = recurse): yield result
+        for item in self._findAll(key, *args, **kwargs): yield item.value    
 
-    def __getitem__(self, query):
+    def __getitem__(self, key):
         """Return the LAST value corresponding to a key or None if not found"""
-        return self.find(query, reverse = True)
+        return self.find(key, reverse = True)
 
     # write methods
     def append(self, key, value, preComments = None, lineComment = None):
@@ -166,6 +175,32 @@ class Tree(Struct):
         result += other
 
     # TODO: update
+    
+    # comments
+    
+    def getLineComment(self, key):
+        return self._find(key).lineComment
+        
+    def getPreComments(self, key):
+        return self._find(key).preComments
+    
+    def setLineComment(self, key, lineComment):
+        self._find(key).lineComment = lineComment
+        
+    def setPreComments(self, key, preComments):
+        self._find(key).preComments = preComments
+    
+    def getLineCommentAt(self, i):
+        return self._data[i].lineComment
+        
+    def getPreCommentsAt(self, i):
+        return self._data[i].preComments
+    
+    def setLineCommentAt(self, i, lineComment):
+        self._data[i].lineComment = lineComment
+        
+    def setPreCommentsAt(self, i, preComments):
+        self._data[i].preComments = preComments
     
     # string output methods
     def __repr__(self):
@@ -279,6 +314,12 @@ class List(Struct):
     def __setitem__(self, key, value):
         """Replaces a value"""
         self._data[i] = List._Item(value)
+        
+    def getLineComment(self, i):
+        return self._data[i].lineComment
+        
+    def getPreComments(self, i):
+        return self._data[i].preComments
         
     def setLineComment(self, i, lineComment):
         self._data[i].lineComment = lineComment
