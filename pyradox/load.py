@@ -1,3 +1,4 @@
+import copy
 import os
 import pyradox.format
 import pyradox.txt
@@ -33,6 +34,6 @@ def loadFunctions(gameName, name, dirpath, mode = None):
         if basedir is None: basedir = pyradox.config.basedirs[gameName]
         if basedir not in cache: cache[basedir] = {}
         if name not in cache[basedir]: cache[basedir][name] = parseData(basedir)
-        return cache[basedir][name].deepCopy()
+        return copy.deepcopy(cache[basedir][name])
 
     return parseData, getData

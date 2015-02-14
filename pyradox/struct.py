@@ -2,6 +2,7 @@ import pyradox.primitive
 import re
 import os
 import inspect
+import copy
 
 class Struct():
     """
@@ -15,116 +16,133 @@ class Tree(Struct):
     Supports most features of OrderedDict and some of ElementTree.
     Keys are stored with case but are matched non-case-sensitive.
     """
-    def __init__(self, iterator = None):
+    
+    class _Item():
+        """
+        Internal class to keep track of items.
+        preComments appear before the item, one per line.
+        lineComments appear on the same line as the item.
+        """
+        def __init__(self, key, value, preComments = None, lineComment = None):
+            self.key = key
+            self.value = value
+            if preComments is None: self.preComments = []
+            else: self.preComments = preComments
+            self.lineComment = lineComment
+        
+        def prettyprint(self, level = 0, indentString = '    '):
+            result = ''
+            for preComment in self.preComments:
+                result += indentString * level + "#" + preComment + '\n'
+            result += indentString * level + pyradox.primitive.makeTokenString(self.key) + ' = '
+            if isinstance(self.value, Tree) or isinstance(self.value, List):
+                result += '{\n'
+                result += self.value.prettyprint(level + 1)
+                result += indentString * level + '}'
+            else:
+                result += pyradox.primitive.makeTokenString(self.value)
+            result += '\n'
+            if self.lineComment is not None:
+                result += indentString * level + "#" + self.lineComment + '\n'
+            return result
+    
+    def __init__(self, iterator = None, endComments = None):
         """Creates an tree from a key, value iterator if given, or an empty tree otherwise."""
         if iterator is None:
             self._data = []
         else:
-            self._data = [(key, value) for (key, value) in iterator]
+            self._data = [Tree._Item(key, value) for (key, value) in iterator]
+            
+        if endComments is None: self.endComments = []
+        else: self.endComments = endComments
         
     # iterator methods
     def keys(self):
         """Iterator over the keys of this tree."""
-        for x in self._data: yield x[0]
+        for item in self._data: yield item.key
 
     def values(self):
         """Iterator over the values of this tree."""
-        for x in self._data: yield x[1]
+        for item in self._data: yield item.value
 
     def items(self):
         """Iterator over (key, value) pairs of this tree."""
-        for x in self._data: yield x
+        for item in self._data: yield item.key, item.value
+        
+    def comments(self):
+        """Iterator over (key, value) pairs of this tree."""
+        for item in self._data: yield item.preComments, item.lineComment
 
-    def __contains__(self, query):
-        """True iff at least one key matches they query"""
-        return self.find(query) is not None
+    def __contains__(self, key):
+        """True iff key is in the top level of the tree."""
+        return self.contains(key)
+        
+    def contains(self, *args, **kwargs):
+        """True iff key is in the tree. recurse = True for recursive."""
+        return self.find(*args, **kwargs) is not None
 
     def __iter__(self):
         """Iterator over the keys of this tree."""
-        for x in self.keys(): yield x
+        for key in self.keys(): yield key
         
     def __len__(self):
         """Number of key-value pairs."""
         return len(self._data)
 
     # read/find methods
-    def at(self, query):
+    def at(self, i):
         """Return (key, value) by index"""
-        return self._data[query]
+        item = self._data[i]
+        return item.key, item.value
 
-    def keyAt(self, query):
-        """Return the queryth key."""
-        return self._data[query][0]
+    def keyAt(self, i):
+        """Return the ith key."""
+        return self._data[i].key
 
-    def valueAt(self, query):
-        """Return the queryth value."""
-        return self._data[query][1]
+    def valueAt(self, i):
+        """Return the ith value."""
+        return self._data[i].value
+        
+    def setLineCommentAt(self, i, lineComment):
+        self._data[i].lineComment = lineComment
 
-    def indexOf(self, query):
-        for i, (key, value) in enumerate(self._data):
-            if match(key, query): return i
+    def indexOf(self, key):
+        for i, item in enumerate(self._data):
+            if match(key, item.key): return i
         return None
+        
+    def find(self, *args, **kwargs):
+        """Return the first or last value corresponding to a key or None if not found"""
+        it = self.findAll(*args, **kwargs)
+        return next(it, None)
 
-    def find(self, query):
-        """Return the first value corresponding to a key or None if not found"""
-        for key, value in self._data:
-            if match(key, query): return value
-        return None
-
-    def findLast(self, query):
-        """Return the last value corresponding to a key or None if not found"""
-        for key, value in reversed(self._data):
-            if match(key, query): return value
-        return None
+    def findAll(self, key, reverse = False, recurse = False):
+        """Return all values corresponding to a key or None if not found"""
+        it = self._data
+        if reverse: it = reversed(it)
+        for item in it:
+            if match(key, item.key): yield item.value
+            if recurse and isinstance(item.value, Tree):
+                for result in item.value.findWalk(key, reverse = reverse, recurse = recurse): yield result
 
     def __getitem__(self, query):
-        """Return the first value corresponding to a key or None if not found"""
-        return self.findLast(query)
-
-    def findAll(self, query):
-        """Iterator over all values whose key matches the query""" 
-        for key, value in self._data:
-            if match(key, query): yield value
-
-    def findWalk(self, query):
-        """Iterator over all values whose key matches the query; looks recursively"""
-        for key, value in self._data:
-            if match(key, query):
-                yield value
-            if isinstance(value, Tree):
-                for x in value.findWalk(query): yield x
-
-    def containsValueWalk(self, query):
-        """Returns true iff the query appears as a value anywhere in the tree."""
-        for key, value in self._data:
-            if match(value, query):
-                return True
-            if isinstance(value, Tree) and value.containsValueWalk(query):
-                return True
-        return False
-
-    def copy(self):
-        """returns a shallow copy"""
-        return Tree(x for x in self._data)
-
-    def deepCopy(self):
-        """returns a deep copy"""    
-        return Tree((key, deepCopy(value)) for (key, value) in self._data)
+        """Return the LAST value corresponding to a key or None if not found"""
+        return self.find(query, reverse = True)
 
     # write methods
-    def append(self, key, value):
+    def append(self, key, value, preComments = None, lineComment = None):
         """Append a new key, value pair"""
-        self._data.append((key, value))
+        self._data.append(Tree._Item(key, value, preComments, lineComment))
 
     def insert(self, i, key, value):
         """Insert a new key, value pair at a numeric position"""
-        self._data.insert(i, (key, value))
+        self._data.insert(i, Tree._Item(key, value))
 
     def __setitem__(self, key, value):
         """Replaces the first item with the key if it exists; otherwise appends it"""
-        for i, (oldKey, oldValue) in enumerate(self._data):
-            if match(oldKey, key):
-                self._data[i] = (key, value)
+        for i, item in enumerate(self._data):
+            if match(key, item.key):
+                self._data[i] = Tree._Item(key, value)
                 return
         else:
             self.append(key, value)
@@ -135,38 +153,9 @@ class Tree(Struct):
         idx = self.indexOf(key)
         if idx is not None: del self._data[idx]
 
-    def __add__(self, other):
-        """Shallow concatenation of two trees"""
-        result = Tree()
-        result._data = self._data + other._data
-        return result
-        
-    def __iadd__(self, other):
-        """Concatenate a Tree to this one"""
-        self._data += other._data
-        return self
-
-    def update(self, other):
-        """Update this Tree with another Tree or dict"""
-        for key, value in other.items():
-            self[key] = value
-
-    def deleteWalk(self, query):
-        """Delete all items with the key recursively"""
-        toRemove = []
-        for key, value in self._data:
-            if match(key, query):
-                toRemove.append((key, value))
-
-        for item in toRemove:
-            self._data.remove(item)
-
-        for key, value in self._data:
-            if isinstance(value, Tree):
-                value.deleteWalk(query)
-
-        # TODO: option to prune empty subtrees?
-
+    # TODO: add, iadd
+    # TODO: update
+    
     # string output methods
     def __repr__(self):
         """Produces a string in the original .txt format."""
@@ -174,21 +163,17 @@ class Tree(Struct):
     
     def prettyprint(self, level = 0, indentString = '    '):
         result = ''
-        for key, value in self._data:
-            result += indentString * level + pyradox.primitive.makeTokenString(key) + ' = '
-            if isinstance(value, Tree) or isinstance(value, List):
-                result += '{\n'
-                result += value.prettyprint(level + 1)
-                result += indentString * level + '}\n'
-            else:
-                result += pyradox.primitive.makeTokenString(value)
-                result += '\n'
+        for item in self._data:
+            result += item.prettyprint(level, indentString)
+                
+        for endComment in self.endComments:
+            result += indentString * level + '#' + endComment + '\n'
         return result
 
     # other methods
     def atDate(self, date = False):
         """
-        returns a copy of this tree with all date blocks at or before the specified date deepcopied and promoted to the top and the rest omitted
+        returns a deep copy of this tree with all date blocks at or before the specified date deep copied and promoted to the top and the rest omitted
         if date is True, use all date blocks
         if date is False, use no date blocks
         """
@@ -198,28 +183,80 @@ class Tree(Struct):
         
         result = Tree()
         # non-dates
-        for key, value in self._data:
-            if not isinstance(key, pyradox.primitive.Date):
-                result.append(key, deepCopy(value))
+        for item in self._data:
+            if not isinstance(item.key, pyradox.primitive.Date):
+                result.append(item.key, copy.deepcopy(item.value))
 
         # dates
         if date is False: return result
         
-        for key, value in self._data:
-            if isinstance(key, pyradox.primitive.Date):
-                if date is True or key <= date:
-                    for subkey, subvalue in value.items():
-                        result[subkey] = deepCopy(subvalue)
+        for item in self._data:
+            if isinstance(item.key, pyradox.primitive.Date):
+                if date is True or item.key <= date:
+                    for key, value in item.value.items():
+                        result[key] = copy.deepcopy(value)
         return result
 
-class List(list, Struct):
+class List(Struct):
     """
     List class. Like a standard list, but with a different string representation.
     """
     
+    class _Item():
+        """
+        Internal class to keep track of items.
+        preComments appear before the item, one per line.
+        lineComments appear on the same line as the item.
+        """
+        def __init__(self, value, preComments = None, lineComment = None):
+            self.value = value
+            if preComments is None: self.preComments = []
+            else: self.preComments = preComments
+            self.lineComment = lineComment
+        
+        def prettyprint(self, level = 0, indentString = '    '):
+            result = ''
+            for preComment in self.preComments:
+                result += indentString * level + "#" + preComment + '\n'
+                
+            result += indentString * level
+            
+            if isinstance(self.value, Tree) or isinstance(self.value, List):
+                result += '{\n'
+                result += self.value.prettyprint(level + 1)
+                result += indentString * level + '}'
+            else:
+                result += pyradox.primitive.makeTokenString(self.value)
+                
+            if self.lineComment is not None:
+                result += indentString * level + "#" + self.lineComment + '\n'
+            result += '\n'
+            return result
+    
+    def __init__(self, iterator = None, endComments = None):
+        if iterator is None: self._data = []
+        else: self._data = [List._Item(value) for value in iterator]
+        
+        if endComments is None: self.endComments = []
+        else: self.endComments = endComments
+    
     def __repr__(self):
         """Produces a string in the original .txt format."""
         return self.prettyprint(0)
+        
+    def __contains__(self, value):
+        for item in self._data:
+            if item.value == value: return True
+        return False
+        
+    def __iter__(self):
+        for item in self._data: yield item.value
+    
+    def append(self, value, preComments = None, lineComment = None):
+        """Append a new value"""
+        self._data.append(List._Item(value, preComments, lineComment))
+    
+    # TODO: add, iadd
 
     def prettyprint(self, level = 0, indentString = '    '):
         result = indentString * level
@@ -232,24 +269,10 @@ class List(list, Struct):
                 result += pyradox.primitive.makeTokenString(value)
                 result += ' '
         result += "\n"
+        for endComment in self.endComments:
+            result += indentString * level + '#' + endComment + '\n'
         return result
-
-    def copy(self):
-        """returns a shallow copy"""
-        return List(x for x in self)
-
-    def deepCopy(self):
-        """returns a deep copy"""    
-        return List(deepCopy(x) for x in self)
             
-
 def match(x, spec):
     if isinstance(spec, str) and isinstance(x, str): return x.lower() == spec.lower()
     else: return x == spec
-
-def deepCopy(value):
-    if isinstance(value, Struct):
-        return value.deepCopy()
-    else:
-        return value
-
