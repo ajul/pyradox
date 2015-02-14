@@ -156,8 +156,15 @@ class Tree(Struct):
         # TODO: delete all?
         idx = self.indexOf(key)
         if idx is not None: del self._data[idx]
+    
+    def __iadd__(self, other):
+        for item in other._data:
+            self._data.append(copy.deepcopy(item))
+            
+    def __add__(self, other):
+        result = copy.deepcopy(self)
+        result += other
 
-    # TODO: add, iadd
     # TODO: update
     
     # string output methods
@@ -279,7 +286,13 @@ class List(Struct):
     def setPreComments(self, i, preComments):
         self._data[i].preComments = preComments
     
-    # TODO: add, iadd
+    def __iadd__(self, other):
+        for item in other._data:
+            self._data.append(copy.deepcopy(item))
+            
+    def __add__(self, other):
+        result = copy.deepcopy(self)
+        result += other
 
     def prettyprint(self, level = 0, indentString = '    '):
         result = ''
