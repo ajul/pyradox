@@ -80,7 +80,7 @@ tokenTypes = (
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
     ('int', r'-?\d+\b'),
     ('bool', r'(yes|no)\b'),
-    ('str', r'".*?"|[^#=\{\}\s]+'), # do escape characters exist?
+    ('str', r'".*?["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
     )
 
 omnibusPattern = ''
@@ -131,14 +131,16 @@ def parseTokens(tokenData, filename, startPos = 0):
     while pos < len(tokenData) and level >= 0:
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
-        if tokenType == "end":
+        if tokenType == 'end':
             level -= 1
+        elif tokenType == 'comment':
+            continue
         else:
             isEmpty = False
         
-            if tokenType == "begin":
+            if tokenType == 'begin':
                 level += 1
-            elif tokenType == "equals":
+            elif tokenType == 'equals':
                 # parse as tree if equals sign detected at current level
                 if level == 0: return parseAsTree(tokenData, filename, startPos, isTopLevel)
     
@@ -235,9 +237,9 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             state = stateEquals
         else:
             # missing equals sign; unconsume the token and move on
-            warnings.warn(ParseWarning('%s, line %d: Warning: Expected equals sign after key "%s". Continuing to value.' % (filename, tokenLineNumber + 1, keyString)))
+            warnings.warn(ParseWarning('%s, line %d: Warning: Expected equals sign after key "%s". Treating token "%s" as value.' % (filename, tokenLineNumber + 1, keyString, tokenString)))
             pos -= 1
-            state = stateEquals
+            state = stateValue
             
         prevLineNumber = tokenLineNumber
     
