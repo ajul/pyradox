@@ -32,6 +32,7 @@ class Tree(Struct):
         
         def prettyprint(self, level = 0, indentString = '    '):
             result = ''
+            if len(self.preComments) > 0: result += '\n'
             for preComment in self.preComments:
                 result += indentString * level + "#" + preComment + '\n'
             result += indentString * level + pyradox.primitive.makeTokenString(self.key) + ' = '
@@ -84,9 +85,9 @@ class Tree(Struct):
         """True iff key is in the top level of the tree."""
         return self.contains(key)
         
-    def contains(self, *args, **kwargs):
+    def contains(self, key, *args, **kwargs):
         """True iff key is in the tree. recurse = True for recursive."""
-        return self.find(*args, **kwargs) is not None
+        return self.find(key, *args, **kwargs) is not None
 
     def __iter__(self):
         """Iterator over the keys of this tree."""
@@ -131,9 +132,9 @@ class Tree(Struct):
             if recurse and isinstance(item.value, Tree):
                 for subitem in item.value._findAll(key, reverse = reverse, recurse = recurse): yield subitem
         
-    def find(self, default = None, *args, **kwargs):
+    def find(self, key, default = None, *args, **kwargs):
         """Return the first or last value corresponding to a key or None if not found"""
-        it = self.findAll(*args, **kwargs)
+        it = self.findAll(key, *args, **kwargs)
         return next(it, default)
 
     def findAll(self, key, *args, **kwargs):
@@ -213,7 +214,8 @@ class Tree(Struct):
         result = ''
         for item in self._data:
             result += item.prettyprint(level, indentString)
-                
+        
+        if len(self.endComments) > 0: result += '\n'
         for endComment in self.endComments:
             result += indentString * level + '#' + endComment + '\n'
         return result
@@ -264,6 +266,7 @@ class List(Struct):
         
         def prettyprint(self, level = 0, indentString = '    '):
             result = ''
+            if len(self.preComments) > 0: result += '\n'
             for preComment in self.preComments:
                 result += indentString * level + "#" + preComment + '\n'
                 
@@ -341,6 +344,7 @@ class List(Struct):
         result = ''
         for item in self._data:
             result += item.prettyprint(level, indentString)
+        if len(self.endComments) > 0: result += '\n'
         for endComment in self.endComments:
             result += indentString * level + '#' + endComment + '\n'
         return result
