@@ -41,9 +41,10 @@ class Tree(Struct):
                 result += indentString * level + '}'
             else:
                 result += pyradox.primitive.makeTokenString(self.value)
-            result += '\n'
+            
             if self.lineComment is not None:
-                result += indentString * level + "#" + self.lineComment + '\n'
+                result += indentString * level + " #" + self.lineComment
+            result += '\n'
             return result
     
     def __init__(self, iterator = None, endComments = None):
@@ -105,6 +106,9 @@ class Tree(Struct):
         
     def setLineCommentAt(self, i, lineComment):
         self._data[i].lineComment = lineComment
+        
+    def setPreCommentsAt(self, i, preComments):
+        self._data[i].preComments = preComments
 
     def indexOf(self, key):
         for i, item in enumerate(self._data):
@@ -193,8 +197,8 @@ class Tree(Struct):
         for item in self._data:
             if isinstance(item.key, pyradox.primitive.Date):
                 if date is True or item.key <= date:
-                    for key, value in item.value.items():
-                        result[key] = copy.deepcopy(value)
+                    for item in item.value._data:
+                        result[item.key] = copy.deepcopy(item.value)
         return result
 
 class List(Struct):
@@ -229,7 +233,7 @@ class List(Struct):
                 result += pyradox.primitive.makeTokenString(self.value)
                 
             if self.lineComment is not None:
-                result += indentString * level + "#" + self.lineComment + '\n'
+                result += " #" + self.lineComment
             result += '\n'
             return result
     
@@ -251,24 +255,36 @@ class List(Struct):
         
     def __iter__(self):
         for item in self._data: yield item.value
-    
+        
+    def __getitem__(self, query):
+        """Return the LAST value corresponding to a key or None if not found"""
+        return self.find(query, reverse = True)
+
+    # write methods
     def append(self, value, preComments = None, lineComment = None):
         """Append a new value"""
         self._data.append(List._Item(value, preComments, lineComment))
+
+    def insert(self, i, value):
+        """Insert a new value"""
+        self._data.insert(i, List._Item(value))
+
+    def __setitem__(self, key, value):
+        """Replaces a value"""
+        self._data[i] = List._Item(value)
+        
+    def setLineComment(self, i, lineComment):
+        self._data[i].lineComment = lineComment
+        
+    def setPreComments(self, i, preComments):
+        self._data[i].preComments = preComments
     
     # TODO: add, iadd
 
     def prettyprint(self, level = 0, indentString = '    '):
-        result = indentString * level
-        for value in self:
-            if isinstance(value, Struct):
-                result += '{\n'
-                result += value.prettyprint(level + 1)
-                result += indentString * level + '}\n'
-            else:
-                result += pyradox.primitive.makeTokenString(value)
-                result += ' '
-        result += "\n"
+        result = ''
+        for item in self._data:
+            result += item.prettyprint(level, indentString)
         for endComment in self.endComments:
             result += indentString * level + '#' + endComment + '\n'
         return result

@@ -113,14 +113,14 @@ def lexIter(fileLines, filename):
     return (
         (m.lastgroup, m.group(0), lineNumber)
         for lineNumber, line in enumerate(fileLines)
-        for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace', 'comment')
+        for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace',)
         )
 
 def parseTokens(tokenData, filename, startPos = 0):
     """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
     isTopLevel = (startPos == 0)
     # if starting position is 0, check for extra token at beginning
-    if startPos == 0 and len(tokenData) >= 3 and tokenData[2][0] == 'equals':
+    if startPos == 0 and len(tokenData) >= 1 and tokenData[0][1] == 'EU4txt':
         tokenType, tokenString, lineNumber = tokenData[0]
         print('%s, line %d: Skipping header token "%s".' % (filename, lineNumber + 1, tokenString))
         startPos = 1 # skip first token
@@ -146,84 +146,136 @@ def parseTokens(tokenData, filename, startPos = 0):
     else: return parseAsList(tokenData, filename, startPos, isTopLevel)
     
 def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
-    """Parse a list from the tokenData."""
+    """Parse a list from the tokenData. Returns the list, end position, and end line number."""
     result = pyradox.struct.List()
     pos = startPos
+    prevLineNumber = -1
+    preComments = []
     while pos < len(tokenData):
-        valueType, valueString, valueLineNumber = tokenData[pos]
+        tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
-        if valueType in primitiveValues.keys():
-            value = primitiveValues[valueType](valueString)
-        elif valueType == "end":
+        
+        if tokenType in primitiveValues.keys():
+            value = primitiveValues[tokenType](tokenString)
+            result.append(value, preComments = preComments)
+            preComments = []
+        elif tokenType == "comment":
+            if tokenLineNumber == prevLineNumber:
+                result.setLineComment(-1, tokenString[1:])
+            else:
+                preComments.append(tokenString[1:])
+        elif tokenType == "end":
             if isTopLevel:
                 # top level cannot be ended, warn
-                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket.' % (filename, keyLineNumber + 1)))
-                continue
+                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket.' % (filename, tokenLineNumber + 1)))
             else:
-                return result, pos
+                result.endComments = preComments
+                return result, pos, tokenLineNumber
         elif valueType == "begin":
-            value, pos = parseTokens(tokenData, filename, pos)
+            value, pos, tokenLineNumber = parseTokens(tokenData, filename, pos)
         else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, keyLineNumber + 1, valueType))
-        result.append(value)
+            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, tokenLineNumber + 1, valueType))
+        
+        prevLineNumber = tokenLineNumber
+    
+    # End of file reached.
     if isTopLevel:
         return result
     else:
-        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
+        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, prevLineNumber + 1))
         
 def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
     """Parse a Tree from the tokenData."""
+    
     result = pyradox.struct.Tree()
     pos = startPos
-    while pos < len(tokenData):
-        # read key
-        keyType, keyString, keyLineNumber = tokenData[pos]
-        if keyType in primitiveKeys.keys():
-            pos += 1
-            key = primitiveKeys[keyType](keyString)
-        elif keyType == "end":
-            pos += 1
+    prevLineNumber = -1
+    preComments = []
+    key = None
+    keyString = None
+    
+    def stateKey():
+        # expecting a key
+        nonlocal result, pos, prevLineNumber, preComments, key, keyString, state
+        tokenType, tokenString, tokenLineNumber = tokenData[pos]
+        pos += 1
+        
+        if tokenType in primitiveKeys.keys():
+            keyString = tokenString
+            key = primitiveKeys[tokenType](tokenString)
+            state = stateEquals
+        elif tokenType == 'comment':
+            if tokenLineNumber == prevLineNumber:
+                result.setLineCommentAt(-1, tokenString[1:])
+            else:
+                preComments.append(tokenString[1:])
+            state = stateKey
+        elif tokenType == 'end':
             if isTopLevel:
                 # top level cannot be ended, warn
-                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket.' % (filename, keyLineNumber + 1)))
-                continue
-            else:
-                return result, pos
+                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket. Skipping token.' % (filename, tokenLineNumber + 1)))
+            state = None
         else:
             #invalid key
-            warnings.warn(ParseWarning('%s, line %d: Warning: Token "%s" is not valid key. Omitting corresponding value.' % (filename, keyLineNumber + 1, keyString)))
-            key = None
-
-        if pos >= len(tokenData):
-            raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
-
-        # read equals sign
-        equalsType, _, equalsLineNumber = tokenData[pos]
-        if equalsType == "equals":
-            pos += 1
-        else:
-            if key is not None:
-                warnings.warn(ParseWarning('%s, line %d: Warning: Expected equals sign after key "%s".' % (filename, equalsLineNumber + 1, keyString)))
-
-        if pos >= len(tokenData):
-            raise ParseError('%s, line %d: Error: Reached end of file during key "%s".' % (filename, keyLineNumber + 1, keyString))
-
-        # read value
-        valueType, valueString, valueLineNumber = tokenData[pos]
+            warnings.warn(ParseWarning('%s, line %d: Warning: Token "%s" is not valid key. Skipping token.' % (filename, tokenLineNumber + 1, tokenString)))
+            state = stateKey
+            
+        prevLineNumber = tokenLineNumber
+    
+    def stateEquals():
+        # expecting an equals sign
+        nonlocal result, pos, prevLineNumber, preComments, key, keyString, state
+        tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
-        if valueType in primitiveValues.keys():
-            value = primitiveValues[valueType](valueString)
-        elif valueType == "begin":
-            # value is a dict or list, recurse
-            value, pos = parseTokens(tokenData, filename, pos)
+        
+        if tokenType == 'equals':
+            state = stateValue
+        elif tokenType == 'comment':
+            preComments.append(tokenString[1:])
+            state = stateEquals
         else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s after key "%s".' % (filename, keyLineNumber + 1, valueType, keyString))
-        if key is not None:
-            result.append(key, value)
+            # missing equals sign; unconsume the token and move on
+            warnings.warn(ParseWarning('%s, line %d: Warning: Expected equals sign after key "%s". Continuing to value.' % (filename, tokenLineNumber + 1, keyString)))
+            pos -= 1
+            state = stateEquals
+            
+        prevLineNumber = tokenLineNumber
+    
+    def stateValue():
+        # expecting a value
+        nonlocal result, pos, prevLineNumber, preComments, key, keyString, state
+        tokenType, tokenString, tokenLineNumber = tokenData[pos]
+        pos += 1
+        
+        if tokenType in primitiveValues.keys():
+            value = primitiveValues[tokenType](tokenString)
+            result.append(key, value, preComments = preComments)
+            preComments = []
+            state = stateKey
+        elif tokenType == 'begin':
+            # value is a dict or list, recurse
+            value, pos, tokenLineNumber = parseTokens(tokenData, filename, pos)
+            result.append(key, value, preComments = preComments)
+            preComments = []
+            state = stateKey
+        elif tokenType == 'comment':
+            preComments.append(tokenString[1:])
+            state = stateValue
+        else:
+            raise ParseError('%s, line %d: Error: Invalid token type %s after key "%s", expected a value type.' % (filename, tokenLineNumber + 1, tokenType, keyString))
+            
+        prevLineNumber = tokenLineNumber
+        
+    state = stateKey
+    while pos < len(tokenData):
+        state()
+        if state is None: return result, pos, prevLineNumber
+            
+    # End of file reached.
     if isTopLevel:
         return result
     else:
-        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, keyLineNumber + 1))
+        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, prevLineNumber + 1))
         
 
 
