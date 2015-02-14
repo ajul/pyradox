@@ -115,10 +115,12 @@ class Tree(Struct):
             if match(key, item.key): return i
         return None
         
-    def _find(self, *args, **kwargs):
-        """Internal single find function. Returns a _Item or None."""
-        it = self._findAll(*args, **kwargs)
-        return next(it, None)
+    def _find(self, key, *args, **kwargs):
+        """Internal single find function. Returns a _Item."""
+        it = self._findAll(key, *args, **kwargs)
+        result = next(it, None)
+        if result is None: raise KeyError('Key %s not found.' % key)
+        return result 
         
     def _findAll(self, key, reverse = False, recurse = False):
         """Internal iterative find function. Iterates over _Items."""
@@ -129,10 +131,10 @@ class Tree(Struct):
             if recurse and isinstance(item.value, Tree):
                 for subitem in item.value._findAll(key, reverse = reverse, recurse = recurse): yield subitem
         
-    def find(self, *args, **kwargs):
+    def find(self, default = None, *args, **kwargs):
         """Return the first or last value corresponding to a key or None if not found"""
         it = self.findAll(*args, **kwargs)
-        return next(it, None)
+        return next(it, default)
 
     def findAll(self, key, *args, **kwargs):
         """Return all values corresponding to a key or None if not found"""
