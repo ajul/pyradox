@@ -1,6 +1,13 @@
 import collections
 import re
 
+class ParseError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
 def makeBool(tokenString):
     """
     Converts a token string to a boolean.
@@ -109,6 +116,46 @@ class Duration(DurationBase):
             if 'months' not in kwargs: kwargs['months'] = 0
             if 'days' not in kwargs: kwargs['days'] = 0
         return DurationBase.__new__(cls, *dateArgs(args), **kwargs)
+
+tokenPatterns = [
+    ('date', r'\d{,4}\.\d{,2}\.\d{,2}\b'),
+    ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
+    ('int', r'-?\d+\b'),
+    ('bool', r'(yes|no)\b'),
+    ('str', r'".*?["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
+]
+
+keyConstructors = {
+    'date' : Date,
+    'int' : int,
+    'str' : str,
+    }
+
+constructors = {
+    'date' : Date,
+    'float' : float,
+    'int' : int,
+    'bool' : makeBool,
+    'str' : makeString,
+    }
+    
+def isPrimitiveKeyTokenType(tokenType):
+    return tokenType in keyConstructors.keys()
+    
+def isPrimitiveValueTokenType(tokenType):
+    return tokenType in constructors.keys()
+
+def makePrimitive(tokenString, tokenType = None, defaultTokenType = None):
+    if tokenType is None:
+        for tokenType, pattern in tokenPatterns:
+            m = re.match(pattern + '$', tokenString)
+            if m: break
+        else:
+            if defaultTokenType is None:
+                raise ParseError('Unrecognized token "%s". Should not occur.' % (tokenString,))
+            else:
+                tokenType = defaultTokenType
+    return constructors[tokenType](tokenString)
 
 # unit test
 if __name__ == "__main__":

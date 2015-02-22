@@ -23,6 +23,7 @@ foo = bar # line comment in tree
 list = {
 # pre comment in list
 foo # line comment in list
+{}
 # list end comment
 } # line comment
 # file end comment

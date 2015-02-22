@@ -68,20 +68,14 @@ def parseWalk(dirname, verbose=False):
 # in value strings?
 # are there escape characters?
 
-tokenTypes = (
+tokenTypes = [
     # keysymbols
     ('whitespace', r'\s+'),
     ('equals', r'='),
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
-    # primitives
-    ('date', r'\d{,4}\.\d{,2}\.\d{,2}\b'),
-    ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
-    ('int', r'-?\d+\b'),
-    ('bool', r'(yes|no)\b'),
-    ('str', r'".*?["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
-    )
+    ] + pyradox.primitive.tokenPatterns
 
 omnibusPattern = ''
 for tokenType, p in tokenTypes:
@@ -90,20 +84,6 @@ for tokenType, p in tokenTypes:
 omnibusPattern += '(.+)'
 
 omnibusPattern = re.compile(omnibusPattern)
-
-primitiveKeys = {
-    'date' : pyradox.primitive.Date,
-    'int' : int,
-    'str' : str,
-    }
-
-primitiveValues = {
-    'date' : pyradox.primitive.Date,
-    'float' : float,
-    'int' : int,
-    'bool' : pyradox.primitive.makeBool,
-    'str' : pyradox.primitive.makeString,
-    }
 
 def lex(fileLines, filename):
     return list(lexIter(fileLines, filename))
@@ -157,8 +137,8 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
-        if tokenType in primitiveValues.keys():
-            value = primitiveValues[tokenType](tokenString)
+        if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
+            value = pyradox.primitive.makePrimitive(tokenString, tokenType)
             result.append(value, preComments = preComments)
             preComments = []
         elif tokenType == "comment":
@@ -173,10 +153,12 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
             else:
                 result.endComments = preComments
                 return result, pos, tokenLineNumber
-        elif valueType == "begin":
+        elif tokenType == "begin":
             value, pos, tokenLineNumber = parseTokens(tokenData, filename, pos)
+            result.append(value, preComments = preComments)
+            preComments = []
         else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, tokenLineNumber + 1, valueType))
+            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, tokenLineNumber + 1, tokenType))
         
         prevLineNumber = tokenLineNumber
     
@@ -203,9 +185,9 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
-        if tokenType in primitiveKeys.keys():
+        if pyradox.primitive.isPrimitiveKeyTokenType(tokenType):
             keyString = tokenString
-            key = primitiveKeys[tokenType](tokenString)
+            key = pyradox.primitive.makePrimitive(tokenString, tokenType)
             state = stateEquals
         elif tokenType == 'comment':
             if tokenLineNumber == prevLineNumber:
@@ -250,8 +232,8 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
-        if tokenType in primitiveValues.keys():
-            value = primitiveValues[tokenType](tokenString)
+        if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
+            value = pyradox.primitive.makePrimitive(tokenString, tokenType)
             result.append(key, value, preComments = preComments)
             preComments = []
             state = stateKey
