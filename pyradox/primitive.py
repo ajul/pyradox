@@ -139,6 +139,12 @@ constructors = {
     'str' : makeString,
     }
     
+def primitiveTypeOf(tokenString):
+    for tokenType, pattern in tokenPatterns:
+        m = re.match(pattern + '$', tokenString)
+        if m: return tokenType
+    return None
+    
 def isPrimitiveKeyTokenType(tokenType):
     return tokenType in keyConstructors.keys()
     
@@ -147,10 +153,8 @@ def isPrimitiveValueTokenType(tokenType):
 
 def makePrimitive(tokenString, tokenType = None, defaultTokenType = None):
     if tokenType is None:
-        for tokenType, pattern in tokenPatterns:
-            m = re.match(pattern + '$', tokenString)
-            if m: break
-        else:
+        tokenType = primitiveTypeOf(tokenString)
+        if tokenType is None:
             if defaultTokenType is None:
                 raise ParseError('Unrecognized token "%s". Should not occur.' % (tokenString,))
             else:

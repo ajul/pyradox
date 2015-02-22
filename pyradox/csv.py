@@ -2,6 +2,7 @@ import csv
 import os
 import warnings
 import pyradox.primitive
+import pyradox.struct
 
 class ParseError(Exception):
     def __init__(self, message):
@@ -44,9 +45,10 @@ def parse(lines, filename):
     headerTokens = next(reader, None)
     if headerTokens is None:
         raise ParseError('%s, row 1 (headers): csv file must have at least one row' % filename)
-    headers = [x.lower() for x in headerTokens]
+    headers = [x.lower() for x in headerTokens[:-1]]
     result = Table(headers)
     for i, rowTokens in enumerate(reader):
+        rowTokens = rowTokens[:-1]
         if len(rowTokens) == 0: continue
         if len(rowTokens) != len(headers):
             warnings.warn(ParseWarning('%s, row %d: row length (%d) should be same as headers length (%d)' % (filename, i + 2, len(rowTokens), len(headers))))
@@ -72,16 +74,33 @@ class Table():
         return self._headers
             
     def getHeaderIndex(self, header):
-        return self._headers.index(header.lower())
+        if isinstance(header, int):
+            return header
+        else:
+            return self._headers.index(header.lower())
             
     def selectColumns(self, headers):
         headerIndexes = []
         for header in headers:
-            if isinstance(header, int):
-                headerIndexes.append(header)
-            else:
-                headerIndexes.append(self.getHeaderIndex(header))
+            headerIndexes.append(self.getHeaderIndex(header))
                 
         for row in self._data:
             yield [row[index] for index in headerIndexes]
+            
+    def toTree(self, idHeader = 0):
+        result = pyradox.struct.Tree()
+        idHeader = self.getHeaderIndex(idHeader)
+        for row in self._data:
+            id = row[idHeader]
+            if id == '': continue
+                
+            result[id] = pyradox.struct.Tree()
+            for i, header in enumerate(self._headers):
+                if i == idHeader: continue
+                if header == '': continue
+                value = row[i]
+                if value == '': continue
+                result[id][header] = value
+                
+        return result    
     
