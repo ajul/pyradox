@@ -1,1 +1,5 @@
 *.pyc
+scripts/eu4/in/*
+scripts/eu4/out/*
+scripts/hoi3/in/*
+scripts/hoi3/out/*
