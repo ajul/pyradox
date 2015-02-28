@@ -23,6 +23,7 @@ bonusData = (
     ("blockade_efficiency",         1/3, (0.33, 0.33)), # Oman only
     ("build_cost",                  -0.2, (-0.05, -0.33)), #-0.1 to -0.2?
     ("build_power_cost",            -0.2, (-0.05, -0.33)), 
+    ("caravan_power",                20, (10, 25)),
     ("cavalry_cost",                -0.2, (-0.05, -0.33)), 
     ("cavalry_power",               0.1, (0.05, 0.33)),
     # ("cb_on_government_enemies",    1.0, (True, True)), # obsolete

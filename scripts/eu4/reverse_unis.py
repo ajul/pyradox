@@ -14,7 +14,7 @@ existingIdeas = {}
 # format: bonus -> [(title, value)...]
 bonusSources = {}
 
-localizationSources = ['powers_and_ideas', 'nw2', 'res_publica', "aow"]
+localizationSources = ['powers_and_ideas', 'nw2', 'res_publica', "aow", 'eldorado']
 
 def addBonus(bonus, title, value):
     if bonus not in bonusSources:

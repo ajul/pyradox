@@ -15,6 +15,7 @@ result += '! Name !! Country !! Skill !! Start year !! End year !! Specialties \
 count = 0
 
 for filename, table in pyradox.csv.parseDir('D:/Steam/steamapps/common/Hearts of Iron 2 Complete Pack/Doomsday/db/tech/teams'):
+    print(table.toTree())
     countryTag = table.getHeaders()[0]
     print(countryTag)
     for row in table:

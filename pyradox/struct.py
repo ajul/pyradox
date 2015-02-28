@@ -303,9 +303,9 @@ class List(Struct):
     def __iter__(self):
         for item in self._data: yield item.value
         
-    def __getitem__(self, query):
-        """Return the LAST value corresponding to a key or None if not found"""
-        return self.find(query, reverse = True)
+    def __getitem__(self, i):
+        """Return an item by index"""
+        return self._data[i].value
 
     # write methods
     def append(self, value, preComments = None, lineComment = None):
