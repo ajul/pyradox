@@ -7,7 +7,7 @@ def linearTosRGB(x):
             return 12.92 * c
         else:
             return 1.055 * pow(c, 1/2.4) - 0.055
-    return tuple(round(component(c) * 255.0) for c in x)
+    return tuple(int(round(component(c) * 255.0)) for c in x)
 
 def colormapBlueRed(x):
     """Given x between 0 and 1, interpolates between blue and red."""
