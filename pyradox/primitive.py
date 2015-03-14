@@ -68,6 +68,12 @@ class Date(DateBase):
     
     def __repr__(self):
         return '%d.%d.%d' % (self.year, self.month, self.day)
+        
+    def __int__(self):
+        # number of days since 0.0.0
+        yearDays = 365 * self.year
+        monthDays = sum(daysPerMonth0[:self.month])
+        return yearDays + monthDays + self.day
 
     def __add__(self, other):
         """add a Duration to this date"""
@@ -89,6 +95,16 @@ class Date(DateBase):
             month0 = totalMonths % 12
             
             return Date(year, month0 + 1, day0 + 1)
+        else:
+            raise TypeError('Only a Duration may be added to a Date.')
+            
+    def __sub__(self, other):
+        """ Subtract a Date from a Date -> int or a Duration from a Date -> Date  """
+        if isinstance(other, Date):
+            return int(self) - int(other)
+        elif isinstance(other, Duration):
+            #TODO
+            raise NotImplementedError()
         else:
             raise TypeError('Only a Duration may be added to a Date.')
 

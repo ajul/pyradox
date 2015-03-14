@@ -138,7 +138,7 @@ class Tree(Struct):
         return next(it, default)
 
     def findAll(self, key, *args, **kwargs):
-        """Return all values corresponding to a key or None if not found"""
+        """Return all values corresponding to a key"""
         for item in self._findAll(key, *args, **kwargs): yield item.value    
 
     def __getitem__(self, key):
@@ -172,10 +172,12 @@ class Tree(Struct):
     def __iadd__(self, other):
         for item in other._data:
             self._data.append(copy.deepcopy(item))
+        return self
             
     def __add__(self, other):
         result = copy.deepcopy(self)
         result += other
+        return result
 
     # TODO: update
     
