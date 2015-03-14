@@ -63,6 +63,8 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
 result = '{|class = "wikitable sortable"\n'
 result += '! Idea group !! Base cost !! Adjusted for<br/>early ideas !! Max level ratio !! Final cost !! Bonuses unaccounted for\n'
 
+resultTree = pyradox.struct.Tree()
+
 for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
     for ideaSetName, ideaSet in fileData.items():
         
@@ -102,5 +104,19 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
         result += '|-\n'
         result += '| %s || %0.1f || %0.1f || %0.1f%% || %0.1f || %s \n' % (ideaSetName, baseCost, earlyCost, maxRatio * 100, finalCost, unaccountedString)
 
+        ideaSetTree = pyradox.struct.Tree()
+
+        ideaSetTree['base'] = baseCost
+        ideaSetTree['early'] = earlyCost
+        ideaSetTree['ratio'] = maxRatio
+        ideaSetTree['final'] = finalCost
+        ideaSetTree['unaccounted'] = unaccountedString
+
+        resultTree[ideaSetName] = ideaSetTree
+
 result += '|}\n'
 print(result)
+
+outfile = open('out/idea_costs.txt', mode = 'w')
+outfile.write(str(resultTree))
+outfile.close()
