@@ -25,12 +25,6 @@ def valueString(bonus, value):
 
 localizationSources = ['EU4', 'text', 'modifers']
 
-data = (
-    pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas', 'adm_custom_ideas.txt')),
-    pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas', 'dip_custom_ideas.txt')),
-    pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas', 'mil_custom_ideas.txt')),
-    )
-
 default_max_level = 4
 
 result = ''
@@ -43,8 +37,8 @@ for i in range(default_max_level):
 result = result[:-1]
 result += '\n'
 
-for category in data:
-    for ideaSet in category.values():
+for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
+    for ideaSet in fileData.values():
         # start category
         
         for idea, ideaData in ideaSet.items():
@@ -57,7 +51,7 @@ for category in data:
             max_level = default_max_level
             costs = [0, 5, 15, 30] # cost indexed by level (0-based)
             for key, value in ideaData.items():
-                if key == 'default':
+                if key in ('default', 'chance'):
                     continue
                 elif key == 'max_level':
                     max_level = value
