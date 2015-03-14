@@ -89,7 +89,7 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
             for bonusKey, bonusValue in value.items():
                 bonusInfo = evalBonus(bonusKey, bonusValue)
                 if bonusInfo is None:
-                    unaccounted.append(bonusKey)
+                    unaccounted.append('%s (%s)' %( bonusKey, bonusValue))
                 else:
                     powerType, level, cost = bonusInfo
                     levelCounts[powerType] += level
