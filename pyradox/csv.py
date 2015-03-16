@@ -3,6 +3,7 @@ import os
 import warnings
 import pyradox.primitive
 import pyradox.struct
+import pyradox.table
 
 class ParseError(Exception):
     def __init__(self, message):
@@ -42,65 +43,19 @@ def parseDir(dirname, verbose=False):
 
 def parse(lines, filename):
     reader = csv.reader(lines, dialect = ParadoxDialect)
-    headerTokens = next(reader, None)
-    if headerTokens is None:
-        raise ParseError('%s, row 1 (headers): csv file must have at least one row' % filename)
-    headers = [x.lower() for x in headerTokens[:-1]]
-    result = Table(headers)
+    headingTokens = next(reader, None)
+    if headingTokens is None:
+        raise ParseError('%s, row 1 (headings): csv file must have at least one row' % filename)
+    headings = [x.lower() for x in headingTokens[:-1]]
+    result = pyradox.table.Table(headings)
     for i, rowTokens in enumerate(reader):
         rowTokens = rowTokens[:-1]
         if len(rowTokens) == 0: continue
-        if len(rowTokens) != len(headers):
-            warnings.warn(ParseWarning('%s, row %d: row length (%d) should be same as headers length (%d)' % (filename, i + 2, len(rowTokens), len(headers))))
-            for i in range(len(rowTokens), len(headers)):
+        if len(rowTokens) != len(headings):
+            warnings.warn(ParseWarning('%s, row %d: row length (%d) should be same as headings length (%d)' % (filename, i + 2, len(rowTokens), len(headings))))
+            for i in range(len(rowTokens), len(headings)):
                 rowTokens.append('')
-            rowTokens = rowTokens[:len(headers)]
+            rowTokens = rowTokens[:len(headings)]
         result.addRow([pyradox.primitive.makePrimitive(token, defaultTokenType = 'str') for token in rowTokens])
-    return result
-    
-class Table():
-    def __init__(self, headers):
-        self._headers = headers
-        self._data = []
-
-    def addRow(self, row):
-        self._data.append(row)
-        
-    def __iter__(self):
-        for row in self._data:
-            yield row
-            
-    def getHeaders(self):
-        return self._headers
-            
-    def getHeaderIndex(self, header):
-        if isinstance(header, int):
-            return header
-        else:
-            return self._headers.index(header.lower())
-            
-    def selectColumns(self, headers):
-        headerIndexes = []
-        for header in headers:
-            headerIndexes.append(self.getHeaderIndex(header))
-                
-        for row in self._data:
-            yield [row[index] for index in headerIndexes]
-            
-    def toTree(self, idHeader = 0):
-        result = pyradox.struct.Tree()
-        idHeader = self.getHeaderIndex(idHeader)
-        for row in self._data:
-            id = row[idHeader]
-            if id == '': continue
-                
-            result[id] = pyradox.struct.Tree()
-            for i, header in enumerate(self._headers):
-                if i == idHeader: continue
-                if header == '': continue
-                value = row[i]
-                if value == '': continue
-                result[id][header] = value
-                
-        return result    
+    return result 
     

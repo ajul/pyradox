@@ -55,13 +55,15 @@ def rulerCost(country, date = pyradox.primitive.Date('1444.11.11')):
     
     cost = 0.0
     if monarch is not None:
+        
         skill = sum(monarch[x] for x in ('adm', 'dip', 'mil'))
         age = max(15, (date - monarchBirth) / 365)
-        cost += (skill - 6) * 30 / age
+        print(skill, age)
+        cost += 2 * (skill - 6) * 30 / age
     if heir is not None:
         skill = sum(heir[x] for x in ('adm', 'dip', 'mil'))
         age = (date - heirBirth) / 365
-        cost += (skill - 6) * 30 / (age + 15)
+        cost += 2 * (skill - 6) * 30 / (age + 15)
     return cost
 
 governments = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'governments'))
@@ -118,6 +120,7 @@ governmentCosts = {}
 
 for tag, country in countries.items():
     if tag in ('NAT', 'PIR', 'REB'): continue
+    print(tag)
     governmentCosts[tag] = [0.0, 0.0, 0.0] # ruler, govt., tech group
     governmentCosts[tag][0] = rulerCost(country)
     governmentCosts[tag][1] = governmentCost(country)
@@ -151,10 +154,10 @@ resultTree = pyradox.struct.Tree()
 
 for tag in sorted(governmentCosts.keys()):
     nationTree = pyradox.struct.Tree()
-    nationTree['territory'] = int(territoryCosts[tag])
-    nationTree['ruler'] = int(governmentCosts[tag][0])
-    nationTree['government'] = int(governmentCosts[tag][1])
-    nationTree['technology'] = int(governmentCosts[tag][2])
+    nationTree['territory'] = territoryCosts[tag]
+    nationTree['ruler'] = governmentCosts[tag][0]
+    nationTree['government'] = governmentCosts[tag][1]
+    nationTree['technology'] = governmentCosts[tag][2]
     resultTree[tag] = nationTree
 
 outfile = open('out/non_idea_costs.txt', mode = 'w')
