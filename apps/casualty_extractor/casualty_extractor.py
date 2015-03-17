@@ -1,13 +1,12 @@
 import traceback
 
-try:
-    import _initpath
-except:
-    pass
-
+import io
 import re
 import os
 import sys
+import zipfile
+
+sys.path.append("../..")
 import pyradox.primitive
 import pyradox.table
 import pyradox.txt
@@ -32,7 +31,7 @@ unitHeadings = [side + '_' + unit for unit in allUnits for side in ('attacker', 
 headings = [
     'war_name', 'battle_name',
     'year', 'month', 'day',
-    'war_attacker', 'war_defender',
+    'attacker_war_leader', 'defender_war_leader',
     'attacker', 'defender', 'winner',
     'type', # land or naval
     'attacker_commander', 'defender_commander',
@@ -45,21 +44,28 @@ def extract(inFilename, outFilename = None):
         outFilename = inFileRoot + '.csv'
     
     # open and read the save
-    inFile = open(inFilename)
-    data = inFile.read()
-    inFile.close()
+    if zipfile.is_zipfile(inFilename):
+        inFile = zipfile.ZipFile(inFilename)
+        for info in inFile.infolist():
+            if info.filename != 'meta':
+                data = inFile.read(info).decode('utf-8', 'ignore')
+        inFile.close()
+    else:
+        inFile = open(inFilename)
+        data = inFile.read()
+        inFile.close()
     m = re.search('((active|previous)_war=.*)(?=income_statistics)', data, flags = re.DOTALL)
     if m is None: return
     
-    data = pyradox.txt.parse(m.group(1))
+    data = pyradox.txt.parse(m.group(1), filename=inFilename)
 
     result = pyradox.table.Table(headings)
 
     for warType, warData in data.items():
         warRow = {
             'war_name' : warData['name'],
-            'war_attacker' : warData['original_attacker'],
-            'war_defender' : warData['original_defender'],
+            'attacker_war_leader' : warData['original_attacker'],
+            'defender_war_leader' : warData['original_defender'],
             }
 
         for date, events in warData['history'].items():
@@ -95,10 +101,13 @@ def extract(inFilename, outFilename = None):
 
 if __name__ == '__main__':
     if len(sys.argv) >= 3:
+        # explicit input and output files
         extract(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 2:
+        # put output file at same place as input
         extract(sys.argv[1])
     else:
+        # use in/ and out/ dirs
         dirname = 'in'
         for filename in os.listdir(dirname):
             inFilename = os.path.join(dirname, filename)
@@ -108,6 +117,9 @@ if __name__ == '__main__':
                 try:
                     extract(inFilename, outFilename)
                 except:
+                    print('Failed to extract data from %s.' % inFilename)
                     traceback.print_exc()
+                else:
+                    print('Extracted data from %s and written to %s.' % (inFilename, outFilename))
                 
                 
