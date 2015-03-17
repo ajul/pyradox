@@ -1,5 +1,12 @@
-# import _initpath
+import traceback
+
+try:
+    import _initpath
+except:
+    pass
+
 import re
+import os
 import sys
 import pyradox.primitive
 import pyradox.table
@@ -32,12 +39,18 @@ headings = [
     'attacker_losses', 'defender_losses',
     ] + unitHeadings
 
-def extract(inFileName, outFileName):
+def extract(inFilename, outFilename = None):
+    if outFilename is None:
+        inFileRoot, inFileExt = os.path.splitext(inFileName)
+        outFilename = inFileRoot + '.csv'
+    
     # open and read the save
-    inFile = open(inFileName)
+    inFile = open(inFilename)
     data = inFile.read()
     inFile.close()
     m = re.search('((active|previous)_war=.*)(?=income_statistics)', data, flags = re.DOTALL)
+    if m is None: return
+    
     data = pyradox.txt.parse(m.group(1))
 
     result = pyradox.table.Table(headings)
@@ -76,7 +89,25 @@ def extract(inFileName, outFileName):
                 battleRow.update(warRow)
                 result.addRow(battleRow)
 
-    outFile = open(outFileName, mode='w')
+    outFile = open(outFilename, mode='w')
     outFile.write(result.toCSV(separator=','))
     outFile.close()
 
+if __name__ == '__main__':
+    if len(sys.argv) >= 3:
+        extract(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 2:
+        extract(sys.argv[1])
+    else:
+        dirname = 'in'
+        for filename in os.listdir(dirname):
+            inFilename = os.path.join(dirname, filename)
+            inRoot, _ = os.path.splitext(filename)
+            outFilename = os.path.join('out', inRoot + '.csv')
+            if os.path.isfile(inFilename):
+                try:
+                    extract(inFilename, outFilename)
+                except:
+                    traceback.print_exc()
+                
+                
