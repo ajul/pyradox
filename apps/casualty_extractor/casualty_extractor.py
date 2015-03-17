@@ -54,8 +54,9 @@ def extract(inFilename, outFilename = None):
         inFile = open(inFilename)
         data = inFile.read()
         inFile.close()
-    m = re.search('((active|previous)_war=.*)(?=income_statistics)', data, flags = re.DOTALL)
-    if m is None: return
+    m = re.search('((active|previous)_war\s*=.*)(?=income_statistics)', data, flags = re.DOTALL)
+    if m is None:
+        raise Exception("War data not found.")
     
     data = pyradox.txt.parse(m.group(1), filename=inFilename)
 
