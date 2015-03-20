@@ -182,7 +182,7 @@ def extract(inFilename, outFilenameBase = None):
                 'number_of_battles' : numBattles,
                 'country' : country,
                 'side' : side,
-                'is_war_leader' : int(isWarLeader),
+                'is_war_leader' : isWarLeader,
                 'friendly_losses' : warLosses[0] if side == 'attacker' else warLosses[1],
                 'enemy_losses' : warLosses[0] if side == 'defender' else warLosses[1],
                 })
