@@ -5,6 +5,8 @@ import pyradox.primitive
 import pyradox.struct
 import pyradox.table
 
+encoding = 'cp1252'
+
 class ParseError(Exception):
     def __init__(self, message):
         self.message = message
@@ -26,7 +28,7 @@ class ParadoxDialect(csv.Dialect):
     strict = True
 
 def parseFile(filename, verbose=False):
-    f = open(filename)
+    f = open(filename, encoding=encoding)
     lines = f.readlines()
     f.close()
     if verbose: print('Parsing file %s.' % filename)

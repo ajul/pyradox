@@ -122,10 +122,10 @@ def extract(inFilename, outFilenameBase = None):
         inFile = zipfile.ZipFile(inFilename)
         for info in inFile.infolist():
             if info.filename != 'meta':
-                data = inFile.read(info).decode('utf-8', 'ignore')
+                data = inFile.read(info).decode(pyradox.txt.encoding)
         inFile.close()
     else:
-        inFile = open(inFilename)
+        inFile = open(inFilename, encoding=pyradox.txt.encoding)
         data = inFile.read()
         inFile.close()
     m = re.search('((active|previous)_war\s*=.*?)^(?=\w+)(?!(active|previous)_war)', data, flags = re.DOTALL | re.MULTILINE)

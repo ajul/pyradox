@@ -4,6 +4,8 @@ import re
 import os
 import warnings
 
+encoding = 'cp1252'
+
 class ParseError(Exception):
     def __init__(self, message):
         self.message = message
@@ -26,7 +28,7 @@ def parse(s, filename=""):
 
 def parseFile(filename, verbose=False):
     """Parse a single file and return a Tree."""
-    f = open(filename)
+    f = open(filename, encoding=encoding)
     lines = f.readlines()
     f.close()
     if verbose: print('Parsing file %s.' % filename)
