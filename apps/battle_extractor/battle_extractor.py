@@ -187,11 +187,11 @@ def extract(inFilename, outFilenameBase = None):
                 'enemy_losses' : warLosses[0] if side == 'defender' else warLosses[1],
                 })
 
-    outWarFile = open(outFilenameBase + '.war.csv', mode='w')
+    outWarFile = open(outFilenameBase + '.war.csv', mode='w', encoding=pyradox.txt.encoding)
     outWarFile.write(warTable.toCSV(separator=','))
     outWarFile.close()
 
-    outBattleFile = open(outFilenameBase + '.battle.csv', mode='w')
+    outBattleFile = open(outFilenameBase + '.battle.csv', mode='w', encoding=pyradox.txt.encoding)
     outBattleFile.write(battleTable.toCSV(separator=','))
     outBattleFile.close()
 
