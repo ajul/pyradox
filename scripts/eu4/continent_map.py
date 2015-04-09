@@ -19,6 +19,22 @@ colorDefs = collections.OrderedDict([
     ('default', (127, 127, 127)),       #gray
     ])
 
+def provinceCost(province):
+    cost = 0
+    if 'base_tax' in province:
+        if 'trade_goods' in province and province['trade_goods'] == 'gold':
+            cost += 4 * province['base_tax']
+        else:
+            cost += province['base_tax']
+            
+    if 'manpower' in province:
+        cost += province['manpower']
+
+    if 'extra_cost' in province:
+        cost += province['extra_cost']
+
+    return cost
+
 legend = ''
 for name, color in colorDefs.items():
     bgColorString = '#%02x%02x%02x' % color
@@ -43,10 +59,12 @@ for continent, provinces in pyradox.txt.parseFile(os.path.join(pyradox.config.ba
 continentProvinceCount = {}
 continentBaseTax = {}
 continentManpower = {}
+continentCost = {}
 for continent in colorDefs.keys():
     continentProvinceCount[continent] = 0
     continentBaseTax[continent] = 0
     continentManpower[continent] = 0
+    continentCost[continent] = 0
     
 colormap = {}
 for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
@@ -57,6 +75,7 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
         continent = continentMap[provinceID]
         continentProvinceCount[continent] += 1
         continentBaseTax[continent] += data['base_tax']
+        continentCost[continent] += provinceCost(data)
         if 'manpower' in data: continentManpower[continent] += data['manpower']
         colormap[provinceID] = colorDefs[continent]
     else:
@@ -66,6 +85,7 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
 print(continentProvinceCount)
 print(continentBaseTax)
 print(continentManpower)
+print(continentCost)
 
 provinceMap = pyradox.worldmap.ProvinceMap()
 out = provinceMap.generateImage(colormap)

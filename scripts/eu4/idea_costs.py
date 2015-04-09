@@ -28,9 +28,10 @@ bonuses = {}
 
 def evalBonus(bonusKey, bonusValue):
     if bonusKey in bonuses:
-        powerType, baseValue, max_level, costFunction = bonuses[bonusKey]
+        powerType, baseValue, max_level, costs = bonuses[bonusKey]
+        costFunction = costFunctions[costs]
         level = bonusValue / baseValue
-        return powerType, 10 * level / max_level, costFunction(level)
+        return powerType, 10 * level / max_level, costFunction(level), costs[0] + (level - 1) * (costs[1] - costs[0])
     else:
         return None
 
@@ -57,11 +58,10 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
                 else:
                     bonusKey = key
                     baseValue = value
-            costFunction = costFunctions[tuple(costs)]
-            bonuses[bonusKey] = (powerType, baseValue, max_level, costFunction)
+            bonuses[bonusKey] = (powerType, baseValue, max_level, tuple(costs))
 
 result = '{|class = "wikitable sortable"\n'
-result += '! Idea group !! Base cost !! Adjusted for<br/>early ideas !! Max level ratio !! Final cost !! Bonuses unaccounted for\n'
+result += '! Idea group !! Linear cost !! Base cost !! Adjusted for<br/>early ideas !! Max level ratio !! Final cost !! Bonuses unaccounted for\n'
 
 resultTree = pyradox.struct.Tree()
 
@@ -71,6 +71,7 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
         index = 0
         baseCost = 0.0
         earlyCost = 0.0
+        totalLinearCost = 0.0
         unaccounted = [] # not appearing in designer
         levelCounts = {
             'adm' : 0.0,
@@ -93,19 +94,21 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
                 if bonusInfo is None:
                     unaccounted.append('%s (%s)' %( bonusKey, bonusValue))
                 else:
-                    powerType, level, cost = bonusInfo
+                    powerType, level, cost, linearCost = bonusInfo
                     levelCounts[powerType] += level
                     baseCost += cost
                     earlyCost += cost * costMultiplier
+                    totalLinearCost += linearCost
 
         maxRatio = max(levelCounts.values()) / sum(levelCounts.values())
         finalCost = earlyCost * (1 + 5 * max(0, maxRatio - 0.5))
         unaccountedString = '%d: %s' % (len(unaccounted), ', '.join(unaccounted))
         result += '|-\n'
-        result += '| %s || %0.1f || %0.1f || %0.1f%% || %0.1f || %s \n' % (ideaSetName, baseCost, earlyCost, maxRatio * 100, finalCost, unaccountedString)
+        result += '| %s || %0.1f || %0.1f || %0.1f || %0.1f%% || %0.1f || %s \n' % (ideaSetName, totalLinearCost, baseCost, earlyCost, maxRatio * 100, finalCost, unaccountedString)
 
         ideaSetTree = pyradox.struct.Tree()
 
+        ideaSetTree['flat'] = totalLinearCost
         ideaSetTree['base'] = baseCost
         ideaSetTree['early'] = earlyCost
         ideaSetTree['ratio'] = maxRatio

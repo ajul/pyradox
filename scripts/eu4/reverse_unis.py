@@ -99,7 +99,7 @@ for bonus in sorted(bonusSources.keys()):
     wikiPage += '==[[File:%s.png]] %s ==\n' % (bonus, bonusTitle)
     wikiPage += makeWikiTable(bonus)
 
-f = open('out/reverse_unis.txt', 'w', encoding='utf-8')
+f = open('out/reverse_unis.txt', 'w', encoding='cp1252')
 f.write(wikiPage)
 f.close()
 
@@ -121,7 +121,7 @@ for bonus in sorted(bonusSources.keys()):
 wikiTemplate += '| default (invalid bonus type {{lc:{{{1}}}}})\n'
 wikiTemplate += '}}</includeonly><noinclude>{{template doc}}</noinclude>'
 
-f = open('out/reverse_unis_list_template.txt', 'w', encoding='utf-8')
+f = open('out/reverse_unis_list_template.txt', 'w', encoding='cp1252')
 f.write(wikiTemplate)
 f.close()
 
@@ -133,6 +133,6 @@ for bonus in sorted(bonusSources.keys()):
 wikiTemplate += '| default (invalid bonus type {{lc:{{{1}}}}})\n'
 wikiTemplate += '}}</includeonly><noinclude>{{template doc}}</noinclude>'
 
-f = open('out/reverse_unis_table_template.txt', 'w', encoding='utf-8')
+f = open('out/reverse_unis_table_template.txt', 'w', encoding='cp1252')
 f.write(wikiTemplate)
 f.close()

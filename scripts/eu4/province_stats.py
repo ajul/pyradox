@@ -52,6 +52,12 @@ def nativePopulation(province):
     else:
         return None
 
+def nativeAggressiveness(province):
+    if 'native_size' in province:
+        return province['native_hostileness'] or 0
+    else:
+        return None
+
 rankMethod = 'dense'
 
 def generateMap(provinceFunction, filename, forceMin = None):
@@ -86,6 +92,7 @@ generateMap(provinceBaseTax, 'out/base_tax_map.png', forceMin = 1.0)
 generateMap(provinceManpower, 'out/base_manpower_map.png', forceMin = 1.0)
 generateMap(provinceCost, 'out/custom_nation_cost_map.png', forceMin = 2.0)
 generateMap(nativePopulation, 'out/native_population_map.png')
+generateMap(nativeAggressiveness, 'out/native_aggressiveness_map.png')
 
 
 
