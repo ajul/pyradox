@@ -181,9 +181,8 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
     key = None
     keyString = None
     
-    def stateKey():
+    def stateKey(result, pos, prevLineNumber, preComments, key, keyString, state):
         # expecting a key
-        nonlocal result, pos, prevLineNumber, preComments, key, keyString, state
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
@@ -208,10 +207,11 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             state = stateKey
             
         prevLineNumber = tokenLineNumber
+
+        return result, pos, prevLineNumber, preComments, key, keyString, state
     
-    def stateEquals():
+    def stateEquals(result, pos, prevLineNumber, preComments, key, keyString, state):
         # expecting an equals sign
-        nonlocal result, pos, prevLineNumber, preComments, key, keyString, state
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
@@ -227,10 +227,11 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             state = stateValue
             
         prevLineNumber = tokenLineNumber
+
+        return result, pos, prevLineNumber, preComments, key, keyString, state
     
-    def stateValue():
+    def stateValue(result, pos, prevLineNumber, preComments, key, keyString, state):
         # expecting a value
-        nonlocal result, pos, prevLineNumber, preComments, key, keyString, state
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
@@ -252,10 +253,12 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             raise ParseError('%s, line %d: Error: Invalid token type %s after key "%s", expected a value type.' % (filename, tokenLineNumber + 1, tokenType, keyString))
             
         prevLineNumber = tokenLineNumber
+
+        return result, pos, prevLineNumber, preComments, key, keyString, state
         
     state = stateKey
     while pos < len(tokenData):
-        state()
+        result, pos, prevLineNumber, preComments, key, keyString, state = state(result, pos, prevLineNumber, preComments, key, keyString, state)
         if state is None: return result, pos, prevLineNumber
             
     # End of file reached.
