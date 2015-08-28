@@ -12,47 +12,45 @@ import pyradox.worldmap
 import pyradox.eu4.province
 
 import scipy.stats
+import province_costs
 
 provinces = pyradox.eu4.province.getProvinces()
 
-def provinceBaseTax(province):
+def provinceBaseTax(provinceID, province):
     if 'base_tax' in province and province['base_tax'] > 0:
         return province['base_tax']
     else:
         return None
 
-def provinceManpower(province):
-    if 'manpower' in province and province['manpower'] > 0:
-        return province['manpower']
+def provinceBaseProduction(provinceID, province):
+    if 'base_production' in province and province['base_production'] > 0:
+        return province['base_production']
     else:
         return None
 
-def provinceCost(province):
-    cost = 0
-    if 'base_tax' in province:
-        if 'trade_goods' in province and province['trade_goods'] == 'gold':
-            cost += 4 * province['base_tax']
-        else:
-            cost += province['base_tax']
-            
-    if 'manpower' in province:
-        cost += province['manpower']
-
-    if 'extra_cost' in province:
-        cost += province['extra_cost']
-
-    if cost > 0:
-        return math.floor(cost)
+def provinceBaseManpower(provinceID, province):
+    if 'base_manpower' in province and province['base_manpower'] > 0:
+        return province['base_manpower']
     else:
         return None
 
-def nativePopulation(province):
+def provinceBaseDevelopment(provinceID, province):
+    result = (
+        (provinceBaseTax(provinceID, province) or 0) +
+        (provinceBaseProduction(provinceID, province) or 0) +
+        (provinceBaseManpower(provinceID, province) or 0))
+    if result > 0:
+        return result
+    else:
+        return None
+    
+def nativePopulation(provinceID, province):
     if 'native_size' in province:
         return province['native_size'] / 10.0
     else:
         return None
 
-def nativeAggressiveness(province):
+def nativeAggressiveness(provinceID, province):
     if 'native_size' in province:
         return province['native_hostileness'] or 0
     else:
@@ -61,9 +59,10 @@ def nativeAggressiveness(province):
 rankMethod = 'dense'
 
 def generateMap(provinceFunction, filename, forceMin = None):
-    numberMap = {int(re.match('\d+', filename).group(0)) : provinceFunction(province.atDate(pyradox.primitive.Date('1444.11.11')))
+    numberMap = {int(re.match('\d+', filename).group(0)) :
+                 provinceFunction(int(re.match('\d+', filename).group(0)), province.atDate(pyradox.primitive.Date('1444.11.11')))
                  for filename, province in provinces.items()
-                 if provinceFunction(province) is not None}
+                 if provinceFunction(int(re.match('\d+', filename).group(0)), province) is not None}
     
     if forceMin is None:
         forceMin = min(numberMap.values())
@@ -81,7 +80,7 @@ def generateMap(provinceFunction, filename, forceMin = None):
         else:
             colors[number] = pyradox.image.colormapBlueRed((rank - minRank) / rangeRank)
     colorMap = {provinceID : colors[number] for provinceID, number in numberMap.items()}
-    textMap = {provinceID : ('%d' % number if number >= 1.0 or number == 0 else '%0.1f' % number) for provinceID, number in numberMap.items()}
+    textMap = {provinceID : ('%d' % round(number)) for provinceID, number in numberMap.items()}
 
     provinceMap = pyradox.worldmap.ProvinceMap()
     image = provinceMap.generateImage(colorMap)
@@ -89,10 +88,12 @@ def generateMap(provinceFunction, filename, forceMin = None):
     pyradox.image.saveUsingPalette(image, filename)
         
 generateMap(provinceBaseTax, 'out/base_tax_map.png', forceMin = 1.0)
-generateMap(provinceManpower, 'out/base_manpower_map.png', forceMin = 1.0)
-generateMap(provinceCost, 'out/custom_nation_cost_map.png', forceMin = 2.0)
-generateMap(nativePopulation, 'out/native_population_map.png')
-generateMap(nativeAggressiveness, 'out/native_aggressiveness_map.png')
+generateMap(provinceBaseProduction, 'out/base_production_map.png', forceMin = 1.0)
+generateMap(provinceBaseManpower, 'out/base_manpower_map.png', forceMin = 1.0)
+generateMap(provinceBaseDevelopment, 'out/base_development_map.png', forceMin = 3.0)
+generateMap(province_costs.provinceCost, 'out/custom_nation_cost_map.png', forceMin = 1.0)
+# generateMap(nativePopulation, 'out/native_population_map.png')
+# generateMap(nativeAggressiveness, 'out/native_aggressiveness_map.png')
 
 
 

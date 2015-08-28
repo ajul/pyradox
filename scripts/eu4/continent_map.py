@@ -2,6 +2,7 @@ import _initpath
 import os
 import re
 import collections
+import province_costs
 import pyradox.config
 import pyradox.txt
 import pyradox.worldmap
@@ -18,22 +19,6 @@ colorDefs = collections.OrderedDict([
     ('oceania', (255, 127, 255)),         #magenta
     ('default', (127, 127, 127)),       #gray
     ])
-
-def provinceCost(province):
-    cost = 0
-    if 'base_tax' in province:
-        if 'trade_goods' in province and province['trade_goods'] == 'gold':
-            cost += 4 * province['base_tax']
-        else:
-            cost += province['base_tax']
-            
-    if 'manpower' in province:
-        cost += province['manpower']
-
-    if 'extra_cost' in province:
-        cost += province['extra_cost']
-
-    return cost
 
 legend = ''
 for name, color in colorDefs.items():
@@ -58,12 +43,15 @@ for continent, provinces in pyradox.txt.parseFile(os.path.join(pyradox.config.ba
 
 continentProvinceCount = {}
 continentBaseTax = {}
+continentProduction = {}
 continentManpower = {}
 continentCost = {}
 for continent in colorDefs.keys():
     continentProvinceCount[continent] = 0
     continentBaseTax[continent] = 0
+    continentProduction[continent] = 0
     continentManpower[continent] = 0
+    
     continentCost[continent] = 0
     
 colormap = {}
@@ -75,8 +63,9 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
         continent = continentMap[provinceID]
         continentProvinceCount[continent] += 1
         continentBaseTax[continent] += data['base_tax']
-        continentCost[continent] += provinceCost(data)
-        if 'manpower' in data: continentManpower[continent] += data['manpower']
+        continentProduction[continent] += data['base_production']
+        continentManpower[continent] += data['base_manpower']
+        continentCost[continent] += province_costs.provinceCost(provinceID, data)
         colormap[provinceID] = colorDefs[continent]
     else:
         print('Missing continent for province %d' % provinceID)
@@ -84,6 +73,7 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
 
 print(continentProvinceCount)
 print(continentBaseTax)
+print(continentProduction)
 print(continentManpower)
 print(continentCost)
 

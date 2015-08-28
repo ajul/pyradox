@@ -20,7 +20,7 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs[
     m = re.match('\d+', filename)
     provinceID = int(m.group(0))
     provinceValue = -1
-    for modifier in data.findWalk('add_permanent_province_modifier'):
+    for modifier in data.findAll('add_permanent_province_modifier', recurse=True):
         for x, (s, color) in enumerate(colors):
             if s in modifier['name']:
                 provinceValue = max(provinceValue, x)

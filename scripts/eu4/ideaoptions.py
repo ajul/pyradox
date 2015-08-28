@@ -22,7 +22,7 @@ bonusData = (
     ("auto_explore_adjacent_to_colony", 4.0, (True, True)), # bool), cost 1/4
     ("blockade_efficiency",         1/3, (0.33, 0.33)), # Oman only
     ("build_cost",                  -0.2, (-0.05, -0.33)), #-0.1 to -0.2?
-    ("build_power_cost",            -0.2, (-0.05, -0.33)), 
+    #("build_power_cost",            -0.2, (-0.05, -0.33)), 
     ("caravan_power",                20, (10, 25)),
     ("cavalry_cost",                -0.2, (-0.05, -0.33)), 
     ("cavalry_power",               0.1, (0.05, 0.33)),
@@ -30,11 +30,14 @@ bonusData = (
     ("cb_on_overseas",              1.0, (True, True)), # bool
     ("cb_on_primitives",            1.0, (True, True)), # bool
     ("cb_on_religious_enemies",     1.0, (True, True)), # bool
+    ("church_power_modifier",       0.1, (0.05, 0.25)),
     ("colonists",                   1, (1, 1)),
     # ("colonist_time",               -1/3, (-0.1, -0.33)), # obsolete
     ("core_creation",               -0.15, (-0.1, -0.33)),
     ("culture_conversion_cost",     -0.15, (-0.1, -0.33)),
     ("defensiveness",               0.2, (0.1, 0.4)),
+    ("development_cost",            -0.1, (-0.05, -0.2)),
+    ("devotion",                    0.5, (0.25, 1.0)), 
     ("dip_tech_cost_modifier",      -0.1, (-0.05, -0.25)), # unused
     ("diplomatic_annexation_cost",  -0.15, (-0.1, -0.33)),
     ("diplomatic_reputation",       2, (1, 5)),
@@ -48,8 +51,10 @@ bonusData = (
     # ("extra_manpower_at_religious_war", 2.0, (True, True)), # obsolete
     ("fabricate_claims_time",       -0.25, (-0.1, -0.25)),
     ("free_leader_pool",            1, (1, 1)),
+    ("fort_maintenance_modifier",   -0.15, (-0.1, -0.25)),
     ("galley_cost",                 -0.2, (-0.1, -0.33)),
     ("galley_power",                0.2, (0.1, 0.5)), #?
+    ("garrison_size",               0.1, (0.05, 0.25)),
     ("global_autonomy",             -0.05, (-0.05, -0.05)),
     ("global_colonial_growth",      25, (10, 50)), #?
     ("global_foreign_trade_power",  0.2, (0.05, 0.25)), # cost adjusted downwards
@@ -68,7 +73,7 @@ bonusData = (
     ("global_spy_defence",          0.25, (0.05, 0.5)),
     ("global_tariffs",              0.2, (0.05, 0.2)), # Spain only
     ("global_tax_modifier",         0.1, (0.05, 0.2)),
-    ("global_trade_goods_size",     0.1, (0.05, 0.2)),
+    ("global_trade_goods_size_modifier",     0.1, (0.05, 0.2)),
     ("global_trade_income_modifier", 0.1, (0.05, 0.2)),
     ("global_trade_power",          0.1, (0.05, 0.2)),
     ("global_unrest",               -1, (-1, -2)),
@@ -100,6 +105,7 @@ bonusData = (
     ("legitimacy",                  1.0, (0.25, 1.0)),
     ("light_ship_cost",             -0.2, (-0.1, -0.33)),
     ("light_ship_power",            0.1, (0.05, 0.25)),
+    ("loot_amount",                 0.1, (0.05, 0.25)),
     ("manpower_recovery_speed",     0.2, (0.1, 0.33)),
     ("may_explore",                 1.0, (True, True)), # bool
     ("may_force_march",             1.0, (True, True)), # bool
