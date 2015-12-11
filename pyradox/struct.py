@@ -23,19 +23,22 @@ class Tree(Struct):
         preComments appear before the item, one per line.
         lineComments appear on the same line as the item.
         """
-        def __init__(self, key, value, preComments = None, lineComment = None):
+        def __init__(self, key, value, preComments = None, lineComment = None, operator = None):
             self.key = key
             self.value = value
             if preComments is None: self.preComments = []
             else: self.preComments = preComments
             self.lineComment = lineComment
+            
+            if operator is None: self.operator = '='
+            else: self.operator = operator
         
         def prettyprint(self, level = 0, indentString = '    '):
             result = ''
             if len(self.preComments) > 0: result += '\n'
             for preComment in self.preComments:
-                result += indentString * level + "#" + preComment + '\n'
-            result += indentString * level + pyradox.primitive.makeTokenString(self.key) + ' = '
+                result += '%s#%s\n' % (indentString * level, preComment)
+            result += '%s%s %s ' % (indentString * level, self.key, self.operator)
             if isinstance(self.value, Tree) or isinstance(self.value, List):
                 result += '{\n'
                 result += self.value.prettyprint(level + 1)
@@ -44,7 +47,7 @@ class Tree(Struct):
                 result += pyradox.primitive.makeTokenString(self.value)
             
             if self.lineComment is not None:
-                result += indentString * level + " #" + self.lineComment
+                result += "%s #%s" % (indentString * level, self.lineComment)
             result += '\n'
             return result
     
@@ -146,9 +149,9 @@ class Tree(Struct):
         return self.find(key, reverse = True)
 
     # write methods
-    def append(self, key, value, preComments = None, lineComment = None):
+    def append(self, key, value, **kwargs):
         """Append a new key, value pair"""
-        self._data.append(Tree._Item(key, value, preComments, lineComment))
+        self._data.append(Tree._Item(key, value, **kwargs))
 
     def insert(self, i, key, value):
         """Insert a new key, value pair at a numeric position"""
@@ -181,6 +184,23 @@ class Tree(Struct):
 
     # TODO: update
     
+    def weakUpdate(self, other):
+        # only updates if key isn't already in self
+        for key, value in other.items():
+            if key not in self:
+                self.append(key, copy.deepcopy(value))
+    
+    def merge(self, other, mergeLevels = 0):
+        if mergeLevels == 0:
+            self += copy.deepcopy(other)
+        else:
+            for key, value in other.items():
+                # TODO: non-structs
+                if key in self:
+                    self[key].merge(value)
+                else:
+                    self[key] = copy.deepcopy(value)
+    
     # comments
     
     def getLineComment(self, key):
@@ -206,6 +226,20 @@ class Tree(Struct):
         
     def setPreCommentsAt(self, i, preComments):
         self._data[i].preComments = preComments
+        
+    # operator
+    
+    def getOperator(self, key):
+        return self._find(key).operator
+        
+    def setOperator(self, key, operator):
+        self._find(key).operator = operator
+        
+    def getOperatorAt(self, i):
+        return self._data[i].operator
+        
+    def setOperatorAt(self, i, operator):
+        self._data[i].operator = operator
     
     # string output methods
     def __repr__(self):
@@ -304,6 +338,10 @@ class List(Struct):
         
     def __iter__(self):
         for item in self._data: yield item.value
+        
+    def __len__(self):
+        """Number of key-value pairs."""
+        return len(self._data)
         
     def __getitem__(self, i):
         """Return an item by index"""

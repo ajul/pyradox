@@ -9,13 +9,13 @@ import pyradox.config
 
 cache = {}
 
-def loadFunctions(gameName, name, dirpath, mode = None):
+def loadFunctions(gameName, name, dirpath, mode = None, mergeLevels = 0):
     if isinstance(dirpath, str): dirpath = (dirpath,)
     def parseData(basedir = None):
         if basedir is None: basedir = pyradox.config.basedirs[gameName]
 
         if mode == "merge":
-            result = pyradox.txt.parseMerge(os.path.join(basedir, *dirpath))
+            result = pyradox.txt.parseMerge(os.path.join(basedir, *dirpath), mergeLevels = mergeLevels)
         elif mode == "walk":
             result = pyradox.struct.Tree()
             for filename, tree in pyradox.txt.parseWalk(os.path.join(basedir, *dirpath)):

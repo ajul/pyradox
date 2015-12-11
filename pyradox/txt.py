@@ -4,7 +4,10 @@ import re
 import os
 import warnings
 
-encoding = 'cp1252'
+encodings = [
+    'utf_8_sig',
+    'cp1252',
+    ]
 
 class ParseError(Exception):
     def __init__(self, message):
@@ -19,6 +22,18 @@ class ParseWarning(Warning):
 
     def __str__(self):
         return self.message
+        
+def readlines(filename):
+    for encoding in encodings:
+        try:
+            f = open(filename, encoding=encoding)
+            lines = f.readlines()
+            f.close()
+            return lines
+        except UnicodeDecodeError:
+            warnings.warn(ParseWarning("Failed to decode input file %s using codec %s." % (filename, encoding)))
+            f.close()
+    raise ParseError("All codecs failed for input file %s." % filename)
 
 def parse(s, filename=""):
     """Parse a string."""
@@ -28,9 +43,7 @@ def parse(s, filename=""):
 
 def parseFile(filename, verbose=False):
     """Parse a single file and return a Tree."""
-    f = open(filename, encoding=encoding)
-    lines = f.readlines()
-    f.close()
+    lines = readlines(filename)
     if verbose: print('Parsing file %s.' % filename)
     tokenData = lex(lines, filename)
     return parseTokens(tokenData, filename)
@@ -44,7 +57,7 @@ def parseDir(dirname, verbose=False):
             if ext == ".txt":
                 yield filename, parseFile(fullpath, verbose)
 
-def parseMerge(dirname, verbose=False):
+def parseMerge(dirname, verbose=False, mergeLevels = 0):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
     result = pyradox.struct.Tree()
     for filename in os.listdir(dirname):
@@ -53,7 +66,7 @@ def parseMerge(dirname, verbose=False):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
                 tree = parseFile(fullpath, verbose)
-                result += tree
+                result.merge(tree, mergeLevels)
     return result
 
 def parseWalk(dirname, verbose=False):
@@ -73,7 +86,7 @@ def parseWalk(dirname, verbose=False):
 tokenTypes = [
     # keysymbols
     ('whitespace', r'\s+'),
-    ('equals', r'='),
+    ('operator', r'[=><]'),
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
@@ -122,8 +135,8 @@ def parseTokens(tokenData, filename, startPos = 0):
         
             if tokenType == 'begin':
                 level += 1
-            elif tokenType == 'equals':
-                # parse as tree if equals sign detected at current level
+            elif tokenType == 'operator':
+                # parse as tree if operator detected at current level
                 if level == 0: return parseAsTree(tokenData, filename, startPos, isTopLevel)
     
     if isEmpty: return parseAsTree(tokenData, filename, startPos, isTopLevel) # empty defaults to tree
@@ -180,8 +193,9 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
     preComments = []
     key = None
     keyString = None
+    operator = None
     
-    def stateKey(result, pos, prevLineNumber, preComments, key, keyString, state):
+    def stateKey(result, pos, prevLineNumber, preComments, key, keyString, operator, state):
         # expecting a key
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
@@ -189,7 +203,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         if pyradox.primitive.isPrimitiveKeyTokenType(tokenType):
             keyString = tokenString
             key = pyradox.primitive.makePrimitive(tokenString, tokenType)
-            state = stateEquals
+            state = stateOperator
         elif tokenType == 'comment':
             if tokenLineNumber == prevLineNumber:
                 result.setLineCommentAt(-1, tokenString[1:])
@@ -200,7 +214,9 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             if isTopLevel:
                 # top level cannot be ended, warn
                 warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket. Skipping token.' % (filename, tokenLineNumber + 1)))
-            state = None
+                state = stateKey
+            else:
+                state = None
         else:
             #invalid key
             warnings.warn(ParseWarning('%s, line %d: Warning: Token "%s" is not valid key. Skipping token.' % (filename, tokenLineNumber + 1, tokenString)))
@@ -208,42 +224,49 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             
         prevLineNumber = tokenLineNumber
 
-        return result, pos, prevLineNumber, preComments, key, keyString, state
+        return result, pos, prevLineNumber, preComments, key, keyString, operator, state
     
-    def stateEquals(result, pos, prevLineNumber, preComments, key, keyString, state):
-        # expecting an equals sign
+    def stateOperator(result, pos, prevLineNumber, preComments, key, keyString, operator, state):
+        # expecting an operator
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
-        if tokenType == 'equals':
+        if tokenType == 'operator':
+            operator = tokenString
             state = stateValue
         elif tokenType == 'comment':
             preComments.append(tokenString[1:])
-            state = stateEquals
+            state = stateOperator
         else:
-            # missing equals sign; unconsume the token and move on
-            warnings.warn(ParseWarning('%s, line %d: Warning: Expected equals sign after key "%s". Treating token "%s" as value.' % (filename, tokenLineNumber + 1, keyString, tokenString)))
+            # missing operator; unconsume the token and move on
+            warnings.warn(ParseWarning('%s, line %d: Warning: Expected operator after key "%s". Treating operator as "=" and token "%s" as value.' % (filename, tokenLineNumber + 1, keyString, tokenString)))
             pos -= 1
+            operator = '='
             state = stateValue
             
         prevLineNumber = tokenLineNumber
 
-        return result, pos, prevLineNumber, preComments, key, keyString, state
+        return result, pos, prevLineNumber, preComments, key, keyString, operator, state
     
-    def stateValue(result, pos, prevLineNumber, preComments, key, keyString, state):
+    def stateValue(result, pos, prevLineNumber, preComments, key, keyString, operator, state):
         # expecting a value
         tokenType, tokenString, tokenLineNumber = tokenData[pos]
         pos += 1
         
         if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
-            value = pyradox.primitive.makePrimitive(tokenString, tokenType)
-            result.append(key, value, preComments = preComments)
-            preComments = []
-            state = stateKey
+            if tokenString.lower() in ('hsv', 'rgb'):
+                # Temporary hack.
+                warnings.warn(ParseWarning('Temporary hack to handle colors: Ignoring token "%s".' % tokenString))
+                state = stateValue
+            else:
+                value = pyradox.primitive.makePrimitive(tokenString, tokenType)
+                result.append(key, value, preComments = preComments, operator = operator)
+                preComments = []
+                state = stateKey
         elif tokenType == 'begin':
             # value is a dict or list, recurse
             value, pos, tokenLineNumber = parseTokens(tokenData, filename, pos)
-            result.append(key, value, preComments = preComments)
+            result.append(key, value, preComments = preComments, operator = operator)
             preComments = []
             state = stateKey
         elif tokenType == 'comment':
@@ -254,11 +277,11 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             
         prevLineNumber = tokenLineNumber
 
-        return result, pos, prevLineNumber, preComments, key, keyString, state
+        return result, pos, prevLineNumber, preComments, key, keyString, operator, state
         
     state = stateKey
     while pos < len(tokenData):
-        result, pos, prevLineNumber, preComments, key, keyString, state = state(result, pos, prevLineNumber, preComments, key, keyString, state)
+        result, pos, prevLineNumber, preComments, key, keyString, operator, state = state(result, pos, prevLineNumber, preComments, key, keyString, operator, state)
         if state is None: return result, pos, prevLineNumber
             
     # End of file reached.
