@@ -128,7 +128,7 @@ def extract(inFilename, outFilenameBase = None):
         inFile = open(inFilename, encoding=pyradox.txt.encoding)
         data = inFile.read()
         inFile.close()
-    m = re.search('((active|previous)_war\s*=.*?)^(?=\w+)(?!(active|previous)_war)', data, flags = re.DOTALL | re.MULTILINE)
+    m = re.search('(^(active|previous)_war\s*=.*?)^(?=\w+)(?!(active|previous)_war)', data, flags = re.DOTALL | re.MULTILINE)
     if m is None:
         raise Exception("War data not found.")
 

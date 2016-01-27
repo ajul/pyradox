@@ -30,6 +30,7 @@ def unitsAtYear(year):
 
     for unitKey, unitData in units.items():
         multiplier = 1.00 + unitData["num_upgrades"] * 0.01
+        unitData["year"] = year
         unitData["build_cost_ic"] *= multiplier
         unitData["build_time"] *= multiplier
         unitData["supply_consumption"] *= multiplier
@@ -123,7 +124,7 @@ baseColumns = {
 
 derivedColumns = {
     "land" : (
-        ("Unit", None),
+        ("Year", "%(year)d"),
         ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
         ("Soft Att./kICd", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Soft Att./MP", lambda k, v: '%0.3f' % (v["soft_attack"] / v["build_cost_manpower"])),
@@ -134,7 +135,7 @@ derivedColumns = {
         ("Hard Att./Cons.", lambda k, v: '%0.3f' % (v["hard_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     "naval" : (
-        ("Unit", None),
+        ("Year", "%(year)d"),
         ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
         
         ("Sea Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
@@ -150,7 +151,7 @@ derivedColumns = {
         ("Sub Att./Cons.", lambda k, v: '%0.3f' % (v["sub_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     "air" : (
-        ("Unit", None),
+        ("Year", "%(year)d"),
         ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
         ("Soft Att./kICd", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Soft Att./MP", lambda k, v: '%0.3f' % (v["soft_attack"] / v["build_cost_manpower"])),

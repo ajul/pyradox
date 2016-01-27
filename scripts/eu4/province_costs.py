@@ -22,9 +22,7 @@ def provinceCost(provinceID, province):
 
     if 'extra_cost' in province:
         cost += province['extra_cost']
-
-    # TODO: terrain mult
-
+        
     if cost > 0:
         return cost
     else:

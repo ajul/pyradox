@@ -1,9 +1,17 @@
 import csv
 import os
 import collections
+import warnings
 import pyradox.config
 import pyradox.txt
 from PIL import Image, ImageFilter, ImageChops, ImageFont, ImageDraw
+
+class MapWarning(Warning):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
 
 def neImage(image1, image2):
     """Returns a boolean image that is True where image1 != image2."""
@@ -50,52 +58,73 @@ class ProvinceMap():
         if flipY:
             self.provinceImage = self.provinceImage.transpose(Image.FLIP_TOP_BOTTOM)
 
-        csvReader = csv.reader(open(definitionCSV), delimiter = ';')
-        self.provinceColorFromID = {}
-        self.provinceIDFromColor = {}
-        self.waterProvinces = set()
-        self._adjacency = {} # lazy evaluation
+        with open(definitionCSV) as definitionFile:
+            csvReader = csv.reader(definitionFile, delimiter = ';')
+            self.provinceColorByID = {}
+            self.provinceIDByColor = {}
+            self.waterProvinces = set()
+            self._adjacency = {} # lazy evaluation
 
-        waterKeys = ('sea_starts', 'lakes')
-        defaultTree = pyradox.txt.parseFile(defaultMAP, verbose=False)
-        maxProvince = defaultTree['max_provinces']
-        
-        for key in waterKeys:
-            if key in defaultTree:
-                value = defaultTree[key]
-                if isinstance(value, int):
-                    for provinceID in range(value, maxProvince + 1):
-                        self.waterProvinces.add(provinceID)
-                else:
-                    for provinceID in value:
-                        self.waterProvinces.add(provinceID)
-        
-        for row in csvReader:
-            try:
-                provinceID = int(row[0])
-                provinceColor = (int(row[1]), int(row[2]), int(row[3]))
-                self.provinceColorFromID[provinceID] = provinceColor
-                self.provinceIDFromColor[provinceColor] = provinceID
-            except ValueError:
-                pass
+            waterKeys = ('sea_starts', 'lakes')
+            defaultTree = pyradox.txt.parseFile(defaultMAP, verbose=False)
+            maxProvince = defaultTree['max_provinces']
+            
+            for key in waterKeys:
+                if key in defaultTree:
+                    value = defaultTree[key]
+                    if isinstance(value, int):
+                        for provinceID in range(value, maxProvince + 1):
+                            self.waterProvinces.add(provinceID)
+                    else:
+                        for provinceID in value:
+                            self.waterProvinces.add(provinceID)
+            
+            provinceCount = 0
+            for row in csvReader:
+                try:
+                    provinceID = int(row[0])
+                    provinceColor = (int(row[1]), int(row[2]), int(row[3]))
+                    if row[4] in ("sea", "lake"): self.waterProvinces.add(provinceID) # HoI4
+                    self.provinceColorByID[provinceID] = provinceColor
+                    self.provinceIDByColor[provinceColor] = provinceID
+                    provinceCount += 1
+                except ValueError:
+                    warnings.warn('Could not parse province definition from row "%s" of %s.' % (str(row), definitionCSV))
+                    pass
+            
+            print("Read %d provinces from %s." % (provinceCount, definitionCSV))
 
         # read province positions
-        positionsTXT = os.path.join(basedir, 'map', 'positions.txt')
-        positionsTree = pyradox.txt.parseFile(positionsTXT, verbose=False)
         self.positions = {}
         maxY = self.provinceImage.size[1] # use image coords
-        for provinceID, data in positionsTree.items():
-            if "position" in data:
-                positionData = data['position']
-                # second pair is unit position
-                self.positions[provinceID] = (positionData[2], maxY - positionData[3]) 
-                
-            elif "text_position" in data:
-                positionData = data['text_position']
-                self.positions[provinceID] = (positionData['x'], maxY - positionData['y'])
-            elif "building_position" in data:
-                _, positionData = data['building_position'].at(0)
-                self.positions[provinceID] = (positionData['x'], maxY - positionData['y'])
+        positionsTXT = os.path.join(basedir, 'map', 'positions.txt')
+        positionsTree = pyradox.txt.parseFile(positionsTXT, verbose=False)
+        if len(positionsTree) > 0:
+            
+            for provinceID, data in positionsTree.items():
+                if "position" in data:
+                    positionData = data['position']
+                    # second pair is unit position
+                    self.positions[provinceID] = (positionData[2], maxY - positionData[3]) 
+                    
+                elif "text_position" in data:
+                    positionData = data['text_position']
+                    self.positions[provinceID] = (positionData['x'], maxY - positionData['y'])
+                elif "building_position" in data:
+                    _, positionData = data['building_position'].at(0)
+                    self.positions[provinceID] = (positionData['x'], maxY - positionData['y'])
+        else:
+            # HoI4 fallback to unitstacks
+            with open(os.path.join(basedir, 'map', 'unitstacks.txt')) as positionFile:
+                csvReader = csv.reader(positionFile, delimiter = ';')
+                for row in csvReader:
+                    try:
+                        provinceID = int(row[0])
+                        provinceX = round(float(row[2]))
+                        provinceY = round(float(row[4]))
+                        self.positions[provinceID] = (provinceX, maxY - provinceY)
+                    except ValueError:
+                        pass
                 
     def isWaterProvince(self, provinceID):
         """ Return true iff province is a water province """
@@ -104,7 +133,7 @@ class ProvinceMap():
     def getAdjacent(self, provinceID):
         """ Returns a list of adjacent provinceIDs. """
         # get province bounding box
-        provinceColorImage = ImageChops.constant(self.provinceImage, self.provinceColorFromID[provinceID])
+        provinceColorImage = ImageChops.constant(self.provinceImage, self.provinceColorByID[provinceID])
         mask = ImageChops.invert(neImage(self.provinceImage, provinceColorImage))
         xMin, yMin, xMax, yMax = Image.getbbox(mask)
         
@@ -129,19 +158,19 @@ class ProvinceMap():
         
     
     def generateImage(self, colormap,
-                      scale = 1.0,
                       defaultLandColor = (51, 51, 51),
                       defaultWaterColor = (68, 107, 163),
                       edgeColor = (0, 0, 0),
-                      edgeWidth = 1):
+                      edgeWidth = 1,
+                      edgeGroups = None):
         """
         Given a colormap dict mapping provinceID -> color, colors the map and returns an PIL image.
         provinceIDs with no color get a default color depending on whether they are land or water.
         """
 
-        # precompute map
+        # precompute map provinceColor -> result color
         mergedMap = collections.defaultdict(lambda: defaultWaterColor)
-        for provinceID, provinceColor in self.provinceColorFromID.items():
+        for provinceID, provinceColor in self.provinceColorByID.items():
             if provinceID in colormap.keys():
                 mergedMap[provinceColor] = colormap[provinceID]
             else:
@@ -150,25 +179,46 @@ class ProvinceMap():
                 else:
                     mergedMap[provinceColor] = defaultLandColor
         
-        size = tuple(int(n * scale) for n in self.provinceImage.size)
-        provinceImage = self.provinceImage.resize(size, Image.NEAREST)
-        provinceImageData = provinceImage.getdata()
-        result = Image.new(self.provinceImage.mode, size)
-        result.putdata([mergedMap[pixel] for pixel in provinceImageData])
+        result = Image.new(self.provinceImage.mode, self.provinceImage.size)
+        result.putdata([mergedMap[pixel] for pixel in self.provinceImage.getdata()])
 
         if edgeWidth > 0:
-            self.overlayEdges(result, edgeColor, edgeWidth)
+            self.overlayEdges(result, edgeColor, edgeWidth, groups = edgeGroups)
         return result
 
-    def overlayEdges(self, image, edgeColor = (0, 0, 0), edgeWidth = 1):
+    def overlayEdges(self, image, edgeColor = (0, 0, 0), edgeWidth = 1, groups = None):
         """
         Overlays province edges on the target image.
+        Provinces may be grouped together using the groups argument
+        [[provinceIDinGroup0, provinceIDinGroup0, ...], [provinceIDinGroup1, provinceIDinGroup1, ...], ...]
         """
-        provinceImage = self.provinceImage.resize(image.size, Image.NEAREST)
+        
+        if groups is not None:
+            # map provinceColor -> result color
+            colorMap = {color:color for color in self.provinceIDByColor.keys()}
+            for group in groups:
+                # color all provinces in the group according to the first province in the group
+                groupColor = self.provinceColorByID[group[0]]
+                for provinceID in group[1:]:
+                    originalColor = self.provinceColorByID[provinceID]
+                    colorMap[originalColor] = groupColor
+            
+            # perform the coloring
+            provinceImage = Image.new(self.provinceImage.mode, image.size)
+            def mapColor(pixel):
+                if pixel in colorMap: return colorMap[pixel]
+                else:
+                    warnings.warn(MapWarning("No provinceID found for color %s." % str(pixel)))
+                    return pixel
+            
+            provinceImage.putdata([mapColor(pixel) for pixel in self.provinceImage.getdata()])
+        else:
+            provinceImage = self.provinceImage.resize(image.size, Image.NEAREST)
+                    
         edgeImage = generateEdgeImage(provinceImage, edgeWidth)
         image.paste(edgeColor, None, edgeImage)
 
-    def overlayIcons(self, image, iconmap):
+    def overlayIcons(self, image, iconmap, offsetmap = {}, defaultOffset = (0, 0)):
         """
         Given a dict mapping provinceID -> icon, overlays an icon on each province
         """
@@ -183,13 +233,22 @@ class ProvinceMap():
 
             iconStartX = int(scaledPosX - iconSizeX / 2)
             iconStartY = int(scaledPosY - iconSizeY / 2)
+            
+            if provinceID in offsetmap.keys():
+                iconStartX += offsetmap[provinceID][0]
+                iconStartY += offsetmap[provinceID][1]
+            else:
+                iconStartX += defaultOffset[0]
+                iconStartY += defaultOffset[1]
+            
             box = (iconStartX, iconStartY, iconStartX + iconSizeX, iconStartY + iconSizeY)
             image.paste(icon, box, icon)
 
-    def overlayText(self, image, textmap, colormap = {}, fontsize = 12, fontfile='arial.ttf', defaultFontColor=(0, 0, 0), antialias = True):
+    def overlayText(self, image, textmap, colormap = {}, offsetmap = {}, fontsize = 12, fontfile='arial.ttf', defaultFontColor=(0, 0, 0), antialias = True, defaultOffset = (0, 0)):
         """
         Given a textmap mapping provinceID -> text or (provinceID, ...) -> text, overlays text on each province
-        Optional colormap definiting text color
+        Optional colormap definiting text color.
+        offset: pixels to offset text.
         """
         relScaleX = image.size[0] / self.provinceImage.size[0]
         relScaleY = image.size[1] / self.provinceImage.size[1]
@@ -202,21 +261,37 @@ class ProvinceMap():
         for provinceID, text in textmap.items():
             if isinstance(provinceID, int):
                 # single province: center on that province
+                if provinceID not in self.positions:
+                    warnings.warn(MapWarning('Textmap references province ID %d with no position for text string "%s".' % (provinceID, text)))
+                    continue
                 posX, posY = self.positions[provinceID]
             else:
                 # set of provinces: find centroid
                 centerX, centerY = 0.0, 0.0
+                provinceCount = 0
                 for subProvinceID in provinceID:
+                    if subProvinceID not in self.positions:
+                        warnings.warn(MapWarning('Textmap references province ID %d with no position for text string "%s".' % (subProvinceID, text)))
+                        continue
+                    centerProvinceID = subProvinceID
                     subPosX, subPosY = self.positions[subProvinceID]
                     centerX += subPosX
                     centerY += subPosY
-                centerX /= len(provinceID)
-                centerY /= len(provinceID)
+                    provinceCount += 1
+                    
+                if provinceCount == 0:
+                    warnings.warn(MapWarning('No valid provinces were found for text string "%s".' % (subProvinceID, text)))
+                    continue
+                
+                centerX /= provinceCount
+                centerY /= provinceCount
+                
                 # then choose province nearest to centroid
-                centerProvinceID = provinceID[0]
                 posX, posY = self.positions[centerProvinceID]
                 distSq = (posX - centerX) ** 2 + (posY - centerY) ** 2
                 for subProvinceID in provinceID:
+                    if subProvinceID not in self.positions:
+                        continue # already warned
                     subPosX, subPosY = self.positions[subProvinceID]
                     subDistSq = (subPosX - centerX) ** 2 + (subPosY - centerY) ** 2
                     if subDistSq < distSq:
@@ -230,6 +305,13 @@ class ProvinceMap():
 
             textStartX = int(scaledPosX - textSizeX / 2)
             textStartY = int(scaledPosY - textSizeY / 2)
+            
+            if provinceID in offsetmap.keys():
+                textStartX += offsetmap[provinceID][0]
+                textStartY += offsetmap[provinceID][1]
+            else:
+                textStartX += defaultOffset[0]
+                textStartY += defaultOffset[1]
 
             if provinceID in colormap.keys():
                 color = colormap[provinceID]

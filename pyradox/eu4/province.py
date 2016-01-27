@@ -1,4 +1,5 @@
 import os
+import math
 import pyradox.config
 import pyradox.format
 import pyradox.load
@@ -13,3 +14,26 @@ def getProvinceName(provinceID):
     """
     key = 'PROV%d' % provinceID
     return pyradox.yml.getLocalization(key, ['prov_names'])
+
+def provinceCost(province):
+    cost = 0
+    if 'base_tax' in province:
+        cost += province['base_tax'] * 0.5
+            
+    if 'base_production' in province:
+        cost += province['base_production'] * 0.5
+        if 'trade_goods' in province and province['trade_goods'] == 'gold':
+            cost += province['base_production'] * 3.0
+        
+    if 'base_manpower' in province:
+        cost += province['base_manpower'] * 0.5
+
+    if 'extra_cost' in province:
+        cost += province['extra_cost']
+
+    # TODO: terrain mult
+
+    if cost > 0:
+        return math.floor(cost)
+    else:
+        return None
