@@ -3,6 +3,7 @@ import re
 import os
 import inspect
 import copy
+import json
 
 class Struct():
     """
@@ -32,7 +33,14 @@ class Tree(Struct):
             
             if operator is None: self.operator = '='
             else: self.operator = operator
-        
+
+        #For JSON output
+        def rawData(self):
+            if isinstance(self.value, Tree) or isinstance(self.value, List):
+                return self.value.rawData()
+            else:
+                return self.value
+
         def prettyprint(self, level = 0, indentString = '    '):
             result = ''
             if len(self.preComments) > 0: result += '\n'
@@ -197,7 +205,7 @@ class Tree(Struct):
             for key, value in other.items():
                 # TODO: non-structs
                 if key in self:
-                    self[key].merge(value)
+                    self[key].merge(value, mergeLevels - 1)
                 else:
                     self[key] = copy.deepcopy(value)
     
@@ -245,7 +253,22 @@ class Tree(Struct):
     def __repr__(self):
         """Produces a string in the original .txt format."""
         return self.prettyprint(0)
-    
+
+    def rawData(self):
+        raw = {}
+        for item in self._data:
+            if(item.key in raw):
+                if type(raw[item.key]) is list :
+                    raw[item.key].append(item.rawData())
+                else :
+                    raw[item.key] = [raw[item.key], item.rawData()]
+            else :
+                raw[item.key] = item.rawData()
+        return raw
+
+    def json(self):
+        return json.dumps(self.rawData(),indent=2,sort_keys=True)
+
     def prettyprint(self, level = 0, indentString = '    '):
         result = ''
         for item in self._data:
@@ -299,7 +322,14 @@ class List(Struct):
             if preComments is None: self.preComments = []
             else: self.preComments = preComments
             self.lineComment = lineComment
-        
+
+         #For JSON output
+        def rawData(self):
+            if isinstance(self.value, Tree) or isinstance(self.value, List):
+                return self.value.rawData()
+            else:
+                return self.value
+
         def prettyprint(self, level = 0, indentString = '    '):
             result = ''
             if len(self.preComments) > 0: result += '\n'
@@ -379,6 +409,13 @@ class List(Struct):
     def __add__(self, other):
         result = copy.deepcopy(self)
         result += other
+
+    #For JSON output
+    def rawData(self):
+        raw = []
+        for item in self._data:
+            raw.append(item.rawData())
+        return raw
 
     def prettyprint(self, level = 0, indentString = '    '):
         result = ''

@@ -164,7 +164,7 @@ def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
         elif tokenType == "end":
             if isTopLevel:
                 # top level cannot be ended, warn
-                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket.' % (filename, tokenLineNumber + 1)))
+                warnings.warn_explicit('Unmatched closing bracket.', ParseWarning, filename, tokenLineNumber + 1)
             else:
                 result.endComments = preComments
                 return result, pos, tokenLineNumber
@@ -213,13 +213,13 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         elif tokenType == 'end':
             if isTopLevel:
                 # top level cannot be ended, warn
-                warnings.warn(ParseWarning('%s, line %d: Warning: Unmatched closing bracket. Skipping token.' % (filename, tokenLineNumber + 1)))
+                warnings.warn_explicit('Unmatched closing bracket. Skipping token.', ParseWarning, filename, tokenLineNumber + 1)
                 state = stateKey
             else:
                 state = None
         else:
             #invalid key
-            warnings.warn(ParseWarning('%s, line %d: Warning: Token "%s" is not valid key. Skipping token.' % (filename, tokenLineNumber + 1, tokenString)))
+            warnings.warn_explicit('Token "%s" is not valid key. Skipping token.' % tokenString, ParseWarning, filename, tokenLineNumber + 1)
             state = stateKey
             
         prevLineNumber = tokenLineNumber
@@ -239,7 +239,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             state = stateOperator
         else:
             # missing operator; unconsume the token and move on
-            warnings.warn(ParseWarning('%s, line %d: Warning: Expected operator after key "%s". Treating operator as "=" and token "%s" as value.' % (filename, tokenLineNumber + 1, keyString, tokenString)))
+            warnings.warn_explicit('Expected operator after key "%s". Treating operator as "=" and token "%s" as value.' % (keyString, tokenString), ParseWarning, filename, tokenLineNumber + 1)
             pos -= 1
             operator = '='
             state = stateValue
@@ -256,7 +256,7 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
             if tokenString.lower() in ('hsv', 'rgb'):
                 # Temporary hack.
-                warnings.warn(ParseWarning('Temporary hack to handle colors: Ignoring token "%s".' % tokenString))
+                warnings.warn_explicit('Temporary hack to handle colors: Ignoring token "%s".' % tokenString, ParseWarning, filename, tokenLineNumber + 1)
                 state = stateValue
             else:
                 value = pyradox.primitive.makePrimitive(tokenString, tokenType)

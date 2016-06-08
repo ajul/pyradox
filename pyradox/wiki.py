@@ -1,3 +1,4 @@
+import re
 import pyradox.format
 
 def makeWikitable(tree, columnSpecs, filterFunction = None, sortFunction = lambda item: item[0], tableStyle = "text-align: right;", collapse = False, sortable = True):
@@ -18,7 +19,8 @@ def makeWikitable(tree, columnSpecs, filterFunction = None, sortFunction = lambd
     result += '"'
     
     # table format
-    result += ' style="%s"' % tableStyle
+    if tableStyle:
+        result += ' style="%s"' % tableStyle
     
     result += '\n'  
     
@@ -55,9 +57,7 @@ def makeWikitable(tree, columnSpecs, filterFunction = None, sortFunction = lambd
                 if cellStyle is not None:
                     result += 'style="%s" | ' % cellStyle
             elif contentString != '':
-                try:
-                    x = float(contentString)
-                except ValueError:
+                if not re.search(r'(\+|-)?\d+(\.\d*)?%?', contentString):
                     result += 'style="text-align: left;" | ' 
             result += contentString
             
@@ -65,13 +65,13 @@ def makeWikitable(tree, columnSpecs, filterFunction = None, sortFunction = lambd
     result += '|}\n'
     return result
 
-def coloredPercentString(x, color = True):
+def coloredPercentString(x, numberFormat = '%+d%%', color = True):
     # color can be a fixed color, True (+green), or False (-green)
     if x == 0 or x is None: return ""
     if color in (True, False):
         if (x > 0.0) == color:
-            return "{{green|%+d%%}}" % round(x * 100.0)
+            return ("{{green|%s}}" % numberFormat) % (x * 100.0)
         else:
-            return "{{red|%+d%%}}" % round(x * 100.0)
+            return ("{{red|%s}}" % numberFormat) % (x * 100.0)
     else:
-        return "{{%s|%+d%%}}" % (color, round(x * 100.0))
+        return ("{{%%s|%s}}" % numberFormat) % (color, x * 100.0)
