@@ -197,17 +197,22 @@ class Tree(Struct):
         for key, value in other.items():
             if key not in self:
                 self.append(key, copy.deepcopy(value))
+                
+    def mergeItem(self, key, value, mergeLevels = 0):
+        if key in self and isinstance(self[key], Struct):
+            #print('Merge', value, 'into', self[key])
+            self[key].merge(value, mergeLevels)
+            #print('Result', self[key])
+        else:
+            self[key] = copy.deepcopy(value)
     
+    # -1 for fully recursive merge
     def merge(self, other, mergeLevels = 0):
         if mergeLevels == 0:
             self += copy.deepcopy(other)
         else:
             for key, value in other.items():
-                # TODO: non-structs
-                if key in self:
-                    self[key].merge(value, mergeLevels - 1)
-                else:
-                    self[key] = copy.deepcopy(value)
+                self.mergeItem(key, value, mergeLevels - 1)
     
     # comments
     
@@ -280,7 +285,7 @@ class Tree(Struct):
         return result
 
     # other methods
-    def atDate(self, date = False):
+    def atDate(self, date = False, mergeLevels = -1):
         """
         returns a deep copy of this tree with all date blocks at or before the specified date deep copied and promoted to the top and the rest omitted
         if date is True, use all date blocks
@@ -303,7 +308,7 @@ class Tree(Struct):
             if isinstance(item.key, pyradox.primitive.Date):
                 if date is True or item.key <= date:
                     for item in item.value._data:
-                        result[item.key] = copy.deepcopy(item.value)
+                        result.mergeItem(item.key, item.value, mergeLevels)
         return result
 
 class List(Struct):
@@ -381,6 +386,13 @@ class List(Struct):
     def append(self, value, preComments = None, lineComment = None):
         """Append a new value"""
         self._data.append(List._Item(value, preComments, lineComment))
+        
+    def merge(self, other, mergeLevels = 0):
+        # TODO: recursive, aliasing
+        if isinstance(other, List):
+            self.__iadd__(other)
+        else:
+            self.append(other)
 
     def insert(self, i, value):
         """Insert a new value"""
