@@ -266,17 +266,33 @@ equipmentColumns = {
         ("Resource cost", computeEquipmentResourceCost),
         ("Total cost", computeEquipmentTotalCost),
         ("Manpower", "%(manpower)d"),
+        
         ("Port usage", "%(port_capacity_usage)0.1f"),
+        ("Operational range", "%(naval_range)d"),
         ("Speed", "%(naval_speed)d"),
+        
+        ("Surface detection", "%(surface_detection)d"),
+        ("Sub detection", "%(sub_detection)d"),
+        ("Surface visibility", "%(surface_visibility)d"),
+        ("Submerged visibility", "%(sub_visibility)d"),
+        
         ("HP", computeNavalMaxStrength),
+        ("Evasion", "%(evasion)d"),
+        ("Reliability", lambda k, v: "%d%%" % (v['reliability'] * 100.0)),
+        
         ("Gun range", "%(fire_range)d"),
         ("Gun attack", "%(attack)d"),
         ("Torpedo attack", "%(torpedo_attack)d"),
         ("Anti air attack", "%(anti_air_attack)d"),
         ("Sub attack", "%(sub_attack)d"),
+        ("Shore bombardment", "%(shore_bombardment)d"),
+        
         ("Armor", "%(armor_value)d"),
-        ("Evasion", "%(evasion)d"),
         ("Piercing", "%(ap_attack)d"),
+        
+        ("Deck size", "%(carrier_size)d"),
+        
+        ("Equipment", equipmentName),
         ),
     "air" : (
         ("Equipment", equipmentName),

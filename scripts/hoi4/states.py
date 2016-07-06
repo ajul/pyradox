@@ -8,6 +8,8 @@ import pyradox.struct
 import pyradox.wiki
 import pyradox.yml
 
+date = '1939.1.1'
+
 localizationSources = ['state_names']
 
 def computeCountryTagAndName(filename):
@@ -17,6 +19,7 @@ def computeCountryTagAndName(filename):
 countries = {}
 
 for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+    country = country.atDate(date)
     tag, name = computeCountryTagAndName(filename)
     country['tag'] = tag
     rulingParty = country['set_politics']['ruling_party']
@@ -24,10 +27,14 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
     countries[tag] = country
 
 states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
-stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'), verbose=False)
+stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'),
+                                         verbose=False, mergeLevels = 1)
+
+stateCategories = stateCategories['state_categories']
 
 for state in states.values():
-    history = state['history']
+    history = state['history'].atDate(date, mergeLevels = -1)
+    # if state['id'] == 50: print('state50', history)
     state['owner'] = history['owner']
     state['owner_name'] = countries[history['owner']]['name']
     state['human_name'] = pyradox.yml.getLocalization(state['name'], localizationSources, game = 'HoI4')
@@ -74,12 +81,12 @@ columns = (
     ('Naval dockyards', '%(dockyard)d'),
     ('Civilian factories', '%(industrial_complex)d'),
     # ('Total factories', sumKeysFunction('arms_factory', 'dockyard', 'industrial_complex')),
-    ('Oil', '%(oil)d'),
-    ('Aluminium', '%(aluminium)d'),
-    ('Rubber', '%(rubber)d'),
-    ('Tungsten', '%(tungsten)d'),
-    ('Steel', '%(steel)d'),
-    ('Chromium', '%(chromium)d'),
+    ('{{Icon|Oil}}', '%(oil)d'),
+    ('{{Icon|Aluminium}}', '%(aluminium)d'),
+    ('{{Icon|Rubber}}', '%(rubber)d'),
+    ('{{Icon|Tungsten}}', '%(tungsten)d'),
+    ('{{Icon|Steel}}', '%(steel)d'),
+    ('{{Icon|Chromium}}', '%(chromium)d'),
     # ('Total resources', sumKeysFunction('oil', 'aluminium', 'rubber', 'tungsten', 'steel', 'chromium')),
     ('Air base levels', '%(air_base)d'),
     ('Naval base levels', '%(naval_base)d'),

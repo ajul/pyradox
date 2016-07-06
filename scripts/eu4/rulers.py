@@ -34,6 +34,8 @@ for tag, country in countries.items():
                 for key in leaderKeys:
                     ruler[key] = ''
             if 'regent' in ruler and ruler['regent']: ruler['name'] += ' (regent)'
+            # broken file
+            if not isinstance(ruler['mil'], int): ruler['mil'] = 0
             ruler['total'] = ruler['adm'] + ruler['dip'] + ruler['mil']
             ruler["country"] = countryName
             ruler["date"] = date

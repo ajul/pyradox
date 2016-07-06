@@ -23,7 +23,9 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
     countries[tag] = country
 
 states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
-stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'), verbose=False)
+stateCategories = pyradox.txt.parseMerge(
+    os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'),
+    verbose=False, mergeLevels = 1)['state_categories']
 
 for state in states.values():
     history = state['history']
@@ -39,8 +41,14 @@ for state in states.values():
     total['building_slots'] = (total['building_slots'] or 0) + buildingSlots
     
     if 'manpower' in state:
-        country['manpower'] = (country['manpower'] or 0) + state['manpower']
-        total['manpower'] = (total['manpower'] or 0) + state['manpower']
+        if (tag in history.findAll('add_core_of')
+            or (tag in ['RAJ', 'SIK'])
+            or (state['id'] < 200 and state['id'] != 124)):
+            manpowerKey = 'core_manpower'
+        else:
+            manpowerKey = 'non_core_manpower'
+        country[manpowerKey] = (country[manpowerKey] or 0) + state['manpower']
+        total[manpowerKey] = (total[manpowerKey] or 0) + state['manpower']
     
     if 'resources' in state:
         for resource, quantity in state['resources'].items():
@@ -74,19 +82,20 @@ columns = (
     ('Ruling party', lambda k, v: v['set_politics']['ruling_party'].title()),
     ('States', '%(states)d'),
     ('Research slots', lambda k, v: '%d' % (v['set_research_slots'] or 2)),
-    ('Population (M)', lambda k, v: '%0.2f' % ((v['manpower'] or 0) / 1e6) ),
+    ('Core population (M)', lambda k, v: ('%0.2f' % (v['core_manpower'] / 1e6)) if 'core_manpower' in v else '' ),
+    ('Non-core population (M)', lambda k, v: ('%0.2f' % (v['non_core_manpower'] / 1e6)) if 'non_core_manpower' in v else '' ),
     ('Victory points', '%(victory_points)d'),
     ('Building slots', '%(building_slots)d'),
-    ('Military factories', '%(arms_factory)d'),
-    ('Naval dockyards', '%(dockyard)d'),
-    ('Civilian factories', '%(industrial_complex)d'),
+    ('{{icon|MIC}}', '%(arms_factory)d'),
+    ('{{icon|NIC}}', '%(dockyard)d'),
+    ('{{icon|CIC}}', '%(industrial_complex)d'),
     ('Total factories', sumKeysFunction('arms_factory', 'dockyard', 'industrial_complex')),
-    ('Oil', '%(oil)d'),
-    ('Aluminium', '%(aluminium)d'),
-    ('Rubber', '%(rubber)d'),
-    ('Tungsten', '%(tungsten)d'),
-    ('Steel', '%(steel)d'),
-    ('Chromium', '%(chromium)d'),
+    ('{{icon|Oil}}', '%(oil)d'),
+    ('{{icon|Aluminium}}', '%(aluminium)d'),
+    ('{{icon|Rubber}}', '%(rubber)d'),
+    ('{{icon|Tungsten}}', '%(tungsten)d'),
+    ('{{icon|Steel}}', '%(steel)d'),
+    ('{{icon|Chromium}}', '%(chromium)d'),
     ('Total resources', sumKeysFunction('oil', 'aluminium', 'rubber', 'tungsten', 'steel', 'chromium')),
     ('Air base levels', '%(air_base)d'),
     ('Naval base levels', '%(naval_base)d'),
