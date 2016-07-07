@@ -39,14 +39,14 @@ def parse(s, filename=""):
     """Parse a string."""
     lines = s.splitlines()
     tokenData = lex(lines, filename)
-    return parseTokens(tokenData, filename)
+    return parseTree(tokenData, filename)
 
 def parseFile(filename, verbose=False):
     """Parse a single file and return a Tree."""
     lines = readlines(filename)
     if verbose: print('Parsing file %s.' % filename)
     tokenData = lex(lines, filename)
-    return parseTokens(tokenData, filename)
+    return parseTree(tokenData, filename)
     
 def parseDir(dirname, verbose=False):
     """Given a directory, iterate over the content of the .txt files in that directory as Trees"""
@@ -111,81 +111,14 @@ def lexIter(fileLines, filename):
         for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace',)
         )
 
-def parseTokens(tokenData, filename, startPos = 0):
-    """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree or list as appropriate."""
+def parseTree(tokenData, filename, startPos = 0):
+    """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree."""
     isTopLevel = (startPos == 0)
-    # if starting position is 0, check for extra token at beginning
+     # if starting position is 0, check for extra token at beginning
     if startPos == 0 and len(tokenData) >= 1 and tokenData[0][1] == 'EU4txt':
         tokenType, tokenString, lineNumber = tokenData[0]
         print('%s, line %d: Skipping header token "%s".' % (filename, lineNumber + 1, tokenString))
         startPos = 1 # skip first token
-    # determine whether is tree or list
-    pos = startPos
-    isEmpty = True
-    level = 0
-    while pos < len(tokenData) and level >= 0:
-        tokenType, tokenString, tokenLineNumber = tokenData[pos]
-        pos += 1
-        if tokenType == 'end':
-            level -= 1
-        elif tokenType == 'comment':
-            continue
-        else:
-            isEmpty = False
-        
-            if tokenType == 'begin':
-                level += 1
-            elif tokenType == 'operator':
-                # parse as tree if operator detected at current level
-                if level == 0: return parseAsTree(tokenData, filename, startPos, isTopLevel)
-    
-    if isEmpty: return parseAsTree(tokenData, filename, startPos, isTopLevel) # empty defaults to tree
-    else: return parseAsList(tokenData, filename, startPos, isTopLevel)
-    
-def parseAsList(tokenData, filename, startPos = 0, isTopLevel = False):
-    """Parse a list from the tokenData. Returns the list, end position, and end line number."""
-    result = pyradox.struct.List()
-    pos = startPos
-    prevLineNumber = -1
-    preComments = []
-    while pos < len(tokenData):
-        tokenType, tokenString, tokenLineNumber = tokenData[pos]
-        pos += 1
-        
-        if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
-            value = pyradox.primitive.makePrimitive(tokenString, tokenType)
-            result.append(value, preComments = preComments)
-            preComments = []
-        elif tokenType == "comment":
-            if tokenLineNumber == prevLineNumber:
-                result.setLineComment(-1, tokenString[1:])
-            else:
-                preComments.append(tokenString[1:])
-        elif tokenType == "end":
-            if isTopLevel:
-                # top level cannot be ended, warn
-                warnings.warn_explicit('Unmatched closing bracket.', ParseWarning, filename, tokenLineNumber + 1)
-            else:
-                result.endComments = preComments
-                return result, pos, tokenLineNumber
-        elif tokenType == "begin":
-            value, pos, tokenLineNumber = parseTokens(tokenData, filename, pos)
-            result.append(value, preComments = preComments)
-            preComments = []
-        else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, tokenLineNumber + 1, tokenType))
-        
-        prevLineNumber = tokenLineNumber
-    
-    # End of file reached.
-    if isTopLevel:
-        result.endComments = preComments
-        return result
-    else:
-        raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, prevLineNumber + 1))
-        
-def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
-    """Parse a Tree from the tokenData."""
     
     result = pyradox.struct.Tree()
     pos = startPos
@@ -264,11 +197,38 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
                 preComments = []
                 state = stateKey
         elif tokenType == 'begin':
-            # value is a dict or list, recurse
-            value, pos, tokenLineNumber = parseTokens(tokenData, filename, pos)
-            result.append(key, value, preComments = preComments, operator = operator)
-            preComments = []
-            state = stateKey
+            # Value is a dict or group. First, determine whether this is a tree or group.
+            lookaheadPos = pos + 1
+            level = 0
+            isTree = False
+            while lookaheadPos < len(tokenData) and level >= 0:
+                tokenType, tokenString, tokenLineNumber = tokenData[lookaheadPos]
+                lookaheadPos += 1
+                if tokenType == 'end':
+                    level -= 1
+                elif tokenType == 'comment':
+                    continue
+                else:
+                    isEmpty = False
+                
+                    if tokenType == 'begin':
+                        level += 1
+                    elif tokenType == 'operator':
+                        # Tree if operator detected at current level.
+                        if level == 0: 
+                            isTree = True
+                            break
+            
+            if isTree:
+                # Recurse.
+                value, pos, tokenLineNumber = parseTree(tokenData, filename, pos)
+                result.append(key, value, preComments = preComments, operator = operator)
+                preComments = []
+                state = stateKey
+            else:
+                # Go to group state.
+                state = stateGroup
+                
         elif tokenType == 'comment':
             preComments.append(tokenString[1:])
             state = stateValue
@@ -277,6 +237,31 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
             
         prevLineNumber = tokenLineNumber
 
+        return result, pos, prevLineNumber, preComments, key, keyString, operator, state
+        
+    def stateGroup(result, pos, prevLineNumber, preComments, key, keyString, operator, state):
+        preComments = []
+        tokenType, tokenString, tokenLineNumber = tokenData[pos]
+        pos += 1
+        
+        if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
+            value = pyradox.primitive.makePrimitive(tokenString, tokenType)
+            result.append(key, value, preComments = preComments, inGroup = True)
+            preComments = []
+        elif tokenType == "comment":
+            if tokenLineNumber == prevLineNumber:
+                result.setLineCommentAt(-1, tokenString[1:])
+            else:
+                preComments.append(tokenString[1:])
+        elif tokenType == "end":
+            result.endComments = preComments
+            state = stateKey
+        elif tokenType == "begin":
+            raise ParseError('%s, line %d: Error: Cannot nest inside a group.' % (filename, tokenLineNumber + 1))
+        else:
+            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, tokenLineNumber + 1, tokenType))
+        
+        prevLineNumber = tokenLineNumber
         return result, pos, prevLineNumber, preComments, key, keyString, operator, state
         
     state = stateKey
@@ -290,6 +275,3 @@ def parseAsTree(tokenData, filename, startPos = 0, isTopLevel = False):
         return result
     else:
         raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (filename, prevLineNumber + 1))
-        
-
-

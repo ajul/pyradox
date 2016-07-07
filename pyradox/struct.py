@@ -5,13 +5,7 @@ import inspect
 import copy
 import json
 
-class Struct():
-    """
-    for isinstance only
-    """
-    pass
-
-class Tree(Struct):
+class Tree():
     """
     Tree class representing Paradox .txt files.
     Supports most features of OrderedDict and some of ElementTree.
@@ -24,7 +18,7 @@ class Tree(Struct):
         preComments appear before the item, one per line.
         lineComments appear on the same line as the item.
         """
-        def __init__(self, key, value, preComments = None, lineComment = None, operator = None):
+        def __init__(self, key, value, preComments = None, lineComment = None, operator = None, inGroup = False):
             self.key = key
             self.value = value
             if preComments is None: self.preComments = []
@@ -33,6 +27,8 @@ class Tree(Struct):
             
             if operator is None: self.operator = '='
             else: self.operator = operator
+            
+            self.inGroup = inGroup
 
         #For JSON output
         def rawData(self):
@@ -41,13 +37,14 @@ class Tree(Struct):
             else:
                 return self.value
 
-        def prettyprint(self, level = 0, indentString = '    '):
+        def prettyprint(self, level = 0, indentString = '    ', printKey = True):
             result = ''
             if len(self.preComments) > 0: result += '\n'
             for preComment in self.preComments:
                 result += '%s#%s\n' % (indentString * level, preComment)
-            result += '%s%s %s ' % (indentString * level, self.key, self.operator)
-            if isinstance(self.value, Tree) or isinstance(self.value, List):
+            if printKey:
+                result += '%s%s %s ' % (indentString * level, self.key, self.operator)
+            if isinstance(self.value, Tree):
                 result += '{\n'
                 result += self.value.prettyprint(level + 1)
                 result += indentString * level + '}'
@@ -56,7 +53,10 @@ class Tree(Struct):
             
             if self.lineComment is not None:
                 result += "%s #%s" % (indentString * level, self.lineComment)
-            result += '\n'
+            if printKey or self.lineComment is not None:
+                result += '\n'
+            else:
+                result += ' '
             return result
     
     def __init__(self, iterator = None, endComments = None):
@@ -276,13 +276,31 @@ class Tree(Struct):
 
     def prettyprint(self, level = 0, indentString = '    '):
         result = ''
+        groupKey = None
         for item in self._data:
-            result += item.prettyprint(level, indentString)
+            # 1. End group?
+            if groupKey is not None:
+                if item.inGroup and match(item.key, groupKey) and not isinstance(item.value, Tree):
+                    # continue group
+                    result += item.prettyprint(level = level + 1, printKey = False)
+                    continue
+                else:
+                    # end group
+                    groupKey = None
+                    result += indentString * level + '}\n'
+            if item.inGroup and not isinstance(item.value, Tree):
+                # start group
+                groupKey = item.key
+                result += '%s%s %s { ' % (indentString * level, item.key, item.operator)
+                result += item.prettyprint(level = level + 1, printKey = False)
+            else:
+                result += item.prettyprint(level = level, printKey = True)
         
-        if len(self.endComments) > 0: result += '\n'
-        for endComment in self.endComments:
-            result += indentString * level + '#' + endComment + '\n'
+        # close any groups at end
+        if groupKey is not None:
+            result += indentString * level + '}\n'
         return result
+            
 
     # other methods
     def atDate(self, date = False, mergeLevels = -1):
@@ -309,133 +327,6 @@ class Tree(Struct):
                 if date is True or item.key <= date:
                     for item in item.value._data:
                         result.mergeItem(item.key, item.value, mergeLevels)
-        return result
-
-class List(Struct):
-    """
-    List class. Like a standard list, but with a different string representation.
-    """
-    
-    class _Item():
-        """
-        Internal class to keep track of items.
-        preComments appear before the item, one per line.
-        lineComments appear on the same line as the item.
-        """
-        def __init__(self, value, preComments = None, lineComment = None):
-            self.value = value
-            if preComments is None: self.preComments = []
-            else: self.preComments = preComments
-            self.lineComment = lineComment
-
-         #For JSON output
-        def rawData(self):
-            if isinstance(self.value, Tree) or isinstance(self.value, List):
-                return self.value.rawData()
-            else:
-                return self.value
-
-        def prettyprint(self, level = 0, indentString = '    '):
-            result = ''
-            if len(self.preComments) > 0: result += '\n'
-            for preComment in self.preComments:
-                result += indentString * level + "#" + preComment + '\n'
-                
-            result += indentString * level
-            
-            if isinstance(self.value, Tree) or isinstance(self.value, List):
-                result += '{\n'
-                result += self.value.prettyprint(level + 1)
-                result += indentString * level + '}'
-            else:
-                result += pyradox.primitive.makeTokenString(self.value)
-                
-            if self.lineComment is not None:
-                result += " #" + self.lineComment
-            result += '\n'
-            return result
-    
-    def __init__(self, iterator = None, endComments = None):
-        if iterator is None: self._data = []
-        else: self._data = [List._Item(value) for value in iterator]
-        
-        if endComments is None: self.endComments = []
-        else: self.endComments = endComments
-    
-    def __repr__(self):
-        """Produces a string in the original .txt format."""
-        return self.prettyprint(0)
-        
-    def __contains__(self, value):
-        for item in self._data:
-            if item.value == value: return True
-        return False
-        
-    def __iter__(self):
-        for item in self._data: yield item.value
-        
-    def __len__(self):
-        """Number of key-value pairs."""
-        return len(self._data)
-        
-    def __getitem__(self, i):
-        """Return an item by index"""
-        return self._data[i].value
-
-    # write methods
-    def append(self, value, preComments = None, lineComment = None):
-        """Append a new value"""
-        self._data.append(List._Item(value, preComments, lineComment))
-        
-    def merge(self, other, mergeLevels = 0):
-        # TODO: recursive, aliasing
-        if isinstance(other, List):
-            self.__iadd__(other)
-        else:
-            self.append(other)
-
-    def insert(self, i, value):
-        """Insert a new value"""
-        self._data.insert(i, List._Item(value))
-
-    def __setitem__(self, key, value):
-        """Replaces a value"""
-        self._data[i] = List._Item(value)
-        
-    def getLineComment(self, i):
-        return self._data[i].lineComment
-        
-    def getPreComments(self, i):
-        return self._data[i].preComments
-        
-    def setLineComment(self, i, lineComment):
-        self._data[i].lineComment = lineComment
-        
-    def setPreComments(self, i, preComments):
-        self._data[i].preComments = preComments
-    
-    def __iadd__(self, other):
-        for item in other._data:
-            self._data.append(copy.deepcopy(item))
-            
-    def __add__(self, other):
-        result = copy.deepcopy(self)
-        result += other
-
-    #For JSON output
-    def rawData(self):
-        raw = []
-        for item in self._data:
-            raw.append(item.rawData())
-        return raw
-
-    def prettyprint(self, level = 0, indentString = '    '):
-        result = ''
-        for item in self._data:
-            result += item.prettyprint(level, indentString)
-        if len(self.endComments) > 0: result += '\n'
-        for endComment in self.endComments:
-            result += indentString * level + '#' + endComment + '\n'
         return result
             
 def match(x, spec):
