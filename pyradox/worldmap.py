@@ -195,11 +195,12 @@ class ProvinceMap():
         
         if groups is not None:
             # map provinceColor -> result color
-            colorMap = {color:color for color in self.provinceIDByColor.keys()}
+            colorMap = {}
+            
             for group in groups:
                 # color all provinces in the group according to the first province in the group
                 groupColor = self.provinceColorByID[group[0]]
-                for provinceID in group[1:]:
+                for provinceID in group:
                     originalColor = self.provinceColorByID[provinceID]
                     colorMap[originalColor] = groupColor
             
@@ -208,8 +209,10 @@ class ProvinceMap():
             def mapColor(pixel):
                 if pixel in colorMap: return colorMap[pixel]
                 else:
-                    warnings.warn(MapWarning("No provinceID found for color %s." % str(pixel)))
-                    return pixel
+                    # map all ungrouped provinces to the same group
+                    if 'default' not in colorMap:
+                        colorMap['default'] = pixel
+                    return colorMap['default']
             
             provinceImage.putdata([mapColor(pixel) for pixel in self.provinceImage.getdata()])
         else:
