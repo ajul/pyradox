@@ -18,7 +18,7 @@ provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['Ho
 groups = {}
 
 for state in states.values():
-    k = tuple(provinceID for provinceID in state['provinces'] if not provinceMap.isWaterProvince(provinceID))
+    k = tuple(provinceID for provinceID in state.findAll('provinces') if not provinceMap.isWaterProvince(provinceID))
     groups[k] = str(state['id'])
 
 out = provinceMap.generateImage({}, defaultLandColor=(255, 255, 255), edgeColor=(191, 191, 191), edgeGroups = groups.keys())
