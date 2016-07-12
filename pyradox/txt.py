@@ -198,9 +198,10 @@ def parseTree(tokenData, filename, startPos = 0):
                 state = stateKey
         elif tokenType == 'begin':
             # Value is a dict or group. First, determine whether this is a tree or group.
-            lookaheadPos = pos + 1
+            lookaheadPos = pos
             level = 0
-            isTree = False
+            # Empty brackets are trees.
+            isTree = True
             while lookaheadPos < len(tokenData) and level >= 0:
                 tokenType, tokenString, tokenLineNumber = tokenData[lookaheadPos]
                 lookaheadPos += 1
@@ -209,7 +210,8 @@ def parseTree(tokenData, filename, startPos = 0):
                 elif tokenType == 'comment':
                     continue
                 else:
-                    isEmpty = False
+                    # Non-empty brackets are groups unless an operator is found.
+                    isTree = False
                 
                     if tokenType == 'begin':
                         level += 1
