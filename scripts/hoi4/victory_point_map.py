@@ -76,23 +76,19 @@ for state in states.values():
     if state['id'] in capitalStates and not controller in capitalStates[state['id']]:
         print("Country %s overriding %s" % (controller, capitalStates[state['id']]))
         
-    for vps in history.findAll('victory_points'):
-        for i in range(0, len(vps), 2):
-            provinceID = vps[i]
-            vp = int(vps[i+1])
+    for provinceID, vp in history.findAll('victory_points', tupleLength = 2):
+        # write number of vps
+        textmap[provinceID] = str(vp)
 
-            # write number of vps
-            textmap[provinceID] = str(vp)
-
-            # set icon
-            if needCapital:
-                iconmap[provinceID] = capitalIcon
-                iconoffsetmap[provinceID] = (0, -2)
-                needCapital = False
-            elif vp > 5:
-                iconmap[provinceID] = majorIcon
-            else:
-                iconmap[provinceID] = minorIcon
+        # set icon
+        if needCapital:
+            iconmap[provinceID] = capitalIcon
+            iconoffsetmap[provinceID] = (0, -2)
+            needCapital = False
+        elif vp > 5:
+            iconmap[provinceID] = majorIcon
+        else:
+            iconmap[provinceID] = minorIcon
 
     # backup capital
     if needCapital:

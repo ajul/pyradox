@@ -39,9 +39,8 @@ for supplyArea in supplyAreas.values():
         for provinceID in state['provinces']:
             supplyAreaProvinces[supplyArea['id']].append(provinceID)
 
-        for vps in state['history'].findAll('victory_points'):
-            for i in range(1, len(vps), 2):
-                totalVPSupply += round(vps[i] * 0.1 + 1)
+        for _, vpValue in state['history'].findAll('victory_points', tupleLength = 2):
+            totalVPSupply += round(vpValue * 0.1 + 1)
             
     averageInfrastructure = totalInfrastructure / len(supplyArea['states'])
     infrastructureTransport = 2.0 * (averageInfrastructure ** 2.0)
