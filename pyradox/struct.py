@@ -148,9 +148,18 @@ class Tree():
         it = self.findAll(key, *args, **kwargs)
         return next(it, default)
 
-    def findAll(self, key, *args, **kwargs):
-        """Return all values corresponding to a key"""
-        for item in self._findAll(key, *args, **kwargs): yield item.value    
+    def findAll(self, key, tupleLength = None, *args, **kwargs):
+        """Return all values corresponding to a key. If set, tupleLength parameter causes this to yield tuples."""
+        if tupleLength is None:
+            for item in self._findAll(key, *args, **kwargs): 
+                yield item.value
+        else:
+            partial = []
+            for item in self._findAll(key, *args, **kwargs):
+                partial.append(item.value)
+                if len(partial) >= tupleLength:
+                    yield tuple(x for x in partial)
+                    partial = []
 
     def __getitem__(self, key):
         """Return the LAST value corresponding to a key or None if not found"""

@@ -25,7 +25,7 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
 states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
 stateCategories = pyradox.txt.parseMerge(
     os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'),
-    verbose=False, mergeLevels = 1)['state_categories']
+    verbose=False)
 
 for state in states.values():
     history = state['history']
@@ -55,10 +55,9 @@ for state in states.values():
             country[resource] = (country[resource] or 0) + quantity
             total[resource] = (total[resource] or 0) + quantity
 
-    for victoryPoints in history.findAll('victory_points'):
-        for i in range(1, len(victoryPoints), 2):
-            country['victory_points'] = (country['victory_points'] or 0) + victoryPoints[i]
-            total['victory_points'] = (total['victory_points'] or 0) + victoryPoints[i]
+    for _, vpValue in history.findAll('victory_points', tupleLength = 2):
+        country['victory_points'] = (country['victory_points'] or 0) + vpValue
+        total['victory_points'] = (total['victory_points'] or 0) + vpValue
 
     if 'buildings' in history:
         for building, quantity in history['buildings'].items():

@@ -19,7 +19,7 @@ for year in unitstats.unitTypeYears[unitType]:
     allYears += units
 
 with open("out/%s_units_by_year.txt" % unitType, "w") as outFile:
-    columns = [("Unit", unitstats.computeUnitName)] + unitstats.baseColumns[unitType]
+    columns = [("Unit", unitstats.computeUnitName)] + unitstats.baseColumns[unitType] + [("Unit", unitstats.computeUnitName)]
     tables = {year : pyradox.struct.Tree() for year in unitstats.unitTypeYears[unitType]}
     for unitKey, unit in allYears.items():
         if unit["year"] in unitstats.unitTypeYears[unitType] and unitstats.computeUnitType(unit) == unitType and unitstats.isAvailiable(unit):
