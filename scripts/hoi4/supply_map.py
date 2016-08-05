@@ -27,24 +27,25 @@ for supplyArea in supplyAreas.values():
     
     totalInfrastructure = 0
     totalVPSupply = 0
-    maxNavalBase = 0
+    totalNavalBase = 0
     
-    for stateID in supplyArea['states']:
+    for stateID in supplyArea.findAll('states'):
         state = statesByID[stateID]
-        totalInfrastructure += state['history']['buildings']['infrastructure']
-        for k, v in state['history']['buildings'].items():
-            if isinstance(k, int):
-                maxNavalBase = max(v['naval_base'] or 0, maxNavalBase)
+        if 'buildings' in state['history']:
+            totalInfrastructure += state['history']['buildings']['infrastructure']
+            for k, v in state['history']['buildings'].items():
+                if isinstance(k, int):
+                    totalNavalBase += v['naval_base'] or 0
         
-        for provinceID in state['provinces']:
+        for provinceID in state.findAll('provinces'):
             supplyAreaProvinces[supplyArea['id']].append(provinceID)
 
         for _, vpValue in state['history'].findAll('victory_points', tupleLength = 2):
-            totalVPSupply += round(vpValue * 0.1 + 1)
+            totalVPSupply += math.floor(vpValue * 0.1 + 1)
             
-    averageInfrastructure = totalInfrastructure / len(supplyArea['states'])
+    averageInfrastructure = totalInfrastructure / supplyArea.count('states')
     infrastructureTransport = 2.0 * (averageInfrastructure ** 2.0)
-    navalTransport = 3.0 * maxNavalBase
+    navalTransport = 3.0 * totalNavalBase
     transport = max(infrastructureTransport, navalTransport)
     
     localSupply = supplyArea['value'] + totalVPSupply
@@ -66,18 +67,17 @@ for supplyAreaID, provinces in supplyAreaProvinces.items():
     for provinceID in provinces:
         if not provinceMap.isWaterProvince(provinceID):
             k.append(provinceID)
-            colormapLocal[provinceID] = pyradox.image.colormapRedGreen(localSupply / 20)
+            colormapLocal[provinceID] = pyradox.image.colormapRedGreen(localSupply / 25)
             colormapTransport[provinceID] = pyradox.image.colormapRedGreen(transport / 100)
     k = tuple(x for x in k)
     groupsLocal[k] = '%d' % localSupply
     groupsTransport[k] = '%d' % transport
 
-# Create a blank map and scale it up 2x.
-localImage = provinceMap.generateImage(colormapLocal, defaultLandColor=(255, 255, 255), edgeColor=(191, 191, 191), edgeGroups = groupsLocal.keys())
+localImage = provinceMap.generateImage(colormapLocal, defaultLandColor=(255, 255, 255), edgeColor=(63, 63, 63), edgeGroups = groupsLocal.keys())
 provinceMap.overlayText(localImage, groupsLocal, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
 localImage.save('out/local_supply_map.png')
 
-transportImage = provinceMap.generateImage(colormapTransport, defaultLandColor=(255, 255, 255), edgeColor=(191, 191, 191), edgeGroups = groupsTransport.keys())
+transportImage = provinceMap.generateImage(colormapTransport, defaultLandColor=(255, 255, 255), edgeColor=(63, 63, 63), edgeGroups = groupsTransport.keys())
 provinceMap.overlayText(transportImage, groupsTransport, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
 transportImage.save('out/transport_supply_map.png')
 

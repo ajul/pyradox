@@ -127,6 +127,13 @@ class Tree():
             if match(key, item.key): return i
         return None
         
+    def count(self, key):
+        """Count the number of items with matching key."""
+        result = 0
+        for i, item in enumerate(self._data):
+            if match(key, item.key): result += 1
+        return result
+        
     def _find(self, key, *args, **kwargs):
         """Internal single find function. Returns a _Item."""
         it = self._findAll(key, *args, **kwargs)
