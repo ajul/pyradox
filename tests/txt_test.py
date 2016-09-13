@@ -1,10 +1,10 @@
 import _initpath
-import pyradox.txt
+import pyradox
 
 #result = pyradox.txt.parseFile('D:/Steam/steamapps/common/Europa Universalis IV/common/prices/00_prices.txt')
 #print(result)
 
-result = pyradox.txt.parse("""
+result = pyradox.parse("""
 # pre comment
 foo = bar # line comment
 
