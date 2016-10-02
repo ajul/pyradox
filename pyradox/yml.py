@@ -52,6 +52,8 @@ def parseFile(filename):
     parseLines(lines, filename)
     
 def parseLine(lineNumber, line, filename):
+    comment = re.match(r'\s*#.*', line)
+    if comment is not None: return
     m = re.match(r'\s*([\w-]+):\d?\s*("*)(.*)(\2)\s*', line)
     if m is not None:
         key, value = m.group(1, 3)
