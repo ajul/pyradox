@@ -15,7 +15,7 @@ states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'h
 groups = {}
 
 for state in states.values():
-    k = tuple(provinceID for provinceID in state['provinces'])
+    k = tuple(provinceID for provinceID in state.findAll('provinces'))
     groups[k] = str(state['id'])
 
 # Load the province map using the default location set in pyradox.config.

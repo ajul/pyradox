@@ -29,11 +29,10 @@ for state in states.values():
         populationString = "%d" % population
 
     k = []
-    for provinceID in state['provinces']:
+    for provinceID in state.findAll('provinces'):
         if not provinceMap.isWaterProvince(provinceID):
             k.append(provinceID)
-            slots = min(20, math.floor(population / 200e3))
-            colormap[provinceID] = pyradox.image.colormapRedGreen(slots / 20)
+            colormap[provinceID] = pyradox.image.colormapRedGreen(population / 10e6)
     k = tuple(x for x in k)
     groups[k] = populationString
 

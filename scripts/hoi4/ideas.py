@@ -85,7 +85,7 @@ for ideaType in typesToTabulate:
             row['research_bonus'] = idea['research_bonus']
         row['traits'] = idea['traits']
         row['trait_display'] = '<br/>'.join(
-            pyradox.yml.getLocalization(traitKey, ['ideas', 'traits'], game = 'HoI4') for traitKey in idea['traits']).replace('\\n', ' ')
+            pyradox.yml.getLocalization(traitKey, ['ideas', 'traits'], game = 'HoI4') for traitKey in idea.findAll('traits')).replace('\\n', ' ')
         result.append(ideaKey, row)
 
 traits = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'country_leader', '00_traits.txt'))['leader_traits']
@@ -150,7 +150,7 @@ def computeEffects(k, v):
             magnitudeString = computeMagnitudeString(category, -magnitude, False)
             result += '<li>%s: %s</li>' % (categoryString, magnitudeString)
     
-    for traitKey in v['traits']:
+    for traitKey in v.findAll('traits'):
         trait = traits[traitKey]
         subresult = ''
         for effectKey, magnitude in trait.items():

@@ -28,7 +28,7 @@ with open("out/%s_units_by_year.txt" % unitType, "w") as outFile:
         outFile.write("== %d ==\n" % year)
         outFile.write(pyradox.wiki.makeWikitable(tables[year], columns,
                                                  sortFunction = lambda item: unitstats.computeUnitName(item[0])))
-                                                 
+
 with open("out/%s_units_by_unit.txt" % unitType, "w") as outFile:
     columns = [("Year", "%(year)d")] + unitstats.baseColumns[unitType]
     tables = {}
@@ -41,6 +41,8 @@ with open("out/%s_units_by_unit.txt" % unitType, "w") as outFile:
         unitName = unitstats.computeUnitName(unitKey)
         outFile.write("== %s ==\n" % unitName)
         outFile.write(pyradox.wiki.makeWikitable(unitYears, columns, sortable=False))
+
+
 
 jsonOut = open("out/%s_years.json" % unitType,"w")
 dataForJSON = {year : {} for year in unitstats.unitTypeYears[unitType]}
@@ -82,3 +84,4 @@ for year in dataForJSON:
             for column in columns:
                 data.append(dataForJSON[year][unit][column])
             csvOut.write(str.join(data) + "\n")
+

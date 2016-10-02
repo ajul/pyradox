@@ -15,8 +15,9 @@ def computeCountryTagAndName(filename):
 def listCommanderTraits(k, v):
     if 'traits' not in v: return ''
     result = ''
-    for trait in v['traits']:
-        result += pyradox.yml.getLocalization(trait, ['traits'], game = 'HoI4') + ', '
+    for trait in v.findAll('traits'):
+        if not isinstance(trait, str): continue
+        result += '{{iconify|' + pyradox.yml.getLocalization(trait, ['traits'], game = 'HoI4') + '}}, '
     return result[:-2]
 
 commanderTypeKeys = {

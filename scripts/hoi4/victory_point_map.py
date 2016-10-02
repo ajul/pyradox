@@ -45,7 +45,7 @@ countryColorFile = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['H
 for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
     tag = computeCountryTag(filename)
     if tag in countryColorFile:
-        countryColors[tag] = computeColor(countryColorFile[tag]['color'])
+        countryColors[tag] = computeColor([x for x in countryColorFile[tag].findAll('color')])
     else:
         print('HACK FOR %s' % tag)
         countryColors[tag] = (165, 102, 152)
@@ -67,7 +67,7 @@ for state in states.values():
     controllerColor = countryColors[controller]
 
     # color the province
-    for provinceID in state['provinces']:
+    for provinceID in state.findAll('provinces'):
         if not provinceMap.isWaterProvince(provinceID):
             colormap[provinceID] = controllerColor
 

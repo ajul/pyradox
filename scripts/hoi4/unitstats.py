@@ -24,11 +24,11 @@ for techKey, tech in techs.items():
     if not isinstance(tech, pyradox.struct.Tree): continue
     year = tech["start_year"] or defaultYear
     if "enable_equipments" in tech:
-        for equipmentKey in tech["enable_equipments"]:
+        for equipmentKey in tech.findAll("enable_equipments"):
             equipment = equipments[equipmentKey]
             equipment['year'] = year
     if "enable_subunits" in tech:
-        for unitKey in tech["enable_subunits"]:
+        for unitKey in tech.findAll("enable_subunits"):
             units[unitKey]["year"] = year
 
 def unitsAtYear(year):
@@ -47,7 +47,7 @@ def unitsAtYear(year):
         if (tech["start_year"] or year) > year: continue
         if 'folder' in tech and 'doctrine' in tech['folder']['name']: continue # ignore doctrines
         if "enable_equipments" in tech:
-            for equipmentKey in tech["enable_equipments"]:
+            for equipmentKey in tech.findAll("enable_equipments"):
                 equipment = equipments[equipmentKey]
                 if "archetype" in equipment:
                     archetypeKey = equipment["archetype"]
@@ -55,7 +55,7 @@ def unitsAtYear(year):
                 equipmentModels[equipmentKey] = equipments[equipmentKey]
                 # TODO: drop ordering assumption?
         if "enable_subunits" in tech:
-            for unitKey in tech["enable_subunits"]:
+            for unitKey in tech.findAll("enable_subunits"):
                 units[unitKey]["active"] = True
                 units[unitKey]["last_upgrade"] = max(units[unitKey]["last_upgrade"], tech["start_year"])
 
