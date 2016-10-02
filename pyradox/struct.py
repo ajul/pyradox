@@ -215,7 +215,7 @@ class Tree():
                 self.append(key, copy.deepcopy(value))
                 
     def mergeItem(self, key, value, mergeLevels = 0):
-        if key in self and isinstance(self[key], Struct):
+        if key in self and isinstance(self[key], Tree):
             #print('Merge', value, 'into', self[key])
             self[key].merge(value, mergeLevels)
             #print('Result', self[key])

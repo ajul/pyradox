@@ -197,7 +197,7 @@ def parseTree(tokenData, filename, startPos = 0):
                 preComments = []
                 state = stateKey
         elif tokenType == 'begin':
-            # Value is a dict or group. First, determine whether this is a tree or group.
+            # Value is a tree or group. First, determine whether this is a tree or group.
             lookaheadPos = pos
             level = 0
             # Empty brackets are trees.
@@ -214,7 +214,10 @@ def parseTree(tokenData, filename, startPos = 0):
                     isTree = False
                 
                     if tokenType == 'begin':
-                        level += 1
+                        # Assume any nesting indicates a tree.
+                        isTree = True
+                        break
+                        # level += 1
                     elif tokenType == 'operator':
                         # Tree if operator detected at current level.
                         if level == 0: 
