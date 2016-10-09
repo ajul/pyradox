@@ -12,7 +12,7 @@ import pyradox.worldmap
 import pyradox.eu4.province
 
 import scipy.stats
-import province_costs
+# import province_costs
 
 provinces = pyradox.eu4.province.getProvinces()
 
@@ -91,7 +91,7 @@ generateMap(provinceBaseTax, 'out/base_tax_map.png', forceMin = 1.0)
 generateMap(provinceBaseProduction, 'out/base_production_map.png', forceMin = 1.0)
 generateMap(provinceBaseManpower, 'out/base_manpower_map.png', forceMin = 1.0)
 generateMap(provinceBaseDevelopment, 'out/base_development_map.png', forceMin = 3.0)
-generateMap(province_costs.provinceCost, 'out/custom_nation_cost_map.png', forceMin = 1.0)
+# generateMap(province_costs.provinceCost, 'out/custom_nation_cost_map.png', forceMin = 1.0)
 # generateMap(nativePopulation, 'out/native_population_map.png')
 # generateMap(nativeAggressiveness, 'out/native_aggressiveness_map.png')
 

@@ -22,7 +22,7 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
     country = country.atDate(date)
     tag, name = computeCountryTagAndName(filename)
     country['tag'] = tag
-    rulingParty = country['set_politics']['ruling_party']
+    rulingParty = country['set_politics']['ruling_party'] or 'neutrality'
     country['name'] = pyradox.yml.getLocalization('%s_%s' % (tag, rulingParty), ['countries'], game = 'HoI4')
     countries[tag] = country
 
@@ -50,9 +50,8 @@ for state in states.values():
         for resource, quantity in state['resources'].items():
             state[resource] = quantity
 
-    for victoryPoints in history.findAll('victory_points'):
-        for i in range(1, len(victoryPoints), 2):
-            state['victory_point_total'] = (state['victory_point_total'] or 0) + victoryPoints[i]
+    for _, victoryPoints in history.findAll('victory_points', tupleLength = 2):
+            state['victory_point_total'] = (state['victory_point_total'] or 0) + victoryPoints
 
     if 'buildings' in history:
         for building, quantity in history['buildings'].items():
