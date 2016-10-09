@@ -62,7 +62,8 @@ def parseLine(lineNumber, line, filename):
         # debug
         warnings.warn(ParseWarning('Could not parse line %s' % line))
 
-def getLocalization(key, sources = ['text'], game = pyradox.config.defaultGame):
+def getLocalization(key, sources = ['text'], game = None):
+    if game is None: game = pyradox.config.defaultGame
     if isinstance(sources, str):
         sources = [sources]
     for source in sources:

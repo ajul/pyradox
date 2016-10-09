@@ -47,8 +47,10 @@ def generateEdgeImage(image, edgeWidth=1):
     
 
 class ProvinceMap():
-    def __init__(self, basedir = pyradox.config.defaultBasedir, flipY = False):
+    def __init__(self, basedir = None, flipY = False):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
+        if basedir is None: basedir = pyradox.config.defaultBasedir
+        
         provincesBMP = os.path.join(basedir, 'map', 'provinces.bmp')
         definitionCSV = os.path.join(basedir, 'map', 'definition.csv')
         defaultMAP = os.path.join(basedir, 'map', 'default.map')
@@ -70,14 +72,8 @@ class ProvinceMap():
             maxProvince = defaultTree['max_provinces']
             
             for key in waterKeys:
-                if key in defaultTree:
-                    value = defaultTree[key]
-                    if isinstance(value, int):
-                        for provinceID in range(value, maxProvince + 1):
-                            self.waterProvinces.add(provinceID)
-                    else:
-                        for provinceID in value:
-                            self.waterProvinces.add(provinceID)
+                for provinceID in defaultTree.findAll(key):
+                    self.waterProvinces.add(provinceID)
             
             provinceCount = 0
             for row in csvReader:
@@ -103,7 +99,7 @@ class ProvinceMap():
             
             for provinceID, data in positionsTree.items():
                 if "position" in data:
-                    positionData = data['position']
+                    positionData = [x for x in data.findAll('position')]
                     # second pair is unit position
                     self.positions[provinceID] = (positionData[2], maxY - positionData[3]) 
                     
