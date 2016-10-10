@@ -47,9 +47,9 @@ def generateEdgeImage(image, edgeWidth=1):
     
 
 class ProvinceMap():
-    def __init__(self, basedir = None, flipY = False):
+    def __init__(self, game = None, flipY = False):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
-        if basedir is None: basedir = pyradox.config.defaultBasedir
+        basedir = pyradox.config.getBasedir(game)
         
         provincesBMP = os.path.join(basedir, 'map', 'provinces.bmp')
         definitionCSV = os.path.join(basedir, 'map', 'definition.csv')

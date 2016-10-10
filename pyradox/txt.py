@@ -1,13 +1,17 @@
+import pyradox.config
 import pyradox.primitive
 import pyradox.struct
 import re
 import os
 import warnings
 
-encodings = [
-    'utf_8_sig',
-    'cp1252',
-    ]
+gameEncodings = {
+    'EU4' : ['cp1252', 'utf_8_sig'],
+    'HoI3' : ['cp1252', 'utf_8_sig'],
+    'HoI3_vanilla' : ['cp1252', 'utf_8_sig'],
+    'HoI4' : ['utf_8_sig', 'cp1252'],
+    'HoI4_beta' : ['utf_8_sig', 'cp1252'],
+}
 
 class ParseError(Exception):
     def __init__(self, message):
@@ -23,7 +27,7 @@ class ParseWarning(Warning):
     def __str__(self):
         return self.message
         
-def readlines(filename):
+def readlines(filename, encodings):
     for encoding in encodings:
         try:
             f = open(filename, encoding=encoding)
@@ -41,9 +45,12 @@ def parse(s, filename=""):
     tokenData = lex(lines, filename)
     return parseTree(tokenData, filename)
 
-def parseFile(filename, verbose=False):
+def parseFile(filename, verbose=False, game=None):
     """Parse a single file and return a Tree."""
-    lines = readlines(filename)
+    if game is None: game = pyradox.config.getDefaultGame()
+    encodings = gameEncodings[game]
+    
+    lines = readlines(filename, encodings)
     if verbose: print('Parsing file %s.' % filename)
     tokenData = lex(lines, filename)
     return parseTree(tokenData, filename)

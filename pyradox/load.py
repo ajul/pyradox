@@ -9,10 +9,10 @@ import pyradox.config
 
 cache = {}
 
-def loadFunctions(gameName, name, dirpath, mode = None, mergeLevels = 0):
+def loadFunctions(game, name, dirpath, mode = None, mergeLevels = 0):
     if isinstance(dirpath, str): dirpath = (dirpath,)
     def parseData(basedir = None):
-        if basedir is None: basedir = pyradox.config.basedirs[gameName]
+        if basedir is None: basedir = pyradox.config.getBasedir(game)
 
         if mode == "merge":
             result = pyradox.txt.parseMerge(os.path.join(basedir, *dirpath), mergeLevels = mergeLevels)
@@ -31,7 +31,7 @@ def loadFunctions(gameName, name, dirpath, mode = None, mergeLevels = 0):
         return result
 
     def getData(basedir = None):
-        if basedir is None: basedir = pyradox.config.basedirs[gameName]
+        if basedir is None: basedir = pyradox.config.getBasedir(game)
         if basedir not in cache: cache[basedir] = {}
         if name not in cache[basedir]: cache[basedir][name] = parseData(basedir)
         return copy.deepcopy(cache[basedir][name])
