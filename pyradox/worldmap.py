@@ -318,13 +318,3 @@ class ProvinceMap():
                 color = defaultFontColor
             
             draw.text((textStartX, textStartY), text, font=font, fill=color)
-                    
-
-    
-
-# unit test
-if __name__ == "__main__":
-    provinceMap = ProvinceMap(r'D:\Steam\steamapps\common\Europa Universalis IV')
-    out = provinceMap.generateImage({1:(255, 255, 255)}, 0.25)
-    out.save('test.png')
-        
