@@ -10,7 +10,7 @@ import pyradox.worldmap
 provinceMap = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
     provinceID = int(m.group(0))
     if ('base_tax' in data and data['base_tax'] > 0):
