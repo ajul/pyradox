@@ -9,7 +9,7 @@ import pyradox.image
 import pyradox.wiki
 import pyradox.txt
 
-staticModifiers = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'static_modifiers.txt'))
+staticModifiers = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'static_modifiers.txt'))
 
 def computeName(k, v):
     return pyradox.format.humanString(k.replace('weather_', ''), capFirst = True)

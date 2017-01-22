@@ -14,8 +14,8 @@ buildingType = 'naval_base'
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'), verbose=False)
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'), verbose=False)
+provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
 
 colormap = {}
 textmap = {}

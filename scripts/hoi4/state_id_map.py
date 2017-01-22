@@ -11,8 +11,8 @@ from PIL import Image
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'))
+provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
 
 # provinces -> state id
 groups = {}

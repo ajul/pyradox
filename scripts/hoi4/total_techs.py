@@ -25,7 +25,7 @@ s = '{|class = "wikitable sortable"\n'
 s += '! Country !! Date !! Research slots !! Tech count !! Tech cost !! Since start \n'
 
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     tag, name = computeCountryTagAndName(filename)
     
     techKeys = set(country['set_technology'].keys())

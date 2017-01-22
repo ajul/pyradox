@@ -36,7 +36,7 @@ columns = (
 
 commanders = pyradox.struct.Tree()
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     tag, _ = computeCountryTagAndName(filename)
     rulingParty = country['set_politics']['ruling_party']
     countryName = pyradox.yml.getLocalization('%s_%s' % (tag, rulingParty), ['countries'], game = 'HoI4')

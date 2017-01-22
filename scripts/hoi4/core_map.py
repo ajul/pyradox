@@ -31,9 +31,9 @@ scale = 2.0
 capitalStates = {}
 countryColors = {}
 
-countryColorFile = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'countries', 'colors.txt'))
+countryColorFile = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'countries', 'colors.txt'))
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     tag = computeCountryTag(filename)
     if tag in countryColorFile:
         countryColors[tag] = computeColor(tuple(countryColorFile[tag].findAll('color')))
@@ -45,8 +45,8 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
     capitalStates[country['capital']].append(tag)
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'))
+provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
 
 # provinces -> state id
 colormap = {}

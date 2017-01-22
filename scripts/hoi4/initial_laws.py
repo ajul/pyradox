@@ -12,12 +12,12 @@ def computeCountryTagAndName(filename):
     return m.group(1), m.group(2)
 
 economics = pyradox.txt.parseFile(
-    os.path.join(pyradox.config.basedirs['HoI4'],
+    os.path.join(pyradox.config.getBasedir('HoI4'),
                  'common', 'ideas', '_economic.txt'))['ideas']
 
 result = pyradox.struct.Tree()
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     country = country.atDate('1936.1.1')
     tag, name = computeCountryTagAndName(filename)
     country['tag'] = tag

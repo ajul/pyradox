@@ -8,8 +8,8 @@ import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
 
-definitionCSV = os.path.join(pyradox.config.basedirs['HoI4'], 'map', 'definition.csv')
-terrains = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
+definitionCSV = os.path.join(pyradox.config.getBasedir('HoI4'), 'map', 'definition.csv')
+terrains = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
 colorOverride = {
     'desert' : (255, 63, 0), # more red to avoid confusion with plains
@@ -43,7 +43,7 @@ with open(definitionCSV) as definitionFile:
             colormap[provinceID] = tuple(c for c in terrains[terrainKey]['color'])
         textmap[provinceID] = symbolOverride[terrainKey]
 
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
 out = provinceMap.generateImage(colormap, defaultLandColor=(255, 255, 255))
 provinceMap.overlayText(out, textmap, fontfile = "unifont-8.0.01.ttf", fontsize = 16, antialias = False, defaultOffset = (4, -2))
 pyradox.image.saveUsingPalette(out, 'out/terrain_map.png')

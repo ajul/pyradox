@@ -10,9 +10,9 @@ import pyradox.image
 from PIL import Image
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'), verbose=False)
-stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'), verbose=False)
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'), verbose=False)
+stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'state_category'), verbose=False)
+provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
 
 # provinces -> state id
 groups = {}

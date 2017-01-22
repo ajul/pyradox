@@ -8,7 +8,7 @@ import pyradox.struct
 import pyradox.wiki
 import pyradox.yml
 
-date = '1939.1.1'
+date = '1936.1.1'
 
 localizationSources = ['state_names']
 
@@ -18,7 +18,7 @@ def computeCountryTagAndName(filename):
 
 countries = {}
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     country = country.atDate(date)
     tag, name = computeCountryTagAndName(filename)
     country['tag'] = tag
@@ -26,8 +26,8 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
     country['name'] = pyradox.yml.getLocalization('%s_%s' % (tag, rulingParty), ['countries'], game = 'HoI4')
     countries[tag] = country
 
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
-stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'state_category'),
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'))
+stateCategories = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'state_category'),
                                          verbose=False, mergeLevels = 1)
 
 stateCategories = stateCategories['state_categories']

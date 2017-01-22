@@ -14,7 +14,7 @@ def computeCountryTagAndName(filename):
 
 countries = {}
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     tag, name = computeCountryTagAndName(filename)
     country['tag'] = tag
     rulingParty = country['set_politics']['ruling_party'] or 'neutrality'
@@ -53,7 +53,7 @@ typesToTabulate = militaryChiefTypes
 result = pyradox.struct.Tree()
 
 
-ideaData = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'ideas'), mergeLevels = 2)['ideas']
+ideaData = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'ideas'), mergeLevels = 2)['ideas']
 for ideaType in typesToTabulate:
     ideas = ideaData[ideaType]
     typeName = pyradox.yml.getLocalization(ideaType, ['ideas', 'traits'], game = 'HoI4')
@@ -92,7 +92,7 @@ for ideaType in typesToTabulate:
             pyradox.yml.getLocalization(traitKey, ['ideas', 'traits'], game = 'HoI4') for traitKey in idea.findAll('traits')).replace('\\n', ' ')
         result.append(ideaKey, row)
 
-traits = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'country_leader', '00_traits.txt'))['leader_traits']
+traits = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'country_leader', '00_traits.txt'))['leader_traits']
 
 def computeEffectString(effectKey, magnitude):
     if effectKey in ['sprite', 'random']: return ''

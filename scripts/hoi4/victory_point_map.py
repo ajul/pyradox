@@ -10,8 +10,8 @@ import pyradox.worldmap
 
 from PIL import Image
 
-date = pyradox.primitive.Date('1936.1.1')
-#date = pyradox.primitive.Date('1939.8.14')
+#date = pyradox.primitive.Date('1936.1.1')
+date = pyradox.primitive.Date('1939.8.14')
 
 vpImages = pyradox.image.splitStrip(Image.open('in/onmap_victorypoints_strip.png'), subwidth = 29)
 capitalIcon = vpImages[4]
@@ -40,9 +40,9 @@ def computeColor(values):
 capitalStates = {}
 countryColors = {}
 
-countryColorFile = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['HoI4'], 'common', 'countries', 'colors.txt'))
+countryColorFile = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'countries', 'colors.txt'))
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'countries')):
+for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
     tag = computeCountryTag(filename)
     if tag in countryColorFile:
         countryColors[tag] = computeColor([x for x in countryColorFile[tag].findAll('color')])
@@ -54,8 +54,8 @@ for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.basedi
     capitalStates[country['capital']].append(tag)
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'))
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'))
+provinceMap = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
 iconmap = {}
@@ -98,7 +98,10 @@ for state in states.values():
         textmap[capitalProvinceID] = '0'
 
 out = provinceMap.generateImage(colormap, defaultWaterColor=(32, 32, 63))
+
+pyradox.image.saveUsingPalette(out, 'out/political_map.png')
+
 provinceMap.overlayIcons(out, iconmap, offsetmap = iconoffsetmap)
 provinceMap.overlayText(out, textmap, fontfile = "tahoma.ttf", fontsize = 9, antialias = False, defaultFontColor=(0, 255, 0), defaultOffset = (0, -3))
 
-pyradox.image.saveUsingPalette(out, 'out/political_map.png')
+pyradox.image.saveUsingPalette(out, 'out/victory_point_map.png')

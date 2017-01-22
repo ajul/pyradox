@@ -12,8 +12,8 @@ from PIL import Image
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'history', 'states'), verbose=False)
-supplyAreas = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['HoI4'], 'map', 'supplyareas'), verbose=False)
+states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'), verbose=False)
+supplyAreas = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'map', 'supplyareas'), verbose=False)
 
 statesByID = {state['id'] : state for state in states.values()}
 
@@ -52,7 +52,7 @@ for supplyArea in supplyAreas.values():
     supplyAreaLocalSupply[supplyArea['id']] = localSupply
     supplyAreaTransport[supplyArea['id']] = transport
 
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI4'])
+provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
 
 # provinces -> state id
 groupsLocal = {}
