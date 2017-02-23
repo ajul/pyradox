@@ -7,7 +7,7 @@ import pyradox.hoi4.tech
 import pyradox.hoi4.unit
 import pyradox.yml
 
-factoriesPerResource = 0.25
+factoriesPerResource = 1.5 / 8.0
 
 defaultYear = 1918
 
@@ -45,6 +45,7 @@ def unitsAtYear(year):
     for techKey, tech in techs.items():
         if not isinstance(tech, pyradox.struct.Tree): continue
         if (tech["start_year"] or year) > year: continue
+        if tech["allow"] and tech["allow"]["always"] == False: continue # ignore unallowed techs
         if 'folder' in tech and 'doctrine' in tech['folder']['name']: continue # ignore doctrines
         if "enable_equipments" in tech:
             for equipmentKey in tech.findAll("enable_equipments"):
