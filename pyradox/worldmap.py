@@ -243,7 +243,7 @@ class ProvinceMap():
             box = (iconStartX, iconStartY, iconStartX + iconSizeX, iconStartY + iconSizeY)
             image.paste(icon, box, icon)
 
-    def overlayText(self, image, textmap, colormap = {}, offsetmap = {}, fontsize = 12, fontfile='arial.ttf', defaultFontColor=(0, 0, 0), antialias = True, defaultOffset = (0, 0)):
+    def overlayText(self, image, textmap, colormap = {}, offsetmap = {}, fontsize = 9, fontfile='tahoma.ttf', defaultFontColor=(0, 0, 0), antialias = False, defaultOffset = (0, 0)):
         """
         Given a textmap mapping provinceID -> text or (provinceID, ...) -> text, overlays text on each province
         Optional colormap definiting text color.
