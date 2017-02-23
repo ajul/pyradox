@@ -63,10 +63,10 @@ def unitsAtYear(year):
         # non-equipment modifiers
         for unitKey, unitData in units.items():
             for techUnitKey, stats in tech.items():
-                if techUnitKey == unitKey or ('categories' in unitData and techUnitKey in unitData['categories']):
+                if techUnitKey == unitKey or techUnitKey in unitData.findAll('categories'):
                     units[unitKey]["last_upgrade"] = max(units[unitKey]["last_upgrade"], tech["start_year"])
                     for statKey, statValue in stats.items():
-                        if(not type(statValue) is pyradox.Tree) :
+                        if (not type(statValue) is pyradox.Tree):
                             unitData[statKey] = (unitData[statKey] or 0.0) + statValue
 
     # fill in equipment
@@ -212,7 +212,7 @@ baseColumns = {
         ("Defense", computeUnitStatFunction("defense")),
         ("Breakthru", computeUnitStatFunction("breakthrough")),
         ("Armor", computeUnitStatFunction("armor_value", combiner = max, baseValue = 0)),
-        ("Piercing", computeUnitStatFunction("ap_attack", combiner = max, baseValue = 0)),
+        ("Piercing", computeUnitStatFunction("ap_attack")),
         ],
     "naval" : [
         ("IC cost", computeUnitCost),
@@ -227,7 +227,7 @@ baseColumns = {
         ("Sub attack", computeUnitStatFunction("sub_attack")),
         ("Armor", computeUnitStatFunction("armor_value", combiner = max, baseValue = 0)),
         ("Evasion", computeUnitStatFunction("evasion", combiner = max, baseValue = 0)),
-        ("Piercing", computeUnitStatFunction("ap_attack", combiner = max, baseValue = 0)),
+        ("Piercing", computeUnitStatFunction("ap_attack")),
         ],
     "air" : [
         ("IC cost", computeUnitCost),
