@@ -13,20 +13,29 @@ scale = 2.0
 
 # Load states.
 states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'), verbose=False)
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
+provinceMap = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 # provinces -> state id
 groups = {}
 colormap = {}
 
 for state in states.values():
-    infrastructure = state['history']['buildings']['infrastructure']
+    if 'history' not in state:
+        print('State missing history:')
+        print(state)
+        infrastructure = 0
+    elif 'buildings' not in state['history']:
+        print('State missing buildings:')
+        print(state)
+        infrastructure = 0
+    else:
+        infrastructure = state['history']['buildings']['infrastructure']
 
     k = []
-    for provinceID in state['provinces']:
+    for provinceID in state.findAll('provinces'):
         if not provinceMap.isWaterProvince(provinceID):
             k.append(provinceID)
-            colormap[provinceID] = pyradox.image.colormapRedGreen((infrastructure - 1) / 9)
+            colormap[provinceID] = pyradox.image.colormapRedGreen(infrastructure / 9)
     k = tuple(x for x in k)
     groups[k] = '%d' % infrastructure
 
