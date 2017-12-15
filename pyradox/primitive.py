@@ -66,7 +66,7 @@ class Date(DateBase):
     def __new__(cls, *args, **kwargs):
         return DateBase.__new__(cls, *clampDayArgs(args), **kwargs)
     
-    def __repr__(self):
+    def __str__(self):
         return '%d.%d.%d' % (self.year, self.month, self.day)
         
     def __int__(self):
@@ -138,7 +138,7 @@ tokenPatterns = [
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
     ('int', r'-?\d+\b'),
     ('bool', r'(yes|no)\b'),
-    ('str', r'".*?["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
+    ('str', r'"([^"\\\n]|\\.)*["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
 ]
 
 keyConstructors = {
