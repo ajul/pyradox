@@ -4,6 +4,7 @@ _basedirs = {
     'HoI3_vanilla' : r'C:\Program Files (x86)\Steam\steamapps\common\Hearts of Iron 3',
     'HoI4_beta' : r'C:\Program Files (x86)\Steam\SteamApps\common\Hearts of Iron IV BETA',
     'HoI4' : r'C:\Program Files (x86)\Steam\SteamApps\common\Hearts of Iron IV',
+    'Stellaris' : r'C:\Program Files (x86)\Steam\SteamApps\common\Stellaris',
     }
 
 language = 'english'

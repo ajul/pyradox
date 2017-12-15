@@ -11,6 +11,7 @@ gameEncodings = {
     'HoI3_vanilla' : ['cp1252', 'utf_8_sig'],
     'HoI4' : ['utf_8_sig', 'cp1252'],
     'HoI4_beta' : ['utf_8_sig', 'cp1252'],
+    'Stellaris' : ['utf_8_sig', 'cp1252'],
 }
 
 class ParseError(Exception):
@@ -55,16 +56,16 @@ def parseFile(filename, verbose=False, game=None):
     tokenData = lex(lines, filename)
     return parseTree(tokenData, filename)
     
-def parseDir(dirname, verbose=False):
+def parseDir(dirname, *args, **kwargs):
     """Given a directory, iterate over the content of the .txt files in that directory as Trees"""
     for filename in os.listdir(dirname):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                yield filename, parseFile(fullpath, verbose)
+                yield filename, parseFile(fullpath, *args, **kwargs)
 
-def parseMerge(dirname, verbose=False, mergeLevels = 0):
+def parseMerge(dirname, mergeLevels = 0, *args, **kwargs):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
     result = pyradox.struct.Tree()
     for filename in os.listdir(dirname):
@@ -72,18 +73,18 @@ def parseMerge(dirname, verbose=False, mergeLevels = 0):
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                tree = parseFile(fullpath, verbose)
+                tree = parseFile(fullpath, *args, **kwargs)
                 result.merge(tree, mergeLevels)
     return result
 
-def parseWalk(dirname, verbose=False):
+def parseWalk(dirname, *args, **kwargs):
     """Given a directory, recursively iterate over the content of the .txt files in that directory as Trees"""
     for root, dirs, files in os.walk(dirname):
         for filename in files:
             fullpath = os.path.join(root, filename)
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                yield filename, parseFile(fullpath, verbose)
+                yield filename, parseFile(fullpath, *args, **kwargs)
 
 # open questions:
 # what characters are allowed in key strings?
