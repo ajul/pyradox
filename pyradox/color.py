@@ -64,6 +64,6 @@ class Color():
         
     def __str__(self):
         if self.COLORSPACE_DATA_TYPES[self.colorspace] is int:
-            return '%s { %d %d %d }' % (self.colorspace + self.channels)
+            return '%s { %d %d %d }' % ((self.colorspace,) + tuple(self.channels))
         else:
-            return '%s { %0.2f %0.2f %0.2f }' % (self.colorspace + self.channels)
+            return '%s { %0.2f %0.2f %0.2f }' % ((self.colorspace,) + tuple(self.channels))
