@@ -6,6 +6,8 @@ import re
 import os
 import warnings
 
+from pyradox.error import ParseError, ParseWarning
+
 gameEncodings = {
     'EU4' : ['cp1252', 'utf_8_sig'],
     'HoI3' : ['cp1252', 'utf_8_sig'],
@@ -14,20 +16,6 @@ gameEncodings = {
     'HoI4_beta' : ['utf_8_sig', 'cp1252'],
     'Stellaris' : ['utf_8_sig', 'cp1252'],
 }
-
-class ParseError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
-
-class ParseWarning(Warning):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
         
 def readlines(filename, encodings):
     for encoding in encodings:

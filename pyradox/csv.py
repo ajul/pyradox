@@ -5,21 +5,9 @@ import pyradox.primitive
 import pyradox.struct
 import pyradox.table
 
+from pyradox.error import ParseError, ParseWarning
+
 encoding = 'cp1252'
-
-class ParseError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
-        
-class ParseWarning(Warning):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
 
 class ParadoxDialect(csv.Dialect):
     delimiter = ';'

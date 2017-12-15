@@ -4,6 +4,8 @@ import warnings
 import pyradox.config
 import pyradox.primitive
 
+from pyradox.error import ParseError, ParseWarning
+
 encodings = [
     'utf_8_sig',
     'cp1252',
@@ -25,20 +27,6 @@ def readlines(filename):
             warnings.warn(ParseWarning("Failed to decode input file %s using codec %s." % (filename, encoding)))
             f.close()
     raise ParseError("All codecs failed for input file %s." % filename)
-
-class ParseError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
-
-class ParseWarning(Warning):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
         
 def parseLines(lines, filename):
     for lineNumber, line in enumerate(lines): parseLine(lineNumber, line, filename)

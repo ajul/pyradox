@@ -1,18 +1,15 @@
 import collections
 import re
 
-class ParseError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
+from pyradox.error import ParseError, ParseWarning
 
 def makeBool(tokenString):
     """
     Converts a token string to a boolean.
     """
-    return tokenString in ('yes', 'true')
+    if tokenString in ('yes', 'true'): return True
+    elif tokenString in ('no', 'false'): return False
+    else: raise ValueError('Invalid token string %s for bool.' % tokenString)
 
 def makeString(tokenString):
     """
@@ -101,7 +98,8 @@ class Date(DateBase):
     def __sub__(self, other):
         """ Subtract a Date from a Date -> int or a Duration from a Date -> Date  """
         if isinstance(other, Date):
-            return int(self) - int(other)
+            #TODO
+            raise NotImplementedError()
         elif isinstance(other, Duration):
             #TODO
             raise NotImplementedError()
