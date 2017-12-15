@@ -3,3 +3,6 @@ class ParseError(Exception):
         
 class ParseWarning(Warning):
     pass
+
+class ValueWarning(Warning):
+    pass

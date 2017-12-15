@@ -1,4 +1,4 @@
-from pyradox.primitive import Date, Duration
+from pyradox.primitive import Time
 from pyradox.struct import Tree
 from pyradox.txt import parse, parseFile, parseDir, parseMerge
 

@@ -1,7 +1,8 @@
 import collections
 import re
+import warnings
 
-from pyradox.error import ParseError, ParseWarning
+from pyradox.error import ParseError, ParseWarning, ValueWarning
 
 def makeBool(tokenString):
     """
@@ -33,106 +34,131 @@ def makeTokenString(value):
     else:
         return str(value)
 
-daysPerMonth0 = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+HOURS_PER_DAY = 24
+DAYS_PER_MONTH_0 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] # No leap years.
+DAYS_PER_YEAR = sum(DAYS_PER_MONTH_0)
+TIME_PRECISIONS = ['year', 'month', 'day', 'hour']
+MONTH_NAMES_0 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-DateBase = collections.namedtuple('DateBase', ['year', 'month', 'day'])
-DurationBase = collections.namedtuple('DurationBase', ['years', 'months', 'days'])
-
-def dateArgs(args):
-    if len(args) == 1:
-        if isinstance(args[0], str):
-            args = args[0].split('.')
+class Time():
+    """
+    Represents a time. Valid constructions:
+    Provide a string, as in the .txt file, e.g. Time('1444.1.1')
+    Explicitly named arguments: Time(year=1444, month=1, day=1)
+    Ordered arguments: (1444, 1, 1)
+    
+    Presence or absence of hour is immutable after construction.
+    """
+    
+    def __init__(self, year = None, month = None, day = None, hour = None):
+        if isinstance(year, str):
+            # is actually string containing time data
+            self.data = [int(x) for x in year.split('.')]
         else:
-            args = args[0]
-
-    args = [int(x) for x in args]
-    return args
-
-def clampDayArgs(args):
-    year, month, day = dateArgs(args)
-    if day > daysPerMonth0[month - 1]: day = daysPerMonth0[month - 1]
-    elif day < 1: day = 1
-    return year, month, day
-
-class Date(DateBase):
-    """
-    Represents a date. Can be defined using e.g.:
-    Date('1444.1.1')
-    Date(year=1444, month=1, day=1)
-    """
-    def __new__(cls, *args, **kwargs):
-        return DateBase.__new__(cls, *clampDayArgs(args), **kwargs)
+            self.data = [x for x in [year, month, day, hour] if x is not None]
+        self.validate()
+            
+    def __lt__(self, other):
+        return self.data < other.data
+        
+    def __eq__(self, other):
+        return self.data == other.data
+        
+    def __iter__(self):
+        for x in self.data: yield x
+    
+    def __getitem__(self, index):
+        return self.data[index]
+        
+    def __setitem__(self, index, value):
+        if index < len(self.data):
+            self.data[index] = value
+            self.validate(index)
+        else:
+            raise IndexError('Time lacks precision to %s.' % TIME_PRECISIONS[index])
+        
+    def __getattr__(self, name):
+        if name in TIME_PRECISIONS:
+            index = TIME_PRECISIONS.index(name)
+            return self[index]
+        else:
+            raise AttributeError('Invalid time precision %s.' % name)
+            
+    def __setattr__(self, name, value):
+        if name in TIME_PRECISIONS:
+            index = TIME_PRECISIONS.index(name)
+            self[index] = value
+        else:
+            super().__setattr__(name, value)
     
     def __str__(self):
-        return '%d.%d.%d' % (self.year, self.month, self.day)
+        return '.'.join(str(x) for x in self.data)
+    
+    def humanName(self):
+        result = ''
+        if self.hasHour(): result += '%02d:00, ' % self.hour
+        result += '%d %s %d' % (self.day, MONTH_NAMES_0[self.month-1], self.year)
+        return result
+    
+    def hasHour(self):
+        return len(self.data) >= 4
         
-    def __int__(self):
-        # number of days since 0.0.0
-        yearDays = 365 * self.year
-        monthDays = sum(daysPerMonth0[:self.month])
-        return yearDays + monthDays + self.day
-
-    def __add__(self, other):
-        """add a Duration to this date"""
-        if isinstance(other, Duration):
-            totalMonths = (self.year + other.years) * 12 + (self.month - 1) + other.months
-            day0 = (self.day - 1) + other.days
-
-            # add full years from days
-            totalMonths += (day0 // 365) * 12
-            day0 = day0 % 365
-
-            # add remaining days
-            while day0 >= daysPerMonth0[totalMonths % 12]:
-                day0 -= daysPerMonth0[totalMonths % 12]
-                totalMonths += 1
-
-            # compute years and months
-            year = totalMonths // 12 
-            month0 = totalMonths % 12
-            
-            return Date(year, month0 + 1, day0 + 1)
-        else:
-            raise TypeError('Only a Duration may be added to a Date.')
-            
-    def __sub__(self, other):
-        """ Subtract a Date from a Date -> int or a Duration from a Date -> Date  """
-        if isinstance(other, Date):
-            #TODO
-            raise NotImplementedError()
-        elif isinstance(other, Duration):
-            #TODO
-            raise NotImplementedError()
-        else:
-            raise TypeError('Only a Duration may be added to a Date.')
+    def validate(self, index = None):
+        if index is None:
+            for index in range(len(TIME_PRECISIONS)):
+                self.validate(index)
+        elif index == 0:
+            if self.year < 1: 
+                warnings.warn(ValueWarning('Year is non-positive.'))
+        elif index == 1:
+            if self.month < 1 or self.month > 12: 
+                raise ValueError('Month not in range 1-12.')
+        elif index == 2:
+            daysInMonth = DAYS_PER_MONTH_0[self.month-1]
+            if self.day < 1 or self.day > daysInMonth: 
+                warnings.warn(ValueWarning('Day not in range 1-%d for month %d.' % (daysInMonth, self.month)))
+        elif index == 3:
+            if self.hasHour() and (self.hour < 1 or self.hour > 24): 
+                warnings.warn(ValueWarning('Hour out of standard range 1-24.'))
+    
+    def daysSince1AD(self):
+        # number of days since 1.1.1
+        yearDays = DAYS_PER_YEAR * (self.year - 1)
+        monthDays = sum(daysPerMonth0[:(self.month-1)])
+        return yearDays + monthDays + self.day - 1
+        
+    def hoursSince1AD(self):
+        return self.daysSince1AD() * HOURS_PER_DAY + self.hours - 1
+        
+    @staticmethod
+    def fromDaysSince1AD(days):
+        year = days // DAYS_PER_YEAR + 1
+        days = days % DAYS_PER_YEAR
+        month = 1
+        for daysInMonth in DAYS_PER_MONTH_0:
+            if days < daysInMonth:
+                day = days + 1
+                break
+            days -= daysInMonth
+            month += 1
+        return Time(year, month, day)
 
     def yearsAfter(self, other):
-        """the number of year boundaries between this and the other date"""
+        """the number of year boundaries between this and the other time"""
         return self.year - other.year
 
     def monthsAfter(self, other):
-        """the number of month boundaries between this and the other date"""
-        return (self.year - other.year) * 12 - (self.month - other.month)
+        """the number of month boundaries between this and the other time"""
+        return self.yearsAfter(other) * 12 + (self.month - other.month)
 
     def daysAfter(self, other):
-        #TODO
-        raise NotImplementedError()
-
-class Duration(DurationBase):
-    """
-    Represents a timespan. Can be defined using e.g.:
-    Date(months=12)
-    """
-    def __new__(cls, *args, **kwargs):
-        # defaults
-        if not args:
-            if 'years' not in kwargs: kwargs['years'] = 0
-            if 'months' not in kwargs: kwargs['months'] = 0
-            if 'days' not in kwargs: kwargs['days'] = 0
-        return DurationBase.__new__(cls, *dateArgs(args), **kwargs)
+        return daysSince1AD(self) - daysSince1AD(other)
+        
+    def hoursAfter(self, other):
+        return self.daysAfter(other) + self.hours - other.hours
 
 tokenPatterns = [
-    ('date', r'\d{,4}\.\d{,2}\.\d{,2}\b'),
+    ('time', r'\d+\.\d+\.\d+(\.\d+)?\b'),
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
     ('int', r'-?\d+\b'),
     ('bool', r'(yes|no)\b'),
@@ -140,13 +166,13 @@ tokenPatterns = [
 ]
 
 keyConstructors = {
-    'date' : Date,
+    'time' : Time,
     'int' : int,
     'str' : str,
     }
 
 constructors = {
-    'date' : Date,
+    'time' : Time,
     'float' : float,
     'int' : int,
     'bool' : makeBool,
@@ -174,7 +200,3 @@ def makePrimitive(tokenString, tokenType = None, defaultTokenType = None):
             else:
                 tokenType = defaultTokenType
     return constructors[tokenType](tokenString)
-
-# unit test
-if __name__ == "__main__":
-    print(Date('1444.12.14') + Duration(days=20))
