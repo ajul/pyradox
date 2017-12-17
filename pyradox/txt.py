@@ -165,7 +165,7 @@ class TreeParseState():
             self.operator = tokenString
             self.next = self.processValue
         elif tokenType == 'comment':
-            preComments.append(tokenString[1:])
+            self.preComments.append(tokenString[1:])
             self.next = self.processOperator
         else:
             # missing operator; unconsume the token and move on
