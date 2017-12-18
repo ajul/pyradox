@@ -1,10 +1,10 @@
 import _initpath
 import os
-import pyradox.hoi4.tech
+import load.tech
 import pyradox.primitive
 import pyradox.struct
 
-techs = pyradox.hoi4.tech.getTechs()["technologies"]
+techs = load.tech.getTechs()["technologies"]
 
 # child tech -> [parentTech, ...]
 techsOrDependencies = {}

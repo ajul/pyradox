@@ -2,18 +2,18 @@ import _initpath
 import re
 import pyradox.format
 import pyradox.struct
-import pyradox.hoi4.equipment
-import pyradox.hoi4.tech
-import pyradox.hoi4.unit
+import load.equipment
+import load.tech
+import load.unit
 import pyradox.yml
 
 factoriesPerResource = 1.5 / 8.0
 
 defaultYear = 1918
 
-techs = pyradox.hoi4.tech.getTechs()["technologies"]
-equipments = pyradox.hoi4.equipment.getEquipments()["equipments"]
-units = pyradox.hoi4.unit.getUnits()["sub_units"]
+techs = load.tech.getTechs()["technologies"]
+equipments = load.equipment.getEquipments()["equipments"]
+units = load.unit.getUnits()["sub_units"]
 
 for equipmentKey, equipmentValue in equipments.items():
     if "archetype" in equipmentValue:
@@ -32,7 +32,7 @@ for techKey, tech in techs.items():
             units[unitKey]["year"] = year
 
 def unitsAtYear(year):
-    units = pyradox.hoi4.unit.getUnits()["sub_units"]
+    units = load.unit.getUnits()["sub_units"]
     
     # archetypeKey -> best equipment
     equipmentModels = {}

@@ -1,11 +1,11 @@
 import _initpath
 import re
 import os
-import pyradox.hoi4.tech
+import load.tech
 import pyradox.primitive
 import pyradox.struct
 
-techs = pyradox.hoi4.tech.getTechs()["technologies"]
+techs = load.tech.getTechs()["technologies"]
 
 def computeCountryTagAndName(filename):
     m = re.match('.*([A-Z]{3})\s*-\s*(.*)\.txt$', filename)

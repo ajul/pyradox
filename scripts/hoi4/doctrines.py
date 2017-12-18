@@ -2,12 +2,12 @@ import _initpath
 import re
 import copy
 
-import pyradox.hoi4.tech
+import load.tech
 import json
 
 defaultYear = 1918
 
-techs = pyradox.hoi4.tech.getTechs()["technologies"]
+techs = load.tech.getTechs()["technologies"]
 
 #
 # folders = [ "land_doctrine_folder","naval_doctrine_folder","air_doctrine_folder" ]

@@ -1,8 +1,8 @@
 import _initpath
 import re
 import os
-import pyradox.hoi4.tech
-import pyradox.hoi4.unit
+import load.tech
+import load.unit
 import pyradox.format
 import pyradox.struct
 import pyradox.wiki

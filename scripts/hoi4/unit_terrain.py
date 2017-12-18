@@ -1,7 +1,7 @@
 import _initpath
 import os
-import pyradox.hoi4.tech
-import pyradox.hoi4.unit
+import load.tech
+import load.unit
 import pyradox.format
 import pyradox.struct
 import pyradox.txt
@@ -9,7 +9,7 @@ import pyradox.wiki
 
 from unitstats import computeUnitType, computeUnitName
 
-units = pyradox.hoi4.unit.getUnits()["sub_units"]
+units = load.unit.getUnits()["sub_units"]
 
 terrains = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
