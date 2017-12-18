@@ -7,11 +7,25 @@ import pyradox.config
 import pyradox.txt
 import pyradox.worldmap
 
-terrainBMP = os.path.join('in/terrain.png')
-terrainMap = Image.open(terrainBMP).convert('RGB')
+tree = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('EU4'), 'map', 'terrain.txt'))
+
+terrain_bmp = Image.open(os.path.join(pyradox.config.getBasedir('EU4'), 'map', 'terrain.bmp'))
+print(terrain_bmp.getpalette())
 
 provinceMap = pyradox.worldmap.ProvinceMap()
-provinceMap.overlayEdges(terrainMap)
-#terrainMap.save('out/terrain_map.png', optimize = True)
-terrainMap.convert("P", dither = Image.NONE, palette = Image.ADAPTIVE).save('out/terrain_map.png', optimize = True)
 
+colormap = {}
+
+for provinceID, position in provinceMap.positions.items():
+    print(provinceID)
+    colormap[provinceID] = tuple(terrain_bmp.getpixel(position))
+
+for terrain_type, terrain_data in tree['categories'].items():
+    if 'color' not in terrain_data: continue
+    color = tuple(terrain_data.findAll('color'))
+    for provinceID in terrain_data.findAll('terrain_override'):
+        colormap[provinceID] = color
+
+
+out = provinceMap.generateImage(colormap)
+out.save('out/terrain_map.png')

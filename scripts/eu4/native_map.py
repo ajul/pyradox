@@ -29,8 +29,24 @@ for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedi
         
 provinceMap = pyradox.worldmap.ProvinceMap()
 image = provinceMap.generateImage(nativeSizeColormap)
-provinceMap.overlayText(image, nativeSizeTextmap, fontfile = "tahoma.ttf", defaultFontColor=(255, 255, 255), fontsize = 9, antialias = False)
+provinceMap.overlayText(image, nativeSizeTextmap, defaultFontColor=(255, 255, 255))
 pyradox.image.saveUsingPalette(image, 'out/native_population_map.png')
 
+nativeAggroColormap = {}
+nativeAggroTextmap = {}
+for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('EU4'), 'history', 'provinces'), verbose=False):
+    m = re.match('\d+', filename)
+    provinceID = int(m.group(0))
+
+    if 'native_hostileness' in data:
+        nativeAggroColormap[provinceID] = colormapMinMax(data['native_hostileness'], 0, 10)
+        nativeAggroTextmap[provinceID] = '%d' % data['native_hostileness']
+    elif 'base_tax' in data:
+        nativeAggroColormap[provinceID] = (127, 127, 127)
+        
+provinceMap = pyradox.worldmap.ProvinceMap()
+image = provinceMap.generateImage(nativeSizeColormap)
+provinceMap.overlayText(image, nativeSizeTextmap, defaultFontColor=(255, 255, 255))
+pyradox.image.saveUsingPalette(image, 'out/native_aggressiveness_map.png')
 
 
