@@ -5,7 +5,7 @@ import pyradox.format
 import pyradox.primitive
 import pyradox.txt
 import pyradox.yml
-import pyradox.eu4.country
+import load.country
 
 ideaMap = pyradox.txt.parseFile('out/idea_map.txt')
 ideaCosts = pyradox.txt.parseFile('out/idea_costs.txt')
@@ -31,7 +31,7 @@ for tag, ideaGroupName in ideaMap.items():
     result += '|-\n'
 
     result += '| %s || %s || %d || %0.1f || %d || %d ' % (
-        pyradox.eu4.country.getCountryName(tag), tag, territoryCost,
+        load.country.getCountryName(tag), tag, territoryCost,
         rulerCost, governmentCost, technologyCost)
 
     result += '|| %0.1f || %0.1f || %0.1f || %0.1f \n' % (

@@ -2,8 +2,8 @@ import _initpath
 import os
 import pyradox.config
 import pyradox.txt
-import pyradox.eu4.country
-import pyradox.eu4.province
+import load.country
+import load.province
 import pyradox.primitive
 import pyradox.yml
 
@@ -13,7 +13,7 @@ def leaderRow(leader):
     return result
 
 # Load countries and provinces.
-countries = pyradox.eu4.country.getCountries()
+countries = load.country.getCountries()
 
 leaders = ()
 
@@ -22,7 +22,7 @@ s += "! Leader !! Country !! Start date !! End date !! Type !! Fire !! Shock !! 
 
 # Initialize total provincial values.
 for tag, country in countries.items():
-    countryName = pyradox.eu4.country.getCountryName(tag)
+    countryName = load.country.getCountryName(tag)
 
     for date, data in country.items():
         if not isinstance(date, pyradox.primitive.Date): continue

@@ -7,10 +7,10 @@ import pyradox.image
 import pyradox.primitive
 import pyradox.txt
 import pyradox.worldmap
-import pyradox.hoi3.province
+import load.province
 
-vanilla_provinces = pyradox.hoi3.province.getProvinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
-tfh_provinces = pyradox.hoi3.province.getProvinces(basedir = pyradox.config.basedirs['HoI3'])
+vanilla_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
+tfh_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3'])
 provinceMap = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flipY = True)
 provinceContents = {
     'infra' : (1, 10, 1),

@@ -8,7 +8,7 @@ import pyradox.worldmap
 import pyradox.primitive
 import pyradox.image
 from PIL import Image
-import pyradox.hoi3.province
+import load.province
 
 resourceImageDir = 'in/strategic_resource/'
 
@@ -21,8 +21,8 @@ for filename in os.listdir(resourceImageDir):
         if m is None: continue
         resourceImages[m.group(1)] = Image.open(os.path.join(resourceImageDir, filename))
 
-vanilla_provinces = pyradox.hoi3.province.getProvinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
-tfh_provinces = pyradox.hoi3.province.getProvinces(basedir = pyradox.config.basedirs['HoI3'])
+vanilla_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
+tfh_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3'])
 
 iconmap = {}
 

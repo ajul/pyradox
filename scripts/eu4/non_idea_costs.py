@@ -9,12 +9,12 @@ import pyradox.txt
 import pyradox.primitive
 import pyradox.worldmap
 
-import pyradox.eu4.country
-import pyradox.eu4.province
+import load.country
+import load.province
 
 import scipy.stats
 
-countries = pyradox.eu4.country.getCountries()
+countries = load.country.getCountries()
 
 def provinceCost(province):
     cost = 0
@@ -126,7 +126,7 @@ for tag, country in countries.items():
     governmentCosts[tag][1] = governmentCost(country)
     governmentCosts[tag][2] = technologyCost(country)
 
-provinces = pyradox.eu4.province.getProvinces()
+provinces = load.province.getProvinces()
 
 territoryCosts = {tag : 0.0 for tag in countries.keys()}
 
@@ -143,7 +143,7 @@ for tag in sorted(governmentCosts.keys()):
     result += '|-\n'
     totalCost = sum(governmentCosts[tag]) + territoryCosts[tag]
     result += '| %s || %s || %d || %0.1f || %d || %d || %d \n' % (
-        pyradox.eu4.country.getCountryName(tag), tag, territoryCosts[tag],
+        load.country.getCountryName(tag), tag, territoryCosts[tag],
         governmentCosts[tag][0], governmentCosts[tag][1], governmentCosts[tag][2],
         totalCost)
 

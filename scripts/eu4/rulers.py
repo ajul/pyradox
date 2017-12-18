@@ -2,8 +2,8 @@ import _initpath
 import os
 import pyradox.config
 import pyradox.txt
-import pyradox.eu4.country
-import pyradox.eu4.province
+import load.country
+import load.province
 import pyradox.primitive
 import pyradox.yml
 
@@ -13,7 +13,7 @@ def outputRow(data):
     return result
 
 # Load countries and provinces.
-countries = pyradox.eu4.country.getCountries()
+countries = load.country.getCountries()
 
 leaderKeys = ('fire', 'shock', 'manuever', 'siege')
 
@@ -21,7 +21,7 @@ s = '{|class = "wikitable sortable"\n'
 s += "! Leader !! Country !! Date !! {{icon|adm}} !! {{icon|dip}} !! {{icon|mil}} !! Total !! {{icon|leader fire}} !! {{icon|leader shock}} !! {{icon|leader maneuver}} !! {{icon|leader siege}} \n"
 
 for tag, country in countries.items():
-    countryName = pyradox.eu4.country.getCountryName(tag)
+    countryName = load.country.getCountryName(tag)
     if countryName is None: print('Missing localization: ' + tag)
 
     for date, data in country.items():

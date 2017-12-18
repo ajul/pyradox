@@ -1,6 +1,6 @@
 import _initpath
-import pyradox.hoi3.tech
-import pyradox.hoi3.unit
+import load.tech
+import load.unit
 import pyradox.format
 import pyradox.struct
 import pyradox.wiki

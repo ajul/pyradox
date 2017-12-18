@@ -9,12 +9,12 @@ import pyradox.txt
 import pyradox.primitive
 import pyradox.worldmap
 
-import pyradox.eu4.province
+import load.province
 
 import scipy.stats
 # import province_costs
 
-provinces = pyradox.eu4.province.getProvinces()
+provinces = load.province.getProvinces()
 
 def provinceBaseTax(provinceID, province):
     if 'base_tax' in province and province['base_tax'] > 0:

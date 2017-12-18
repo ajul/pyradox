@@ -1,18 +1,18 @@
 import _initpath
-import pyradox.hoi3.tech
-import pyradox.hoi3.unit
+import load.tech
+import load.unit
 
-techs = pyradox.hoi3.tech.getTechs()
+techs = load.tech.getTechs()
 
 def unitsAtYear(year):
-    units = pyradox.hoi3.unit.getUnits()
+    units = load.unit.getUnits()
     
     for unitKey, unitData in units.items():
         if "active" not in unitData.keys(): unitData["active"] = True
         unitData["num_upgrades"] = 0
     
     for tech in techs.values():
-        level = pyradox.hoi3.tech.getTechLevel(tech, year)
+        level = load.tech.getTechLevel(tech, year)
         if level == 0: continue
         
         for unitKey, effects in tech.items():

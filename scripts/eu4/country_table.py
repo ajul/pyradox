@@ -2,14 +2,14 @@ import _initpath
 import os
 import pyradox.config
 import pyradox.txt
-import pyradox.eu4.country
-import pyradox.eu4.province
+import load.country
+import load.province
 import pyradox.primitive
 import pyradox.yml
 
 # Load countries and provinces.
-countries = pyradox.eu4.country.getCountries()
-provinces = pyradox.eu4.province.getProvinces()
+countries = load.country.getCountries()
+provinces = load.province.getProvinces()
 
 # Initialize total provincial values.
 for country in countries.values():
@@ -43,7 +43,7 @@ w += '! Country !! Tech group !! Religion !! Primary culture !! Provinces !! Bas
 
 for tag, country in countries.items():
     country = country.atDate('1444.11.11')
-    country['name'] = pyradox.eu4.country.getCountryName(tag)
+    country['name'] = load.country.getCountryName(tag)
     country['technology_group'] = pyradox.yml.getLocalization(country['technology_group'] or '')
     country['religion'] = pyradox.yml.getLocalization(country['religion'] or '')
     country['primary_culture'] = pyradox.yml.getLocalization(country['primary_culture'] or '')
