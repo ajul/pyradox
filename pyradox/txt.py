@@ -135,12 +135,12 @@ class TreeParseState():
             if self.next is not None:
                 self.next() # Keep parsing.
             else:
-                self.result.endComments = self.pendingComments
+                self.appendPostComments()
                 return self.result, self.pos
         
         # End of file reached.
         if self.isTopLevel:
-            self.result.endComments = self.pendingComments
+            self.appendPostComments()
             return self.result
         else:
             raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (self.filename, self.getPreviousLineNumber() + 1))
@@ -155,9 +155,27 @@ class TreeParseState():
         """ 
         Append the current value to result. 
         key and operator are set by internal state. 
-        Also consumes any preComments.
+        Also consumes any pending comments.
         """
         self.result.append(self.key, value, preComments = self.pendingComments, operator = self.operator, **kwargs)
+        self.pendingComments = []
+        
+    def appendLineComment(self, comment):
+        """
+        Appends a line comment if not already set; otherwise appends to postComments.
+        """
+        
+        if self.result.getLineCommentAt(-1) is None:
+            self.result.setLineCommentAt(-1, comment)
+        else:
+            self.result.getPostCommentsAt(-1).append(comment)
+        
+    def appendPostComments(self):
+        """
+        Consumes pending comments and adds them to the last item's postComments.
+        """
+        postComments = self.result.getPostCommentsAt(-1) 
+        postComments += self.pendingComments
         self.pendingComments = []
         
     def processKey(self):
@@ -170,7 +188,7 @@ class TreeParseState():
         elif tokenType == 'comment':
             if tokenLineNumber == self.getPreviousLineNumber():
                 # Comment following a previous value.
-                self.result.setLineCommentAt(-1, tokenString[1:])
+                self.appendLineComment(tokenString[1:])
             else:
                 self.pendingComments.append(tokenString[1:])
             self.next = self.processKey
@@ -310,10 +328,11 @@ class TreeParseState():
             self.appendToResult(value, inGroup = True)
         elif tokenType == "comment":
             if tokenLineNumber == self.getPreviousLineNumber():
-                self.result.setLineCommentAt(-1, tokenString[1:])
+                self.appendLineComment(tokenString[1:])
             else:
                 self.pendingComments.append(tokenString[1:])
         elif tokenType == "end":
+            self.appendPostComments()
             self.next = self.processKey
         elif tokenType == "begin":
             raise ParseError('%s, line %d: Error: Cannot nest inside a group.' % (filename, tokenLineNumber + 1))

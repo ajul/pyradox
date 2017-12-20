@@ -17,13 +17,19 @@ class Tree():
         Internal class to keep track of items.
         preComments appear before the item, one per line.
         lineComments appear on the same line as the item.
+        postComments appear after the item, one per line.
         """
-        def __init__(self, key, value, preComments = None, lineComment = None, operator = None, inGroup = False):
+        def __init__(self, key, value, operator = None, inGroup = False, preComments = None, lineComment = None, postComments = None):
             self.key = key
             self.value = value
+            
             if preComments is None: self.preComments = []
             else: self.preComments = preComments
+            
             self.lineComment = lineComment
+            
+            if postComments is None: self.postComments = []
+            else: self.postComments = postComments
             
             if operator is None: self.operator = '='
             else: self.operator = operator
@@ -37,13 +43,16 @@ class Tree():
             else:
                 return self.value
 
-        def prettyprint(self, level = 0, indentString = '    ', printKey = True):
+        def prettyprint(self, level, indentString, includeComments):
             result = ''
-            if len(self.preComments) > 0: result += '\n'
-            for preComment in self.preComments:
-                result += '%s#%s\n' % (indentString * level, preComment)
-            if printKey:
-                result += '%s%s %s ' % (indentString * level, self.key, self.operator)
+            if includeComments:
+                for preComment in self.preComments:
+                    result += '%s#%s\n' % (indentString * level, preComment)
+            
+            # Output key.
+            result += '%s%s %s ' % (indentString * level, self.key, self.operator)
+            
+            # Output value.
             if isinstance(self.value, Tree):
                 result += '{\n'
                 result += self.value.prettyprint(level + 1)
@@ -51,13 +60,51 @@ class Tree():
             else:
                 result += pyradox.primitive.makeTokenString(self.value)
             
-            if self.lineComment is not None:
-                result += "%s #%s" % (indentString * level, self.lineComment)
-            if printKey or self.lineComment is not None:
-                result += '\n'
-            else:
-                result += ' '
+            if includeComments and self.lineComment is not None:
+                result += " #%s" % (self.lineComment)
+                
+            result += '\n'
+            
+            if includeComments:
+                for postComment in self.postComments:
+                    result += '%s#%s\n' % (indentString * level, preComment)
+            
             return result
+            
+        def prettyprintGroup(self, level, indentString, includeComments):
+            """
+            Some trickiness here. Assumes that any indentation for the first line has already been performed.
+            If there are no comments, return (value string, False), so following values may be placed on the same line.
+            Otherwise, return (string ending in newline, True).
+            """
+            result = ''
+            needIndent = False
+            hasPreComment = False
+            if includeComments:
+                for preComment in self.preComments:
+                    hasPreComment = True
+                    result += '\n%s#%s' % (indentString * level, preComment)
+            
+            if hasPreComment:
+                result += '\n%s' % (indentString * level)
+            
+            # Output value. At current trees are not valid inside groups.
+            result += pyradox.primitive.makeTokenString(self.value) + ' '
+            
+            if includeComments and self.lineComment is not None:
+                needIndent = True
+                result += "#%s" % (self.lineComment)
+            
+            if includeComments:
+                for postComment in self.postComments:
+                    needIndent = True
+                    result += '\n%s#%s' % (indentString * level, postComment)
+            
+            if needIndent:
+                result += '\n'
+            
+            return result, needIndent
+            
     
     def __init__(self, iterator = None, endComments = None):
         """Creates an tree from a key, value iterator if given, or an empty tree otherwise."""
@@ -65,9 +112,6 @@ class Tree():
             self._data = []
         else:
             self._data = [Tree._Item(key, value) for (key, value) in iterator]
-            
-        if endComments is None: self.endComments = []
-        else: self.endComments = endComments
         
     # iterator methods
     def keys(self):
@@ -232,29 +276,41 @@ class Tree():
     
     # comments
     
+    def getPreComments(self, key):
+        return self._find(key).preComments
+    
     def getLineComment(self, key):
         return self._find(key).lineComment
         
-    def getPreComments(self, key):
-        return self._find(key).preComments
+    def getPostComments(self, key):
+        return self._find(key).postComments
+    
+    def setPreComments(self, key, preComments):
+        self._find(key).preComments = preComments
     
     def setLineComment(self, key, lineComment):
         self._find(key).lineComment = lineComment
         
-    def setPreComments(self, key, preComments):
-        self._find(key).preComments = preComments
-    
-    def getLineCommentAt(self, i):
-        return self._data[i].lineComment
+    def setPostComments(self, key, postComments):
+        self._find(key).postComments = postComments
         
     def getPreCommentsAt(self, i):
         return self._data[i].preComments
     
+    def getLineCommentAt(self, i):
+        return self._data[i].lineComment
+        
+    def getPostCommentsAt(self, i):
+        return self._data[i].postComments
+    
+    def setPreCommentsAt(self, i, preComments):
+        self._data[i].preComments = preComments
+    
     def setLineCommentAt(self, i, lineComment):
         self._data[i].lineComment = lineComment
         
-    def setPreCommentsAt(self, i, preComments):
-        self._data[i].preComments = preComments
+    def setPostCommentsAt(self, i, postComments):
+        self._data[i].postComments = postComments
         
     # operator
     
@@ -271,7 +327,7 @@ class Tree():
         self._data[i].operator = operator
     
     # string output methods
-    def __repr__(self):
+    def __str__(self):
         """Produces a string in the original .txt format."""
         return self.prettyprint(0)
 
@@ -290,36 +346,37 @@ class Tree():
     def json(self):
         return json.dumps(self.rawData(),indent=2,sort_keys=True)
 
-    def prettyprint(self, level = 0, indentString = '    '):
+    def prettyprint(self, level = 0, indentString = '    ', includeComments = True):
         result = ''
-        groupKey = None
+        groupKey = None # The key corresponding to the current group. None if no group in progress.
+        
         for item in self._data:
-            # 1. End group?
-            if groupKey is not None:
+            if groupKey is not None: # Last item was in a group.
                 if item.inGroup and match(item.key, groupKey) and not isinstance(item.value, Tree):
-                    # continue group
-                    result += item.prettyprint(level = level + 1, printKey = False)
+                    # Continue the previous group.
+                    if needsIndent:
+                        result += indentString * (level + 1)
+                    groupString, needsIndent = item.prettyprintGroup(level = level + 1, indentString = indentString, includeComments = includeComments)
+                    result += groupString
                     continue
                 else:
-                    # end group
+                    # End the group.
                     groupKey = None
                     result += indentString * level + '}\n'
             if item.inGroup and not isinstance(item.value, Tree):
-                # start group
+                # Start a group.
                 groupKey = item.key
                 result += '%s%s %s { ' % (indentString * level, item.key, item.operator)
-                result += item.prettyprint(level = level + 1, printKey = False)
+                groupString, needsIndent = item.prettyprintGroup(level = level + 1, indentString = indentString, includeComments = includeComments)
+                result += groupString
             else:
-                result += item.prettyprint(level = level, printKey = True)
+                result += item.prettyprint(level = level, indentString = indentString, includeComments = includeComments)
         
-        # close any groups at end
+        # If last item was in a group, close it.
         if groupKey is not None:
             result += indentString * level + '}\n'
-            
-        for endComment in self.endComments:
-            result += '%s#%s\n' % (indentString * level, endComment)
+
         return result
-            
 
     # other methods
     def atDate(self, date = False, mergeLevels = -1):
