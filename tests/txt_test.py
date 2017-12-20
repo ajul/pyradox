@@ -6,7 +6,7 @@ import pyradox
 
 result = pyradox.parse("""
 # pre comment
-foo = bar # line comment
+foo = bar # line comment 0
 
 1 # pre comment
 = # pre comment
@@ -17,17 +17,19 @@ tree = {
 # pre comment in tree
 foo = bar # line comment in tree
 # tree end comment
-} # line comment
+} # tree line comment
 
-# list test
-list = {
-# pre comment in list
-foo # line comment in list
-# list end comment
-} # line comment
-# file end comment
+# group outside precomment?
+group = {
+    # group item precomment
+    foo # line comment in group
+    bar baz
+    # group item postcomment
+} # group outside postcomment?
 
 list2 = {1 2 3}
+
+# file end comment (or item outside postcomment?)
 """)
 
 print(result)
