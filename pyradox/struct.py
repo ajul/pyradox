@@ -315,6 +315,9 @@ class Tree():
         # close any groups at end
         if groupKey is not None:
             result += indentString * level + '}\n'
+            
+        for endComment in self.endComments:
+            result += '%s#%s\n' % (indentString * level, endComment)
         return result
             
 
