@@ -7,25 +7,25 @@ import pyradox.config
 import pyradox.txt
 import pyradox.worldmap
 
-tree = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('EU4'), 'map', 'terrain.txt'))
+tree = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('EU4'), 'map', 'terrain.txt'))
 
-terrain_bmp = Image.open(os.path.join(pyradox.config.getBasedir('EU4'), 'map', 'terrain.bmp'))
+terrain_bmp = Image.open(os.path.join(pyradox.config.get_basedir('EU4'), 'map', 'terrain.bmp'))
 print(terrain_bmp.getpalette())
 
-provinceMap = pyradox.worldmap.ProvinceMap()
+province_map = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
 
-for provinceID, position in provinceMap.positions.items():
-    print(provinceID)
-    colormap[provinceID] = tuple(terrain_bmp.getpixel(position))
+for province_id, position in province_map.positions.items():
+    print(province_id)
+    colormap[province_id] = tuple(terrain_bmp.getpixel(position))
 
 for terrain_type, terrain_data in tree['categories'].items():
     if 'color' not in terrain_data: continue
-    color = tuple(terrain_data.findAll('color'))
-    for provinceID in terrain_data.findAll('terrain_override'):
-        colormap[provinceID] = color
+    color = tuple(terrain_data.find_all('color'))
+    for province_id in terrain_data.find_all('terrain_override'):
+        colormap[province_id] = color
 
 
-out = provinceMap.generateImage(colormap)
+out = province_map.generate_image(colormap)
 out.save('out/terrain_map.png')

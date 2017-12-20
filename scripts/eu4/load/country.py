@@ -6,10 +6,10 @@ import pyradox.struct
 import pyradox.txt
 import pyradox.yml
 
-parseCountries, getCountries = pyradox.load.loadFunctions('EU4', 'countries', ('history', 'countries'))
+parse_countries, get_countries = pyradox.load.load_functions('EU4', 'countries', ('history', 'countries'))
 
-def getCountryName(tag):
+def get_country_name(tag):
     """
     Gets the name a country by its tag according to localization.
     """
-    return pyradox.yml.getLocalization(tag, ['EU4', 'text', 'countries', 'nw2', 'res_publica', 'aow', 'eldorado', 'tags_phase4'], game = 'EU4')
+    return pyradox.yml.get_localization(tag, ['EU4', 'text', 'countries', 'nw2', 'res_publica', 'aow', 'eldorado', 'tags_phase4'], game = 'EU4')

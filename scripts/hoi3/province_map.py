@@ -9,10 +9,10 @@ import pyradox.txt
 import pyradox.worldmap
 import load.province
 
-vanilla_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
-tfh_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3'])
-provinceMap = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flipY = True)
-provinceContents = {
+vanilla_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
+tfh_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3'])
+province_map = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flip_y = True)
+province_contents = {
     'infra' : (1, 10, 1),
     'industry' : (1, 10, 1),
     'leadership' : (0.0, 3.0, 0.5),
@@ -27,39 +27,39 @@ provinceContents = {
     'points' : (0, 30, 5),
     }
 
-def printLegend(minVal, maxVal, step = 1):
+def print_legend(min_val, max_val, step = 1):
     result = ''
-    x = minVal
-    while x <= maxVal:
-        color = pyradox.image.colormapRedGreen((x - valMin) / valRange)
-        bgColorString = '#%02x%02x%02x' % color
+    x = min_val
+    while x <= max_val:
+        color = pyradox.image.colormap_red_green((x - val_min) / val_range)
+        bg_color_string = '#%02x%02x%02x' % color
         r, g, b = color
         y = 0.2126 * r + 0.7152 * g + 0.0722 * b
         if y >= 255 / 2:
-            textColorString = '#000000'
+            text_color_string = '#000000'
         else:
-            textColorString = '#ffffff'
-        result += '<span style="color:%s; background-color:%s">%0.2f </span>' % (textColorString, bgColorString, x)
+            text_color_string = '#ffffff'
+        result += '<span style="color:%s; background-color:%s">%0.2f </span>' % (text_color_string, bg_color_string, x)
         x += step
     print(result)
 
-for mode in provinceContents:
+for mode in province_contents:
 
-    valMin, valMax, step = provinceContents[mode]
-    valRange = valMax - valMin
+    val_min, val_max, step = province_contents[mode]
+    val_range = val_max - val_min
 
-    printLegend(valMin, valMax, step)
+    print_legend(val_min, val_max, step)
 
     colormap = {}
-    for provinceID, data in vanilla_provinces.items():
-        data = data.atDate(pyradox.primitive.Date('1936.1.1'))
+    for province_id, data in vanilla_provinces.items():
+        data = data.at_date(pyradox.primitive.Date('1936.1.1'))
         if mode in data.keys():
-            colormap[int(provinceID)] = pyradox.image.colormapRedGreen((data[mode] - valMin) / valRange)
+            colormap[int(province_id)] = pyradox.image.colormap_red_green((data[mode] - val_min) / val_range)
             
-    for provinceID, data in tfh_provinces.items():
-        data = data.atDate(pyradox.primitive.Date('1936.1.1'))
+    for province_id, data in tfh_provinces.items():
+        data = data.at_date(pyradox.primitive.Date('1936.1.1'))
         if mode in data.keys():
-            colormap[int(provinceID)] = pyradox.image.colormapRedGreen((data[mode] - valMin) / valRange)
+            colormap[int(province_id)] = pyradox.image.colormap_red_green((data[mode] - val_min) / val_range)
 
-    out = provinceMap.generateImage(colormap)
+    out = province_map.generate_image(colormap)
     out.save('out/%s_map.png' % mode)

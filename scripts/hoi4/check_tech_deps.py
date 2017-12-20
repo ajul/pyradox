@@ -4,76 +4,76 @@ import load.tech
 import pyradox.primitive
 import pyradox.struct
 
-techs = load.tech.getTechs()["technologies"]
+techs = load.tech.get_techs()["technologies"]
 
-# child tech -> [parentTech, ...]
-techsOrDependencies = {}
+# child tech -> [parent_tech, ...]
+techs_or_dependencies = {}
 
-for techKey, tech in techs.items():
+for tech_key, tech in techs.items():
     if isinstance(tech, pyradox.struct.Tree):
-        for path in tech.findAll('path'):
-            childTechKey = path['leads_to_tech']
-            if childTechKey not in techsOrDependencies:
-                techsOrDependencies[childTechKey] = []
-            techsOrDependencies[childTechKey].append(techKey)
+        for path in tech.find_all('path'):
+            child_tech_key = path['leads_to_tech']
+            if child_tech_key not in techs_or_dependencies:
+                techs_or_dependencies[child_tech_key] = []
+            techs_or_dependencies[child_tech_key].append(tech_key)
 
-def checkDeps(techKeys, filename, date):
-    for techKey in techKeys:
-        tech = techs[techKey]
+def check_deps(tech_keys, filename, date):
+    for tech_key in tech_keys:
+        tech = techs[tech_key]
         if 'xor' in tech:
-            for otherTechKey in tech['xor']:
-                if otherTechKey in techKeys:
-                    print('%s : %s : Tech %s violates mutual exclusivity with: %s' % (filename, date, techKey, otherTechKey))
+            for other_tech_key in tech['xor']:
+                if other_tech_key in tech_keys:
+                    print('%s : %s : Tech %s violates mutual exclusivity with: %s' % (filename, date, tech_key, other_tech_key))
         if 'dependencies' in tech:
-            for otherTechKey in tech['dependencies']:
-                if otherTechKey not in techKeys:
-                    print('%s : %s : Tech %s is missing prerequisite: %s' % (filename, date, techKey, otherTechKey))
+            for other_tech_key in tech['dependencies']:
+                if other_tech_key not in tech_keys:
+                    print('%s : %s : Tech %s is missing prerequisite: %s' % (filename, date, tech_key, other_tech_key))
 
-        if techKey in techsOrDependencies:
-            ancestors = list(techsOrDependencies[techKey])
-            researchedAncestors = []
+        if tech_key in techs_or_dependencies:
+            ancestors = list(techs_or_dependencies[tech_key])
+            researched_ancestors = []
             while len(ancestors) > 0:
                 ancestor = ancestors.pop()
-                if ancestor in techKeys:
+                if ancestor in tech_keys:
                     # found root tech
-                    if ancestor not in techsOrDependencies: break
+                    if ancestor not in techs_or_dependencies: break
                     # otherwise dig further
-                    researchedAncestors.append(ancestor)
-                    ancestors += list(techsOrDependencies[ancestor])
+                    researched_ancestors.append(ancestor)
+                    ancestors += list(techs_or_dependencies[ancestor])
             else:
-                printString = '%s : %s : Tech %s is missing prerequsite' % (filename, date, techKey)
-                if len(researchedAncestors) > 0:
-                    printString += ' via: '
-                    for otherTechKey in researchedAncestors:
-                        printString += otherTechKey + ', '
-                    printString = printString[:-2] + '.'
+                print_string = '%s : %s : Tech %s is missing prerequsite' % (filename, date, tech_key)
+                if len(researched_ancestors) > 0:
+                    print_string += ' via: '
+                    for other_tech_key in researched_ancestors:
+                        print_string += other_tech_key + ', '
+                    print_string = print_string[:-2] + '.'
                 else:
-                    printString += ', needs one of: '
-                    for otherTechKey in techsOrDependencies[techKey]:
-                        printString += otherTechKey + ', '
-                    printString = printString[:-2] + '.'
-                print(printString)
+                    print_string += ', needs one of: '
+                    for other_tech_key in techs_or_dependencies[tech_key]:
+                        print_string += other_tech_key + ', '
+                    print_string = print_string[:-2] + '.'
+                print(print_string)
 
-def checkYears(techKeys, filename, date):
-    for techKey in techKeys:
-        tech = techs[techKey]
+def check_years(tech_keys, filename, date):
+    for tech_key in tech_keys:
+        tech = techs[tech_key]
         if (tech['start_year'] or 0) > date.year:
-            print('%s : %s : Tech %s is ahead of time with year %s' % (filename, date, techKey, tech['start_year']))
+            print('%s : %s : Tech %s is ahead of time with year %s' % (filename, date, tech_key, tech['start_year']))
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
-    techKeys = set(country['set_technology'].keys())
-    checkDeps(techKeys, filename, pyradox.primitive.Date('1936.1.1'))
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+    tech_keys = set(country['set_technology'].keys())
+    check_deps(tech_keys, filename, pyradox.primitive.Date('1936.1.1'))
     for date, effects in country.items():
         if not isinstance(date, pyradox.primitive.Date): continue
         if 'set_technology' not in effects: continue
-        techKeys |= set(effects['set_technology'].keys())
-        checkDeps(techKeys, filename, date)
+        tech_keys |= set(effects['set_technology'].keys())
+        check_deps(tech_keys, filename, date)
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
-    techKeys = set(country['set_technology'].keys())
-    checkYears(techKeys, filename, pyradox.primitive.Date('1936.1.1'))
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+    tech_keys = set(country['set_technology'].keys())
+    check_years(tech_keys, filename, pyradox.primitive.Date('1936.1.1'))
     for date, effects in country.items():
         if not isinstance(date, pyradox.primitive.Date): continue
         if 'set_technology' not in effects: continue
-        techKeys |= set(effects['set_technology'].keys())
-        checkYears(techKeys, filename, date)
+        tech_keys |= set(effects['set_technology'].keys())
+        check_years(tech_keys, filename, date)

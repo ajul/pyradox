@@ -7,7 +7,7 @@ import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
         
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_basedir('HoI4'))
 
-out = provinceMap.generateImage({}, defaultLandColor=(255, 255, 255))
-pyradox.image.saveUsingPalette(out, 'out/blank_province_map.png')
+out = province_map.generate_image({}, default_land_color=(255, 255, 255))
+pyradox.image.save_using_palette(out, 'out/blank_province_map.png')

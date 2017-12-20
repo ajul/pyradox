@@ -1,4 +1,4 @@
 import sys
 sys.path.append("../..")
 import pyradox.config
-pyradox.config.setDefaultGame('EU4')
+pyradox.config.set_default_game('EU4')

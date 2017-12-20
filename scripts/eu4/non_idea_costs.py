@@ -14,9 +14,9 @@ import load.province
 
 import scipy.stats
 
-countries = load.country.getCountries()
+countries = load.country.get_countries()
 
-def provinceCost(province):
+def province_cost(province):
     cost = 0
     if 'base_tax' in province:
         if 'trade_goods' in province and province['trade_goods'] == 'gold':
@@ -35,7 +35,7 @@ def provinceCost(province):
     else:
         return None
 
-def rulerCost(country, date = pyradox.primitive.Date('1444.11.11')):
+def ruler_cost(country, date = pyradox.primitive.Date('1444.11.11')):
     monarch = None
     heir = None
     for key, value in country.items():
@@ -44,32 +44,32 @@ def rulerCost(country, date = pyradox.primitive.Date('1444.11.11')):
             if 'monarch' in value:
                 monarch = value['monarch']
                 if heir is not None and monarch['name'] == heir['monarch_name']:
-                    monarchBirth = heirBirth
+                    monarch_birth = heir_birth
                     heir = None
                 else:
-                    monarchBirth = key
+                    monarch_birth = key
             if 'heir' in value:
                 heir = value['heir']
-                heirBirth = key
-                nextMonarchName = heir['monarch_name']
+                heir_birth = key
+                next_monarch_name = heir['monarch_name']
     
     cost = 0.0
     if monarch is not None:
         
         skill = sum(monarch[x] for x in ('adm', 'dip', 'mil'))
-        age = max(15, (date - monarchBirth) / 365)
+        age = max(15, (date - monarch_birth) / 365)
         print(skill, age)
         cost += 2 * (skill - 6) * 30 / age
     if heir is not None:
         skill = sum(heir[x] for x in ('adm', 'dip', 'mil'))
-        age = (date - heirBirth) / 365
+        age = (date - heir_birth) / 365
         cost += 2 * (skill - 6) * 30 / (age + 15)
     return cost
 
-governments = pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'governments'))
+governments = pyradox.txt.parse_merge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'governments'))
 
-def governmentCost(country, date = pyradox.primitive.Date('1444.11.11')):
-    country = country.atDate(date)
+def government_cost(country, date = pyradox.primitive.Date('1444.11.11')):
+    country = country.at_date(date)
     if 'government' not in country: return 0.0
     government = governments[country['government']]
     if 'nation_designer_cost' in government:
@@ -78,14 +78,14 @@ def governmentCost(country, date = pyradox.primitive.Date('1444.11.11')):
         return 0.0
 
 continents = {}
-for continent, provincesIDs in pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'continent.txt')).items():
-    for provinceID in provincesIDs:
-        if provinceID in continents:
-            print('Duplicate continent for province %d' % provinceID)
+for continent, provinces_id_s in pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'continent.txt')).items():
+    for province_id in provinces_id_s:
+        if province_id in continents:
+            print('Duplicate continent for province %d' % province_id)
         else:
-            continents[provinceID] = continent
+            continents[province_id] = continent
 
-baselineTech = {
+baseline_tech = {
     'europe' : 'western',
     'asia' : 'muslim',
     'africa' : 'muslim',
@@ -94,72 +94,72 @@ baselineTech = {
     'oceania' : 'south_american',
     }
 
-fallbackContinents = {
+fallback_continents = {
     'indian' : 'asia',
     'ottoman' : 'europe',
     }
 
-techGroups = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'technology.txt'))['groups']
+tech_groups = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'technology.txt'))['groups']
 
-def technologyCost(country, date = pyradox.primitive.Date('1444.11.11')):
-    country = country.atDate(date)
-    if 'valid_for_nation_designer' in techGroups[country['technology_group']] and not techGroups[country['technology_group']]['valid_for_nation_designer']:
+def technology_cost(country, date = pyradox.primitive.Date('1444.11.11')):
+    country = country.at_date(date)
+    if 'valid_for_nation_designer' in tech_groups[country['technology_group']] and not tech_groups[country['technology_group']]['valid_for_nation_designer']:
         return 0.0
     if 'capital' in country:
         continent = continents[country['capital']]
     else:
-        continent = fallbackContinents[country['technology_group']]
-    modifier = techGroups[country['technology_group']]['modifier']
-    baseline = techGroups[baselineTech[continent]]['modifier']
+        continent = fallback_continents[country['technology_group']]
+    modifier = tech_groups[country['technology_group']]['modifier']
+    baseline = tech_groups[baseline_tech[continent]]['modifier']
     if modifier < baseline:
         return (baseline - modifier) * 100
     else:
         return (baseline - modifier) * 20
 
-governmentCosts = {}
+government_costs = {}
 
 for tag, country in countries.items():
     if tag in ('NAT', 'PIR', 'REB'): continue
     print(tag)
-    governmentCosts[tag] = [0.0, 0.0, 0.0] # ruler, govt., tech group
-    governmentCosts[tag][0] = rulerCost(country)
-    governmentCosts[tag][1] = governmentCost(country)
-    governmentCosts[tag][2] = technologyCost(country)
+    government_costs[tag] = [0.0, 0.0, 0.0] # ruler, govt., tech group
+    government_costs[tag][0] = ruler_cost(country)
+    government_costs[tag][1] = government_cost(country)
+    government_costs[tag][2] = technology_cost(country)
 
-provinces = load.province.getProvinces()
+provinces = load.province.get_provinces()
 
-territoryCosts = {tag : 0.0 for tag in countries.keys()}
+territory_costs = {tag : 0.0 for tag in countries.keys()}
 
 for filename, province in provinces.items():
-    province = province.atDate(pyradox.primitive.Date('1444.11.11'))
+    province = province.at_date(pyradox.primitive.Date('1444.11.11'))
     if 'owner' not in province: continue
-    territoryCosts[province['owner']] += provinceCost(province)
+    territory_costs[province['owner']] += province_cost(province)
     
 result = '{|class = "wikitable sortable"\n'
 result += '! Country !! Tag !! Territory cost !! Ruler cost !! Government cost !! Technology cost !! Total cost \n'
 
-for tag in sorted(governmentCosts.keys()):
-    if territoryCosts[tag] == 0: continue
+for tag in sorted(government_costs.keys()):
+    if territory_costs[tag] == 0: continue
     result += '|-\n'
-    totalCost = sum(governmentCosts[tag]) + territoryCosts[tag]
+    total_cost = sum(government_costs[tag]) + territory_costs[tag]
     result += '| %s || %s || %d || %0.1f || %d || %d || %d \n' % (
-        load.country.getCountryName(tag), tag, territoryCosts[tag],
-        governmentCosts[tag][0], governmentCosts[tag][1], governmentCosts[tag][2],
-        totalCost)
+        load.country.get_country_name(tag), tag, territory_costs[tag],
+        government_costs[tag][0], government_costs[tag][1], government_costs[tag][2],
+        total_cost)
 
 result += '|}\n'
 print(result)
 
-resultTree = pyradox.struct.Tree()
+result_tree = pyradox.struct.Tree()
 
-for tag in sorted(governmentCosts.keys()):
-    nationTree = pyradox.struct.Tree()
-    nationTree['territory'] = territoryCosts[tag]
-    nationTree['ruler'] = governmentCosts[tag][0]
-    nationTree['government'] = governmentCosts[tag][1]
-    nationTree['technology'] = governmentCosts[tag][2]
-    resultTree[tag] = nationTree
+for tag in sorted(government_costs.keys()):
+    nation_tree = pyradox.struct.Tree()
+    nation_tree['territory'] = territory_costs[tag]
+    nation_tree['ruler'] = government_costs[tag][0]
+    nation_tree['government'] = government_costs[tag][1]
+    nation_tree['technology'] = government_costs[tag][2]
+    result_tree[tag] = nation_tree
 
 outfile = open('out/non_idea_costs.txt', mode = 'w')
-outfile.write(str(resultTree))
+outfile.write(str(result_tree))
 outfile.close()

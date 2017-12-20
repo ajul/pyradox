@@ -9,22 +9,22 @@ import pyradox.worldmap
 import pyradox.yml
 from PIL import Image
         
-provinceMap = pyradox.worldmap.ProvinceMap()
+province_map = pyradox.worldmap.ProvinceMap()
 
-regionColors = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'region_colors', '00_region_colors.txt'))
-regions = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'region.txt'))
-tradeGoodEvents = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'events', 'TradeGoods.txt'))
+region_colors = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'region_colors', '00_region_colors.txt'))
+regions = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'region.txt'))
+trade_good_events = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'events', 'TradeGoods.txt'))
 
 colormap = {}
 textmap = {}
-for regionIndex, (regionKey, regionProvinces) in enumerate(regions.items()):
-    if not tradeGoodEvents.containsValueWalk(regionKey): continue # filter to regions appearing in trade goods events
-    color = tuple(regionColors.valueAt(regionIndex))
-    textmap[tuple(regionProvinces)] = pyradox.format.humanTitle(regionKey)
-    for provinceID in regionProvinces:
-        colormap[provinceID] = color
+for region_index, (region_key, region_provinces) in enumerate(regions.items()):
+    if not trade_good_events.contains_value_walk(region_key): continue # filter to regions appearing in trade goods events
+    color = tuple(region_colors.value_at(region_index))
+    textmap[tuple(region_provinces)] = pyradox.format.human_title(region_key)
+    for province_id in region_provinces:
+        colormap[province_id] = color
         
-out = provinceMap.generateImage(colormap, edgeColor = (255, 255, 255))
+out = province_map.generate_image(colormap, edge_color = (255, 255, 255))
 
-provinceMap.overlayText(out, textmap, fontsize = 16)
+province_map.overlay_text(out, textmap, fontsize = 16)
 out.save('out/region_trade_good_map.png')

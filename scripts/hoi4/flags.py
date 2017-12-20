@@ -4,7 +4,7 @@ from PIL import Image
 import pyradox.config
 import os
 
-flagdir = os.path.join(pyradox.config.getBasedir('HoI4'), 'gfx', 'flags')
+flagdir = os.path.join(pyradox.config.get_basedir('HoI4'), 'gfx', 'flags')
 
 for filename in os.listdir(flagdir):
     fullpath = os.path.join(flagdir, filename)

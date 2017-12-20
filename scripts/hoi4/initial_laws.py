@@ -7,22 +7,22 @@ import pyradox.struct
 import pyradox.wiki
 import pyradox.yml
 
-def computeCountryTagAndName(filename):
+def compute_country_tag_and_name(filename):
     m = re.match('.*([A-Z]{3})\s*-\s*(.*)\.txt$', filename)
     return m.group(1), m.group(2)
 
-economics = pyradox.txt.parseFile(
-    os.path.join(pyradox.config.getBasedir('HoI4'),
+economics = pyradox.txt.parse_file(
+    os.path.join(pyradox.config.get_basedir('HoI4'),
                  'common', 'ideas', '_economic.txt'))['ideas']
 
 result = pyradox.struct.Tree()
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
-    country = country.atDate('1936.1.1')
-    tag, name = computeCountryTagAndName(filename)
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+    country = country.at_date('1936.1.1')
+    tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
-    rulingParty = country['set_politics']['ruling_party']
-    country['name'] = pyradox.yml.getLocalization('%s_%s' % (tag, rulingParty), ['countries'], game = 'HoI4')
+    ruling_party = country['set_politics']['ruling_party']
+    country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = 'HoI4')
     result[tag] = country
 
     if 'add_ideas' in country:
@@ -42,7 +42,7 @@ columns = [
     ]
 
 out = open("out/initial_laws.txt", "w", encoding = 'utf_8_sig')
-out.write(pyradox.wiki.makeWikitable(result, columns,
-                                     sortFunction = lambda item: item[1]['name'],
-                                     tableStyle = None))
+out.write(pyradox.wiki.make_wikitable(result, columns,
+                                     sort_function = lambda item: item[1]['name'],
+                                     table_style = None))
 out.close()

@@ -16,18 +16,18 @@ colors = (
     )
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
-    provinceValue = -1
-    for modifier in data.findAll('add_permanent_province_modifier', recurse=True):
+    province_id = int(m.group(0))
+    province_value = -1
+    for modifier in data.find_all('add_permanent_province_modifier', recurse=True):
         for x, (s, color) in enumerate(colors):
             if s in modifier['name']:
-                provinceValue = max(provinceValue, x)
-    if provinceValue > -1:
-        colormap[provinceID] = colors[provinceValue][1]
+                province_value = max(province_value, x)
+    if province_value > -1:
+        colormap[province_id] = colors[province_value][1]
         
-provinceMap = pyradox.worldmap.ProvinceMap()
-out = provinceMap.generateImage(colormap)
-pyradox.image.saveUsingPalette(out, 'out/trade_center_map.png')
+province_map = pyradox.worldmap.ProvinceMap()
+out = province_map.generate_image(colormap)
+pyradox.image.save_using_palette(out, 'out/trade_center_map.png')
 

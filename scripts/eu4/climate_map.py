@@ -6,7 +6,7 @@ import pyradox.config
 import pyradox.txt
 import pyradox.worldmap
 
-colorDefs = collections.OrderedDict([
+color_defs = collections.OrderedDict([
     ('default', (127, 127, 127)),
     ('tropical' , (255, 63, 63)),       # light red
     ('arid' , (255, 255, 127)),         # light yellow
@@ -19,36 +19,36 @@ colorDefs = collections.OrderedDict([
     ])
 
 legend = ''
-for name, color in colorDefs.items():
-    bgColorString = '#%02x%02x%02x' % color
+for name, color in color_defs.items():
+    bg_color_string = '#%02x%02x%02x' % color
     r, g, b = color
     y = 0.2126 * r + 0.7152 * g + 0.0722 * b
     if y >= 255 / 2:
-        textColorString = '#000000'
+        text_color_string = '#000000'
     else:
-        textColorString = '#ffffff'
-    legend += '<span style="color:%s; background-color:%s">%s </span>' % (textColorString, bgColorString, name)
+        text_color_string = '#ffffff'
+    legend += '<span style="color:%s; background-color:%s">%s </span>' % (text_color_string, bg_color_string, name)
 
 print(legend)
 
-climateMap = {}
-for climate, provinces in pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'climate.txt'), verbose=False).items():
-    for provinceID in provinces:
-        if climate in colorDefs.keys():
-            climateMap[provinceID] = climate
+climate_map = {}
+for climate, provinces in pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'climate.txt'), verbose=False).items():
+    for province_id in provinces:
+        if climate in color_defs.keys():
+            climate_map[province_id] = climate
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
+    province_id = int(m.group(0))
     if 'base_tax' not in data: continue # skip wastelands
-    if provinceID in climateMap:
-        colormap[provinceID] = colorDefs[climateMap[provinceID]]
+    if province_id in climate_map:
+        colormap[province_id] = color_defs[climate_map[province_id]]
     else:
-        colormap[provinceID] = colorDefs['default']
+        colormap[province_id] = color_defs['default']
         
-provinceMap = pyradox.worldmap.ProvinceMap()
-out = provinceMap.generateImage(colormap)
+province_map = pyradox.worldmap.ProvinceMap()
+out = province_map.generate_image(colormap)
 out.save('out/climate_map.png')
 
 

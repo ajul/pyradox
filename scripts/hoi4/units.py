@@ -9,12 +9,12 @@ import os.path
 from unitstats import *
 
 files = {}
-for unitType in baseColumns.keys():
-    files[unitType] = open("out/%s_units.txt" % unitType, "w")
+for unit_type in base_columns.keys():
+    files[unit_type] = open("out/%s_units.txt" % unit_type, "w")
 
 columns = {
     "land" : (
-        ("Unit", computeUnitName),
+        ("Unit", compute_unit_name),
         ("Year", "%(year)d"),
         ("Manpower", "%(manpower)d"),
         ("Training time", "%(training_time)d"),
@@ -33,12 +33,12 @@ columns = {
         )
     }
 
-for unitType, unitFile in files.items():
-    unitFile.write(pyradox.wiki.makeWikitable(units, columns[unitType],
-                                              filterFunction = lambda k, v: computeUnitType(v) == unitType, collapse = True,
-                                              sortFunction = lambda item: computeUnitName(item[0])))
-    #unitFile.write("=== Derived statistics ===\n")
-    #unitFile.write(pyradox.wiki.makeWikitable(units, derivedColumns[unitType], lambda k, v: computeUnitType(v) == unitType and isAvailiable(v)))
+for unit_type, unit_file in files.items():
+    unit_file.write(pyradox.wiki.make_wikitable(units, columns[unit_type],
+                                              filter_function = lambda k, v: compute_unit_type(v) == unit_type, collapse = True,
+                                              sort_function = lambda item: compute_unit_name(item[0])))
+    #unit_file.write("=== Derived statistics ===\n")
+    #unit_file.write(pyradox.wiki.make_wikitable(units, derived_columns[unit_type], lambda k, v: compute_unit_type(v) == unit_type and is_availiable(v)))
 
-for unitFile in files.values():
-    unitFile.close()
+for unit_file in files.values():
+    unit_file.close()

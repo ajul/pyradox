@@ -1,14 +1,14 @@
-intValues = (
+int_values = (
     1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 33, 40, 50, 60, 75, 100, 150, 200,
     )
 
-floatValues = (
+float_values = (
     0.002, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.075, 0.1, 0.15, 0.2, 0.25, 0.3, 0.33, 0.4, 0.5, 0.6, 0.66, 0.75,
     1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0,
     )
 
 # comments refer to normal value
-bonusData = (
+bonus_data = (
     ("(none)",                      1, (None, None)), # special
     ("accepted_culture_threshold",  -0.15, (-0.05, -0.2)), 
     ("adm_tech_cost_modifier",      -0.1, (-0.05, -0.25)), # unused
@@ -170,9 +170,9 @@ bonusData = (
     ("years_of_nationalism",        -5, (-5, -10)),
     )
 
-bonusTypes, bonusNormalValues, bonusRanges = zip(*bonusData)
+bonus_types, bonus_normal_values, bonus_ranges = zip(*bonus_data)
 
-nonPercentFloats = set([
+non_percent_floats = set([
     "army_tradition",
     "hostile_attrition",
     "inflation_reduction",
@@ -184,22 +184,22 @@ nonPercentFloats = set([
     "war_exhaustion",
     ])
 
-def isPercentBonus(bonusName):
-    if bonusName in nonPercentFloats: return False
-    if bonusName not in bonusTypes: print(bonusName)
-    idx = bonusTypes.index(bonusName)
-    lowerBound = bonusRanges[idx][0]
-    return isinstance(lowerBound, float)
+def is_percent_bonus(bonus_name):
+    if bonus_name in non_percent_floats: return False
+    if bonus_name not in bonus_types: print(bonus_name)
+    idx = bonus_types.index(bonus_name)
+    lower_bound = bonus_ranges[idx][0]
+    return isinstance(lower_bound, float)
 
-def isReversed(bonusName):
-    idx = bonusTypes.index(bonusName)
-    return bonusNormalValues[idx] < 0.0
+def is_reversed(bonus_name):
+    idx = bonus_types.index(bonus_name)
+    return bonus_normal_values[idx] < 0.0
 
-disallowPositiveDuplicates = set([
+disallow_positive_duplicates = set([
     "hostile_attrition",
     ])
 
-allowNegativeDuplicates = set([
+allow_negative_duplicates = set([
     "artillery_cost",
     "cavalry_cost",
     "global_regiment_cost",
@@ -208,70 +208,70 @@ allowNegativeDuplicates = set([
     "war_exhaustion",
     ])
 
-def allowDuplicate(bonusType):
-    normalValue = bonusNormalValues[bonusTypes.index(bonusType)]
-    if normalValue > 0: return bonusType not in disallowPositiveDuplicates
-    else: return bonusType in allowNegativeDuplicates
+def allow_duplicate(bonus_type):
+    normal_value = bonus_normal_values[bonus_types.index(bonus_type)]
+    if normal_value > 0: return bonus_type not in disallow_positive_duplicates
+    else: return bonus_type in allow_negative_duplicates
 
-def isBeneficial(bonusName, value):
+def is_beneficial(bonus_name, value):
     if isinstance(value, bool):
         return True
     else:
-        idx = bonusTypes.index(bonusName)
-        normalValue = bonusNormalValues[idx]
-        return (normalValue > 0) == (value > 0)
+        idx = bonus_types.index(bonus_name)
+        normal_value = bonus_normal_values[idx]
+        return (normal_value > 0) == (value > 0)
 
-def generateOptions(bonusTypeIndex):
-    bonusType, normalValue, valueRange = bonusData[bonusTypeIndex]
+def generate_options(bonus_type_index):
+    bonus_type, normal_value, value_range = bonus_data[bonus_type_index]
 
-    if normalValue > 0:
+    if normal_value > 0:
         sign = 1
     else:
         sign = -1
     
-    if valueRange[0] is None:
+    if value_range[0] is None:
         options = ["(none): 0.00 point(s)"]
         values = [None]
         costs = [0.0]
-    elif isinstance(valueRange[0], bool):
-        cost = 1.0 / normalValue
+    elif isinstance(value_range[0], bool):
+        cost = 1.0 / normal_value
         options = ["yes: %0.2f point(s)" % (cost,)]
         values = [True]
         costs = [cost]
-    elif isinstance(valueRange[0], int):
+    elif isinstance(value_range[0], int):
         options = []
         values = []
         costs = []
 
-        for value in intValues:
-            if value < valueRange[0] * sign: continue
-            if value > valueRange[1] * sign: continue
+        for value in int_values:
+            if value < value_range[0] * sign: continue
+            if value > value_range[1] * sign: continue
             
-            cost = value / normalValue * sign
+            cost = value / normal_value * sign
             options.append("%+d: %0.2f point(s)" % (value * sign, cost))
             values.append(value * sign)
             costs.append(cost)
 
         # negative option
-        negValue = -values[0]
-        negCost = -costs[0]
-        negOption = "%+d: %0.2f point(s)" % (negValue, negCost)
-        options = [negOption] + options
-        values = [negValue] + values
-        costs = [negCost] + costs
+        neg_value = -values[0]
+        neg_cost = -costs[0]
+        neg_option = "%+d: %0.2f point(s)" % (neg_value, neg_cost)
+        options = [neg_option] + options
+        values = [neg_value] + values
+        costs = [neg_cost] + costs
             
     else: # float
         options = []
         values = []
         costs = []
 
-        for value in floatValues:
-            if value < valueRange[0] * sign: continue
-            if value > valueRange[1] * sign: continue
+        for value in float_values:
+            if value < value_range[0] * sign: continue
+            if value > value_range[1] * sign: continue
 
-            cost = value / normalValue * sign
+            cost = value / normal_value * sign
 
-            if bonusType in nonPercentFloats:
+            if bonus_type in non_percent_floats:
                 options.append("%+0.3f: %0.2f point(s)" % (value * sign, cost))
             else:
                 options.append("%+0.1f%%: %0.2f point(s)" % (value * sign * 100.0, cost))
@@ -279,26 +279,26 @@ def generateOptions(bonusTypeIndex):
             costs.append(cost)
 
         # negative option
-        negValue = -values[0]
-        negCost = -costs[0] * 0.5 # only returns half points
-        if bonusType in nonPercentFloats:
-            negOption = "%+0.3f: %0.2f point(s)" % (negValue, negCost)
+        neg_value = -values[0]
+        neg_cost = -costs[0] * 0.5 # only returns half points
+        if bonus_type in non_percent_floats:
+            neg_option = "%+0.3f: %0.2f point(s)" % (neg_value, neg_cost)
         else:
-            negOption = "%+0.1f%%: %0.2f point(s)" % (negValue * 100.0, negCost)
-        options = [negOption] + options
-        values = [negValue] + values
-        costs = [negCost] + costs
+            neg_option = "%+0.1f%%: %0.2f point(s)" % (neg_value * 100.0, neg_cost)
+        options = [neg_option] + options
+        values = [neg_value] + values
+        costs = [neg_cost] + costs
 
     return options, values, costs
 
-def getClosestValueIndex(values, target):
+def get_closest_value_index(values, target):
     if values[0] is True or values[0] is None: return 0
     
     difference = abs(values[0] - target)
     result = 0
     for i, value in enumerate(values):
-        currDifference = abs(value - target)
-        if currDifference < difference:
-            difference = currDifference
+        curr_difference = abs(value - target)
+        if curr_difference < difference:
+            difference = curr_difference
             result = i
     return result

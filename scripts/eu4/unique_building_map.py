@@ -7,9 +7,9 @@ import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
 
-endGame = False
+end_game = False
 
-buildingColors = (
+building_colors = (
     ('tax_assessor', (255, 191, 0)), # gold
     ('embassy', (127, 255, 127)), # green
     ('glorious_monument', (127, 255, 127)), # green
@@ -23,22 +23,22 @@ buildingColors = (
     )
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
-    if endGame:
-        data = data.atDate(True)
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+    if end_game:
+        data = data.at_date(True)
     else:
-        data = data.atDate('1444.11.11')
+        data = data.at_date('1444.11.11')
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
+    province_id = int(m.group(0))
     color = None
-    for building, buildingColor in buildingColors:
+    for building, building_color in building_colors:
         if building in data:
             print(filename, building)
-            color = buildingColor
+            color = building_color
     if color is not None:
-        colormap[provinceID] = color
+        colormap[province_id] = color
         
-provinceMap = pyradox.worldmap.ProvinceMap()
-out = provinceMap.generateImage(colormap)
-pyradox.image.saveUsingPalette(out, 'out/unique_building_map.png')
+province_map = pyradox.worldmap.ProvinceMap()
+out = province_map.generate_image(colormap)
+pyradox.image.save_using_palette(out, 'out/unique_building_map.png')
 

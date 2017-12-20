@@ -14,7 +14,7 @@ def cost0_3(level):
 def cost0_5(level):
     return 5 * (level - 1) * level / 2
 
-costFunctions = {
+cost_functions = {
     (0, 3) : cost0_3,
     (0, 5) : cost0_5,
     (0, 15) : lambda level: cost0_5(level * 2 - 1),
@@ -26,27 +26,27 @@ costFunctions = {
 
 bonuses = {}
 
-def evalBonus(bonusKey, bonusValue):
-    if bonusKey in bonuses:
-        powerType, baseValue, max_level, costs = bonuses[bonusKey]
-        costFunction = costFunctions[costs]
-        level = bonusValue / baseValue
-        return powerType, 10 * level / max_level, costFunction(level), costs[0] + (level - 1) * (costs[1] - costs[0])
+def eval_bonus(bonus_key, bonus_value):
+    if bonus_key in bonuses:
+        power_type, base_value, max_level, costs = bonuses[bonus_key]
+        cost_function = cost_functions[costs]
+        level = bonus_value / base_value
+        return power_type, 10 * level / max_level, cost_function(level), costs[0] + (level - 1) * (costs[1] - costs[0])
     else:
         return None
 
-for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
-    for ideaSet in fileData.values():
+for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
+    for idea_set in file_data.values():
         # start category
         
-        for idea, ideaData in ideaSet.items():
+        for idea, idea_data in idea_set.items():
             if idea == 'category':
-                powerType = ideaData.lower()
+                power_type = idea_data.lower()
                 continue
 
             costs = [0, 5] # cost indexed by level (0-based)
             max_level = 4
-            for key, value in ideaData.items():
+            for key, value in idea_data.items():
                 if key in ('default', 'chance'):
                     continue
                 elif key == 'max_level':
@@ -56,70 +56,70 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
                     if level <= 2:
                         costs[level - 1] = value
                 else:
-                    bonusKey = key
-                    baseValue = value
-            bonuses[bonusKey] = (powerType, baseValue, max_level, tuple(costs))
+                    bonus_key = key
+                    base_value = value
+            bonuses[bonus_key] = (power_type, base_value, max_level, tuple(costs))
 
 result = '{|class = "wikitable sortable"\n'
 result += '! Idea group !! Linear cost !! Base cost !! Adjusted for<br/>early ideas !! Max level ratio !! Final cost !! Bonuses unaccounted for\n'
 
-resultTree = pyradox.struct.Tree()
+result_tree = pyradox.struct.Tree()
 
-for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
-    for ideaSetName, ideaSet in fileData.items():
+for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
+    for idea_set_name, idea_set in file_data.items():
         
         index = 0
-        baseCost = 0.0
-        earlyCost = 0.0
-        totalLinearCost = 0.0
+        base_cost = 0.0
+        early_cost = 0.0
+        total_linear_cost = 0.0
         unaccounted = [] # not appearing in designer
-        levelCounts = {
+        level_counts = {
             'adm' : 0.0,
             'dip' : 0.0,
             'mil' : 0.0,
             }
-        for key, value in ideaSet.items():
+        for key, value in idea_set.items():
             if key in ('category', 'trigger', 'free', 'ai_will_do', 'important'): continue
             
             if key == 'start':
-                costMultiplier = 2
+                cost_multiplier = 2
             elif key == 'bonus':
-                costMultiplier = 1
+                cost_multiplier = 1
             else:
-                costMultiplier = 2 - 0.2 * min(index, 5)
+                cost_multiplier = 2 - 0.2 * min(index, 5)
                 index += 1
 
-            for bonusKey, bonusValue in value.items():
-                bonusInfo = evalBonus(bonusKey, bonusValue)
-                if bonusInfo is None:
-                    unaccounted.append('%s (%s)' %( bonusKey, bonusValue))
+            for bonus_key, bonus_value in value.items():
+                bonus_info = eval_bonus(bonus_key, bonus_value)
+                if bonus_info is None:
+                    unaccounted.append('%s (%s)' %( bonus_key, bonus_value))
                 else:
-                    powerType, level, cost, linearCost = bonusInfo
-                    levelCounts[powerType] += level
-                    baseCost += cost
-                    earlyCost += cost * costMultiplier
-                    totalLinearCost += linearCost
+                    power_type, level, cost, linear_cost = bonus_info
+                    level_counts[power_type] += level
+                    base_cost += cost
+                    early_cost += cost * cost_multiplier
+                    total_linear_cost += linear_cost
 
-        maxRatio = max(levelCounts.values()) / sum(levelCounts.values())
-        finalCost = earlyCost * (1 + 5 * max(0, maxRatio - 0.5))
-        unaccountedString = '%d: %s' % (len(unaccounted), ', '.join(unaccounted))
+        max_ratio = max(level_counts.values()) / sum(level_counts.values())
+        final_cost = early_cost * (1 + 5 * max(0, max_ratio - 0.5))
+        unaccounted_string = '%d: %s' % (len(unaccounted), ', '.join(unaccounted))
         result += '|-\n'
-        result += '| %s || %0.1f || %0.1f || %0.1f || %0.1f%% || %0.1f || %s \n' % (ideaSetName, totalLinearCost, baseCost, earlyCost, maxRatio * 100, finalCost, unaccountedString)
+        result += '| %s || %0.1f || %0.1f || %0.1f || %0.1f%% || %0.1f || %s \n' % (idea_set_name, total_linear_cost, base_cost, early_cost, max_ratio * 100, final_cost, unaccounted_string)
 
-        ideaSetTree = pyradox.struct.Tree()
+        idea_set_tree = pyradox.struct.Tree()
 
-        ideaSetTree['flat'] = totalLinearCost
-        ideaSetTree['base'] = baseCost
-        ideaSetTree['early'] = earlyCost
-        ideaSetTree['ratio'] = maxRatio
-        ideaSetTree['final'] = finalCost
-        ideaSetTree['unaccounted'] = unaccountedString
+        idea_set_tree['flat'] = total_linear_cost
+        idea_set_tree['base'] = base_cost
+        idea_set_tree['early'] = early_cost
+        idea_set_tree['ratio'] = max_ratio
+        idea_set_tree['final'] = final_cost
+        idea_set_tree['unaccounted'] = unaccounted_string
 
-        resultTree[ideaSetName] = ideaSetTree
+        result_tree[idea_set_name] = idea_set_tree
 
 result += '|}\n'
 print(result)
 
 outfile = open('out/idea_costs.txt', mode = 'w')
-outfile.write(str(resultTree))
+outfile.write(str(result_tree))
 outfile.close()

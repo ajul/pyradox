@@ -9,29 +9,29 @@ import pyradox.image
 from PIL import Image
 
 # Load the province map using the default location set in pyradox.config.
-provinceMap = pyradox.worldmap.ProvinceMap()
+province_map = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('EU4'), 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
+    province_id = int(m.group(0))
     if ('base_tax' in data and data['base_tax'] > 0):
-        colormap[provinceID] = (150, 150, 150)
+        colormap[province_id] = (150, 150, 150)
 
 # Create a blank map and scale it up 2x.
-out = provinceMap.generateImage(colormap, defaultLandColor=(97, 97, 97), defaultWaterColor=(68, 107, 163), edgeColor=(255, 255, 255))
+out = province_map.generate_image(colormap, default_land_color=(97, 97, 97), default_water_color=(68, 107, 163), edge_color=(255, 255, 255))
 out = out.resize((out.size[0] * 2, out.size[1] * 2), Image.NEAREST)
 
 # Create the map labels.
 textmap = {}
 colormap = {}
-for provinceID in provinceMap.positions.keys():
-    textmap[provinceID] = '%d' % provinceID
-    if provinceMap.isWaterProvince(provinceID):
-        colormap[provinceID] = (0, 0, 0)
+for province_id in province_map.positions.keys():
+    textmap[province_id] = '%d' % province_id
+    if province_map.is_water_province(province_id):
+        colormap[province_id] = (0, 0, 0)
     else:
-        colormap[provinceID] = (0, 0, 0)
+        colormap[province_id] = (0, 0, 0)
 
-provinceMap.overlayText(out, textmap, colormap = colormap, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
-out.save('out/province_ID_map.png')
-#pyradox.image.saveUsingPalette(out, 'out/province_ID_map.png')
+province_map.overlay_text(out, textmap, colormap = colormap, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
+out.save('out/province__id_map.png')
+#pyradox.image.save_using_palette(out, 'out/province__id_map.png')

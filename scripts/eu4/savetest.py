@@ -6,7 +6,7 @@ import collections
 import pyradox
 import warnings
 
-import cProfile
+import c_profile
 import pstats
 
 import time
@@ -25,10 +25,10 @@ class Timer:
 warnings.simplefilter("ignore", pyradox.txt.ParseWarning)
 
 if mode == "profiler":
-    pr = cProfile.Profile()
+    pr = c_profile.Profile()
 
     pr.enable()
-    savetree = pyradox.parseFile('in/thebloke.eu4')
+    savetree = pyradox.parse_file('in/thebloke.eu4')
     print(savetree["checksum"])
     pr.disable()
 
@@ -38,6 +38,6 @@ if mode == "profiler":
     print(s.getvalue())
 else:
     with Timer() as t:
-        savetree = pyradox.parseFile('in/thebloke.eu4')
+        savetree = pyradox.parse_file('in/thebloke.eu4')
         print(savetree["checksum"])
     print("Elapsed time: %fs" % t.interval)

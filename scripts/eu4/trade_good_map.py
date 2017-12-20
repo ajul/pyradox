@@ -7,7 +7,7 @@ import pyradox.worldmap
 
 basedir = r'D:\Steam\steamapps\common\Europa Universalis IV'
 
-tradeGoodColors = collections.OrderedDict([
+trade_good_colors = collections.OrderedDict([
     ('grain' , (255, 255, 127)),        # pale yellow
     ('wine' , (127, 0, 255)),           # purple
     ('wool' , (255, 127, 255)),         # pale magenta
@@ -37,27 +37,27 @@ tradeGoodColors = collections.OrderedDict([
     ])
 
 legend = ''
-for tradeGood, color in tradeGoodColors.items():
-    bgColorString = '#%02x%02x%02x' % color
+for trade_good, color in trade_good_colors.items():
+    bg_color_string = '#%02x%02x%02x' % color
     r, g, b = color
     y = 0.2126 * r + 0.7152 * g + 0.0722 * b
     if y >= 255 / 2:
-        textColorString = '#000000'
+        text_color_string = '#000000'
     else:
-        textColorString = '#ffffff'
-    legend += '<span style="color:%s; background-color:%s">%s </span>' % (textColorString, bgColorString, tradeGood)
+        text_color_string = '#ffffff'
+    legend += '<span style="color:%s; background-color:%s">%s </span>' % (text_color_string, bg_color_string, trade_good)
 
 print(legend)
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(basedir, 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(basedir, 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
+    province_id = int(m.group(0))
     if 'trade_goods' in data:
-        colormap[provinceID] = tradeGoodColors[data['trade_goods']]
+        colormap[province_id] = trade_good_colors[data['trade_goods']]
         
-provinceMap = pyradox.worldmap.ProvinceMap(basedir)
-out = provinceMap.generateImage(colormap)
+province_map = pyradox.worldmap.ProvinceMap(basedir)
+out = province_map.generate_image(colormap)
 out.save('out/trade_good_map.png')
 
 

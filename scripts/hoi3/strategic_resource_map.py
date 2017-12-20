@@ -10,29 +10,29 @@ import pyradox.image
 from PIL import Image
 import load.province
 
-resourceImageDir = 'in/strategic_resource/'
+resource_image_dir = 'in/strategic_resource/'
 
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI3'], flipY = True)
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI3'], flip_y = True)
 
-resourceImages = {}
-for filename in os.listdir(resourceImageDir):
-    if os.path.isfile(os.path.join(resourceImageDir, filename)):
+resource_images = {}
+for filename in os.listdir(resource_image_dir):
+    if os.path.isfile(os.path.join(resource_image_dir, filename)):
         m = re.match(r'strategic_resource_(.*).png', filename)
         if m is None: continue
-        resourceImages[m.group(1)] = Image.open(os.path.join(resourceImageDir, filename))
+        resource_images[m.group(1)] = Image.open(os.path.join(resource_image_dir, filename))
 
-vanilla_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
-tfh_provinces = load.province.getProvinces(basedir = pyradox.config.basedirs['HoI3'])
+vanilla_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
+tfh_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3'])
 
 iconmap = {}
 
-for provinceID, data in vanilla_provinces.items():
-    if 'strategic_resource' in data.keys(): iconmap[int(provinceID)] = resourceImages[data['strategic_resource']]
+for province_id, data in vanilla_provinces.items():
+    if 'strategic_resource' in data.keys(): iconmap[int(province_id)] = resource_images[data['strategic_resource']]
         
-for provinceID, data in tfh_provinces.items():
-    if 'strategic_resource' in data.keys(): iconmap[int(provinceID)] = resourceImages[data['strategic_resource']]
+for province_id, data in tfh_provinces.items():
+    if 'strategic_resource' in data.keys(): iconmap[int(province_id)] = resource_images[data['strategic_resource']]
             
 
-outMapImage = provinceMap.generateImage({})
-provinceMap.overlayIcons(outMapImage, iconmap)
-outMapImage.save('out/strategic_resource_map.png')
+out_map_image = province_map.generate_image({})
+province_map.overlay_icons(out_map_image, iconmap)
+out_map_image.save('out/strategic_resource_map.png')

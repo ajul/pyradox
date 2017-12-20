@@ -10,4 +10,4 @@ with_hours = 1939.1.1.12
 
 print(result)
 
-print(pyradox.Time.fromDaysSince1AD(365 + 32))
+print(pyradox.Time.from_days_since_1_ad(365 + 32))

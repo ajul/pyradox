@@ -7,11 +7,11 @@ import pyradox.config
 import pyradox.txt
 import pyradox.worldmap
 
-baseBMP = os.path.join(pyradox.config.basedirs['EU4'], 'map', 'rivers.bmp')
-riversMap = Image.open(baseBMP).convert('RGB')
+base_bmp = os.path.join(pyradox.config.basedirs['EU4'], 'map', 'rivers.bmp')
+rivers_map = Image.open(base_bmp).convert('RGB')
 
-provinceMap = pyradox.worldmap.ProvinceMap()
-provinceMap.overlayEdges(riversMap)
-riversMap.save('out/rivers_map.png')
+province_map = pyradox.worldmap.ProvinceMap()
+province_map.overlay_edges(rivers_map)
+rivers_map.save('out/rivers_map.png')
 
 

@@ -1,7 +1,7 @@
 import _initpath
 import pyradox
 
-#result = pyradox.txt.parseFile('D:/Steam/steamapps/common/Europa Universalis IV/common/prices/00_prices.txt')
+#result = pyradox.txt.parse_file('D:/Steam/steamapps/common/Europa Universalis IV/common/prices/00_prices.txt')
 #print(result)
 
 result = pyradox.parse("""

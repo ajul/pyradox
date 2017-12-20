@@ -8,12 +8,12 @@ import pyradox.wiki
 from unitstats import *
 
 files = {}
-for unitType in baseColumns.keys():
-    files[unitType] = open("out/%s_equipments_by_year.txt" % unitType, "w")
+for unit_type in base_columns.keys():
+    files[unit_type] = open("out/%s_equipments_by_year.txt" % unit_type, "w")
 
-for unitType, unitFile in files.items():
-    unitFile.write(pyradox.wiki.makeWikitable(equipments, equipmentColumns[unitType],
-                                              filterFunction = lambda k, v: ('year' in v or v['active']) and computeEquipmentType(v) == unitType))
+for unit_type, unit_file in files.items():
+    unit_file.write(pyradox.wiki.make_wikitable(equipments, equipment_columns[unit_type],
+                                              filter_function = lambda k, v: ('year' in v or v['active']) and compute_equipment_type(v) == unit_type))
 
-for unitFile in files.values():
-    unitFile.close()
+for unit_file in files.values():
+    unit_file.close()

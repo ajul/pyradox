@@ -6,10 +6,10 @@ import pyradox.primitive
 import pyradox.txt
 import pyradox.yml
 
-undefinedBonuses = set()
+undefined_bonuses = set()
 
 # comments refer to normal value
-bonusData = (
+bonus_data = (
     ("(none)",                      1, (None, None)), # special
     ("adm_tech_cost_modifier",      -0.1, (-0.05, -0.25)), # unused
     ("advisor_cost",                -0.1, (-0.05, -0.25)),
@@ -139,44 +139,44 @@ bonusData = (
     ("war_exhaustion_cost",         -0.2, (-0.1, -0.33)), # -0.1 to -0.2?
     )
 
-bonusTypes, bonusNormalValues, bonusRanges = zip(*bonusData)
+bonus_types, bonus_normal_values, bonus_ranges = zip(*bonus_data)
 
-baseBonusValues = dict(zip(bonusTypes, bonusNormalValues))
+base_bonus_values = dict(zip(bonus_types, bonus_normal_values))
 
-def computeBonusCost(bonusType, bonusValue):
-    if bonusType in baseBonusValues:
-        baseBonusValue = baseBonusValues[bonusType]
-        if isinstance(bonusValue, bool): bonusValue = 1.0
-        result = bonusValue / baseBonusValue
-        if result < 0.0: print("Warning: bonus cost for %s below 0." % bonusType) 
+def compute_bonus_cost(bonus_type, bonus_value):
+    if bonus_type in base_bonus_values:
+        base_bonus_value = base_bonus_values[bonus_type]
+        if isinstance(bonus_value, bool): bonus_value = 1.0
+        result = bonus_value / base_bonus_value
+        if result < 0.0: print("Warning: bonus cost for %s below 0." % bonus_type) 
         return result
     else:
-        if bonusType not in undefinedBonuses:
-            print("Undefined bonus %s" % bonusType)
-            undefinedBonuses.add(bonusType)
+        if bonus_type not in undefined_bonuses:
+            print("Undefined bonus %s" % bonus_type)
+            undefined_bonuses.add(bonus_type)
         return 1.0
 
-def computeGroupCost(groupName, tree):
-    groupValue = 0.0
-    # if "start" not in tree.keys(): groupValue += 2.0 # compensate for lack of traditions
+def compute_group_cost(group_name, tree):
+    group_value = 0.0
+    # if "start" not in tree.keys(): group_value += 2.0 # compensate for lack of traditions
 
-    for ideaName, bonuses in tree.items():
-        if ideaName in ("category", "trigger", "ai_will_do", "important", "free"): continue
-        for bonusType, bonusValue in bonuses.items():
-            bonusCost = computeBonusCost(bonusType, bonusValue)
-            groupValue += bonusCost
-    return groupValue
+    for idea_name, bonuses in tree.items():
+        if idea_name in ("category", "trigger", "ai_will_do", "important", "free"): continue
+        for bonus_type, bonus_value in bonuses.items():
+            bonus_cost = compute_bonus_cost(bonus_type, bonus_value)
+            group_value += bonus_cost
+    return group_value
     
 result = []
 
-for _, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
-    for groupName, tree in data.items():
+for _, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
+    for group_name, tree in data.items():
         if "start" not in tree.keys(): continue
-        result.append((computeGroupCost(groupName, tree), groupName))
+        result.append((compute_group_cost(group_name, tree), group_name))
 
 result.sort(reverse=True)
-for i, (cost, groupName) in enumerate(result):
-    print("|-\n| %s || %0.2f || %d" % (groupName, cost, i+1))
+for i, (cost, group_name) in enumerate(result):
+    print("|-\n| %s || %0.2f || %d" % (group_name, cost, i+1))
 
 # cannot into relevant: less than 7
 # cannot into stronk: 7 to 9

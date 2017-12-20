@@ -7,35 +7,35 @@ import pyradox.txt
 import pyradox.yml
 import load.country
 
-ideaMap = pyradox.txt.parseFile('out/idea_map.txt')
-ideaCosts = pyradox.txt.parseFile('out/idea_costs.txt')
-nonIdeaCosts = pyradox.txt.parseFile('out/non_idea_costs.txt')
+idea_map = pyradox.txt.parse_file('out/idea_map.txt')
+idea_costs = pyradox.txt.parse_file('out/idea_costs.txt')
+non_idea_costs = pyradox.txt.parse_file('out/non_idea_costs.txt')
 
 result = '{|class = "wikitable sortable"\n'
 result += '! Country !! Tag !! Territory cost !! Ruler cost !! Government cost !! Technology cost '
 result += '!! Idea cost (without ratio) !! Idea cost (with ratio) !! Total cost (without ratio) !! Total cost (with ratio) \n'
 
-for tag, ideaGroupName in ideaMap.items():
-    territoryCost = nonIdeaCosts[tag]['territory']
-    if territoryCost == 0: continue
-    earlyCost = ideaCosts[ideaGroupName]['early']
-    finalCost = ideaCosts[ideaGroupName]['final']
+for tag, idea_group_name in idea_map.items():
+    territory_cost = non_idea_costs[tag]['territory']
+    if territory_cost == 0: continue
+    early_cost = idea_costs[idea_group_name]['early']
+    final_cost = idea_costs[idea_group_name]['final']
     
-    rulerCost = nonIdeaCosts[tag]['ruler']
-    governmentCost = nonIdeaCosts[tag]['government']
-    technologyCost = nonIdeaCosts[tag]['technology']
+    ruler_cost = non_idea_costs[tag]['ruler']
+    government_cost = non_idea_costs[tag]['government']
+    technology_cost = non_idea_costs[tag]['technology']
 
-    totalEarlyCost = territoryCost + rulerCost + governmentCost + technologyCost + earlyCost
-    totalFinalCost = territoryCost + rulerCost + governmentCost + technologyCost + finalCost
+    total_early_cost = territory_cost + ruler_cost + government_cost + technology_cost + early_cost
+    total_final_cost = territory_cost + ruler_cost + government_cost + technology_cost + final_cost
     
     result += '|-\n'
 
     result += '| %s || %s || %d || %0.1f || %d || %d ' % (
-        load.country.getCountryName(tag), tag, territoryCost,
-        rulerCost, governmentCost, technologyCost)
+        load.country.get_country_name(tag), tag, territory_cost,
+        ruler_cost, government_cost, technology_cost)
 
     result += '|| %0.1f || %0.1f || %0.1f || %0.1f \n' % (
-        earlyCost, finalCost, totalEarlyCost, totalFinalCost,
+        early_cost, final_cost, total_early_cost, total_final_cost,
         )
 
 result += '|}\n'

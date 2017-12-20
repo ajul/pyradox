@@ -8,9 +8,9 @@ import pyradox.txt
 import pyradox.worldmap
 from PIL import Image
 
-drawIDs = False
+draw_id_s = False
 
-colorDefs = collections.OrderedDict([
+color_defs = collections.OrderedDict([
     ('europe', (127, 255, 255)),        #cyan
     ('asia', (255, 255, 127)),          #yellow
     ('africa', (127, 127, 255)),        #blue
@@ -21,78 +21,78 @@ colorDefs = collections.OrderedDict([
     ])
 
 legend = ''
-for name, color in colorDefs.items():
-    bgColorString = '#%02x%02x%02x' % color
+for name, color in color_defs.items():
+    bg_color_string = '#%02x%02x%02x' % color
     r, g, b = color
     y = 0.2126 * r + 0.7152 * g + 0.0722 * b
     if y >= 255 / 2:
-        textColorString = '#000000'
+        text_color_string = '#000000'
     else:
-        textColorString = '#ffffff'
-    legend += '<span style="color:%s; background-color:%s">%s </span>' % (textColorString, bgColorString, name)
+        text_color_string = '#ffffff'
+    legend += '<span style="color:%s; background-color:%s">%s </span>' % (text_color_string, bg_color_string, name)
 
 print(legend)
 
-continentMap = {}
-for continent, provinces in pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('EU4'), 'map', 'continent.txt'), verbose=False).items():
-    for provinceID in provinces:
-        if provinceID in continentMap:
-            print('Duplicate continent for province %d' % provinceID)
+continent_map = {}
+for continent, provinces in pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('EU4'), 'map', 'continent.txt'), verbose=False).items():
+    for province_id in provinces:
+        if province_id in continent_map:
+            print('Duplicate continent for province %d' % province_id)
         else:
-            continentMap[provinceID] = continent
+            continent_map[province_id] = continent
 
-continentProvinceCount = {}
-continentBaseTax = {}
-continentProduction = {}
-continentManpower = {}
-continentCost = {}
-for continent in colorDefs.keys():
-    continentProvinceCount[continent] = 0
-    continentBaseTax[continent] = 0
-    continentProduction[continent] = 0
-    continentManpower[continent] = 0
+continent_province_count = {}
+continent_base_tax = {}
+continent_production = {}
+continent_manpower = {}
+continent_cost = {}
+for continent in color_defs.keys():
+    continent_province_count[continent] = 0
+    continent_base_tax[continent] = 0
+    continent_production[continent] = 0
+    continent_manpower[continent] = 0
     
-    continentCost[continent] = 0
+    continent_cost[continent] = 0
     
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
+    province_id = int(m.group(0))
     if 'base_tax' not in data: continue # skip wastelands
-    if provinceID in continentMap:
-        continent = continentMap[provinceID]
-        continentProvinceCount[continent] += 1
-        continentBaseTax[continent] += data['base_tax']
-        continentProduction[continent] += data['base_production']
-        continentManpower[continent] += data['base_manpower']
-        continentCost[continent] += province_costs.provinceCost(provinceID, data)
-        colormap[provinceID] = colorDefs[continent]
+    if province_id in continent_map:
+        continent = continent_map[province_id]
+        continent_province_count[continent] += 1
+        continent_base_tax[continent] += data['base_tax']
+        continent_production[continent] += data['base_production']
+        continent_manpower[continent] += data['base_manpower']
+        continent_cost[continent] += province_costs.province_cost(province_id, data)
+        colormap[province_id] = color_defs[continent]
     else:
-        print('Missing continent for province %d' % provinceID)
-        colormap[provinceID] = colorDefs['default']
+        print('Missing continent for province %d' % province_id)
+        colormap[province_id] = color_defs['default']
 
-print(continentProvinceCount)
-print(continentBaseTax)
-print(continentProduction)
-print(continentManpower)
-print(continentCost)
+print(continent_province_count)
+print(continent_base_tax)
+print(continent_production)
+print(continent_manpower)
+print(continent_cost)
 
-provinceMap = pyradox.worldmap.ProvinceMap()
-out = provinceMap.generateImage(colormap)
+province_map = pyradox.worldmap.ProvinceMap()
+out = province_map.generate_image(colormap)
 
-if drawIDs:
+if draw_id_s:
     out = out.resize((out.size[0] * 2, out.size[1] * 2), Image.ANTIALIAS)
     textmap = {}
     colormap = {}
-    for provinceID in provinceMap.positions.keys():
-        textmap[provinceID] = '%d' % provinceID
-        if provinceMap.isWaterProvince(provinceID):
-            colormap[provinceID] = (0, 0, 127)
+    for province_id in province_map.positions.keys():
+        textmap[province_id] = '%d' % province_id
+        if province_map.is_water_province(province_id):
+            colormap[province_id] = (0, 0, 127)
         else:
-            colormap[provinceID] = (0, 0, 0)
+            colormap[province_id] = (0, 0, 0)
 
-    provinceMap.overlayText(out, textmap, colormap = colormap)
-    out.save('out/continent_ID_map.png')
+    province_map.overlay_text(out, textmap, colormap = colormap)
+    out.save('out/continent__id_map.png')
 else:
     out.save('out/continent_map.png')
 

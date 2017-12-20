@@ -6,16 +6,16 @@ import pyradox.load
 import pyradox.txt
 import pyradox.struct
 
-parseProvinces, getProvinces = pyradox.load.loadFunctions('EU4', 'provinces', ('history', 'provinces'))
+parse_provinces, get_provinces = pyradox.load.load_functions('EU4', 'provinces', ('history', 'provinces'))
 
-def getProvinceName(provinceID):
+def get_province_name(province_id):
     """
     Gets the name a country by its tag according to localization.
     """
-    key = 'PROV%d' % provinceID
-    return pyradox.yml.getLocalization(key, ['prov_names'])
+    key = 'PROV%d' % province_id
+    return pyradox.yml.get_localization(key, ['prov_names'])
 
-def provinceCost(province):
+def province_cost(province):
     cost = 0
     if 'base_tax' in province:
         cost += province['base_tax'] * 0.5

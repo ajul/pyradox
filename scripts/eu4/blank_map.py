@@ -7,14 +7,14 @@ import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
         
-provinceMap = pyradox.worldmap.ProvinceMap()
+province_map = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
-for filename, data in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('EU4'), 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
-    provinceID = int(m.group(0))
+    province_id = int(m.group(0))
     if ('base_tax' in data and data['base_tax'] > 0):
-        colormap[provinceID] = (255, 255, 255)
+        colormap[province_id] = (255, 255, 255)
 
-out = provinceMap.generateImage(colormap, defaultLandColor=(63, 63, 63))
-pyradox.image.saveUsingPalette(out, 'out/blank_map.png')
+out = province_map.generate_image(colormap, default_land_color=(63, 63, 63))
+pyradox.image.save_using_palette(out, 'out/blank_map.png')

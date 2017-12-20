@@ -7,23 +7,23 @@ import pyradox.struct
 import pyradox.txt
 import pyradox.wiki
 
-from unitstats import computeUnitType, computeUnitName
+from unitstats import compute_unit_type, compute_unit_name
 
-units = load.unit.getUnits()["sub_units"]
+units = load.unit.get_units()["sub_units"]
 
-terrains = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
+terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
-landTerrainKeys = [key for key, value in terrains.items() if "movement_cost" in value and not value["is_water"]]
+land_terrain_keys = [key for key, value in terrains.items() if "movement_cost" in value and not value["is_water"]]
 
-def computeIsSupport(unit):
+def compute_is_support(unit):
     return unit["group"] == "support"
 
-def computeUnitTerrainStat(unit, terrainKey, statKey):
-    if terrainKey in unit:
-        return unit[terrainKey][statKey] or 0.0
+def compute_unit_terrain_stat(unit, terrain_key, stat_key):
+    if terrain_key in unit:
+        return unit[terrain_key][stat_key] or 0.0
     return 0.0
 
-def coloredPercentString(x):
+def colored_percent_string(x):
     if x > 0.0:
         return "{{green|%+d%%}}" % round(x * 100.0)
     elif x < 0.0:
@@ -31,73 +31,73 @@ def coloredPercentString(x):
     else:
         return ""
 
-def computeUnitStatFunction(terrainKey, statKey):
-    if terrainKey in terrains and "units" in terrains[terrainKey]:
-        baseModifier = terrains[terrainKey]["units"][statKey] or 0.0
+def compute_unit_stat_function(terrain_key, stat_key):
+    if terrain_key in terrains and "units" in terrains[terrain_key]:
+        base_modifier = terrains[terrain_key]["units"][stat_key] or 0.0
     else:
-        baseModifier = 0.0
-    def resultFunction(unitKey, unit):
-        result = computeUnitTerrainStat(unit, terrainKey, statKey)
-        return coloredPercentString(result)
-    return resultFunction
+        base_modifier = 0.0
+    def result_function(unit_key, unit):
+        result = compute_unit_terrain_stat(unit, terrain_key, stat_key)
+        return colored_percent_string(result)
+    return result_function
 
-def computeSmallRiverStatFunction(statKey):
-    if statKey == "attack": baseModifier = -0.3
-    elif statKey == "movement": baseModifier = -0.25
-    else: baseModifier = 0.0
-    def resultFunction(unitKey, unit):
-        result = computeUnitTerrainStat(unit, "river", statKey)
-        # if statKey != "defence": result = min(result, 0)
-        return coloredPercentString(result)
-    return resultFunction
+def compute_small_river_stat_function(stat_key):
+    if stat_key == "attack": base_modifier = -0.3
+    elif stat_key == "movement": base_modifier = -0.25
+    else: base_modifier = 0.0
+    def result_function(unit_key, unit):
+        result = compute_unit_terrain_stat(unit, "river", stat_key)
+        # if stat_key != "defence": result = min(result, 0)
+        return colored_percent_string(result)
+    return result_function
 
-def computeLargeRiverStatFunction(statKey):
-    if statKey == "attack": baseModifier = -0.6
-    elif statKey == "movement": baseModifier = -0.5
-    else: baseModifier = 0.0
-    def resultFunction(unitKey, unit):
-        result = computeUnitTerrainStat(unit, "river", statKey)
-        # if statKey != "defence": result = min(result, 0)
-        return coloredPercentString(result)
-    return resultFunction
+def compute_large_river_stat_function(stat_key):
+    if stat_key == "attack": base_modifier = -0.6
+    elif stat_key == "movement": base_modifier = -0.5
+    else: base_modifier = 0.0
+    def result_function(unit_key, unit):
+        result = compute_unit_terrain_stat(unit, "river", stat_key)
+        # if stat_key != "defence": result = min(result, 0)
+        return colored_percent_string(result)
+    return result_function
 
-def computeAmphibiousStatFunction(statKey):
-    if statKey == "attack": baseModifier = -0.7
-    else: baseModifier = 0.0
-    def resultFunction(unitKey, unit):
-        result = computeUnitTerrainStat(unit, "amphibious", statKey)
-        # if statKey != "defence": result = min(result, 0)
-        return coloredPercentString(result)
-    return resultFunction
+def compute_amphibious_stat_function(stat_key):
+    if stat_key == "attack": base_modifier = -0.7
+    else: base_modifier = 0.0
+    def result_function(unit_key, unit):
+        result = compute_unit_terrain_stat(unit, "amphibious", stat_key)
+        # if stat_key != "defence": result = min(result, 0)
+        return colored_percent_string(result)
+    return result_function
 
-def makeColumns(statKey, includeLast = True):
+def make_columns(stat_key, include_last = True):
     result = (
-        [("Unit", computeUnitName),
-         ("Type", lambda k, v: "Support" if computeIsSupport(v) else "Combat"),
+        [("Unit", compute_unit_name),
+         ("Type", lambda k, v: "Support" if compute_is_support(v) else "Combat"),
          ] +
-        [(terrainKey.title(), computeUnitStatFunction(terrainKey, statKey), None) for terrainKey in landTerrainKeys] +
+        [(terrain_key.title(), compute_unit_stat_function(terrain_key, stat_key), None) for terrain_key in land_terrain_keys] +
         [
-            ("Small river", computeSmallRiverStatFunction(statKey), None),
-            ("Large river", computeLargeRiverStatFunction(statKey), None)])
-    if includeLast:
+            ("Small river", compute_small_river_stat_function(stat_key), None),
+            ("Large river", compute_large_river_stat_function(stat_key), None)])
+    if include_last:
         result += [
-            ("Amphibious", computeAmphibiousStatFunction(statKey), None),
-            ("Fort", computeUnitStatFunction("fort", statKey), None)]
+            ("Amphibious", compute_amphibious_stat_function(stat_key), None),
+            ("Fort", compute_unit_stat_function("fort", stat_key), None)]
     return result
 
 file = open("out/unit_terrain.txt", "w")
 
 file.write("=== Attack ===\n")
-file.write(pyradox.wiki.makeWikitable(units, makeColumns("attack"),
-                                      filterFunction = lambda k, v: computeUnitType(v) == "land",
-                                      sortFunction = lambda item: computeUnitName(item[0])))
+file.write(pyradox.wiki.make_wikitable(units, make_columns("attack"),
+                                      filter_function = lambda k, v: compute_unit_type(v) == "land",
+                                      sort_function = lambda item: compute_unit_name(item[0])))
 file.write("=== Defense ===\n")
-file.write(pyradox.wiki.makeWikitable(units, makeColumns("defence"),
-                                      filterFunction = lambda k, v: computeUnitType(v) == "land",
-                                      sortFunction = lambda item: computeUnitName(item[0])))
+file.write(pyradox.wiki.make_wikitable(units, make_columns("defence"),
+                                      filter_function = lambda k, v: compute_unit_type(v) == "land",
+                                      sort_function = lambda item: compute_unit_name(item[0])))
 file.write("=== Movement ===\n")
-file.write(pyradox.wiki.makeWikitable(units, makeColumns("movement"),
-                                      filterFunction = lambda k, v: computeUnitType(v) == "land",
-                                      sortFunction = lambda item: computeUnitName(item[0])))
+file.write(pyradox.wiki.make_wikitable(units, make_columns("movement"),
+                                      filter_function = lambda k, v: compute_unit_type(v) == "land",
+                                      sort_function = lambda item: compute_unit_name(item[0])))
 
 file.close()

@@ -1,8 +1,8 @@
 import pyradox.load
 
-parseTechs, getTechs = pyradox.load.loadFunctions('HoI3', 'technologies', 'technologies', mode="merge")
+parse_techs, get_techs = pyradox.load.load_functions('HoI3', 'technologies', 'technologies', mode="merge")
 
-def getTechLevel(tech, year):
+def get_tech_level(tech, year):
     if year < tech["start_year"]: return 0
     elif "max_level" not in tech.keys(): return 1
     else:

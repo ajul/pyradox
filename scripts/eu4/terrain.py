@@ -5,18 +5,18 @@ import pyradox.worldmap
 import os
 from PIL import Image
 
-provinceMap = pyradox.worldmap.ProvinceMap()
-terrainMapImage = Image.open('in/terrain.png')
-terrainTXT = pyradox.txt.parseFile(os.path.join(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'terrain.txt')))
+province_map = pyradox.worldmap.ProvinceMap()
+terrain_map_image = Image.open('in/terrain.png')
+terrain_txt = pyradox.txt.parse_file(os.path.join(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'terrain.txt')))
 
-terrainByColor = {}
+terrain_by_color = {}
 
-for terrainName, terrain in terrainTXT['categories'].items():
+for terrain_name, terrain in terrain_txt['categories'].items():
     if 'color' in terrain:
         color = tuple(terrain['color'])
-        terrainByColor[color] = (terrainName, terrain)
+        terrain_by_color[color] = (terrain_name, terrain)
 
-def getProvinceTerrain(provinceID):
-    position = provinceMap.positions[provinceID]
-    color = terrainMapImage.getpixel(position)
-    return terrainByColor[tuple(color)]
+def get_province_terrain(province_id):
+    position = province_map.positions[province_id]
+    color = terrain_map_image.getpixel(position)
+    return terrain_by_color[tuple(color)]

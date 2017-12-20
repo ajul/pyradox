@@ -12,72 +12,72 @@ from PIL import Image
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'), verbose=False)
-supplyAreas = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'map', 'supplyareas'), verbose=False)
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'), verbose=False)
+supply_areas = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'map', 'supplyareas'), verbose=False)
 
-statesByID = {state['id'] : state for state in states.values()}
+states_by_id = {state['id'] : state for state in states.values()}
 
-# supplyAreaID -> provinceIDs
-supplyAreaProvinces = {}
-supplyAreaLocalSupply = {}
-supplyAreaTransport = {}
+# supply_area_id -> province_id_s
+supply_area_provinces = {}
+supply_area_local_supply = {}
+supply_area_transport = {}
 
-for supplyArea in supplyAreas.values():
-    supplyAreaProvinces[supplyArea['id']] = []
+for supply_area in supply_areas.values():
+    supply_area_provinces[supply_area['id']] = []
     
-    totalInfrastructure = 0
-    totalVPSupply = 0
-    totalNavalBase = 0
+    total_infrastructure = 0
+    total__vps_upply = 0
+    total_naval_base = 0
     
-    for stateID in supplyArea.findAll('states'):
-        state = statesByID[stateID]
+    for state_id in supply_area.find_all('states'):
+        state = states_by_id[state_id]
         if 'buildings' in state['history']:
-            totalInfrastructure += state['history']['buildings']['infrastructure']
+            total_infrastructure += state['history']['buildings']['infrastructure']
             for k, v in state['history']['buildings'].items():
                 if isinstance(k, int):
-                    totalNavalBase += v['naval_base'] or 0
+                    total_naval_base += v['naval_base'] or 0
         
-        for provinceID in state.findAll('provinces'):
-            supplyAreaProvinces[supplyArea['id']].append(provinceID)
+        for province_id in state.find_all('provinces'):
+            supply_area_provinces[supply_area['id']].append(province_id)
 
-        for _, vpValue in state['history'].findAll('victory_points', tupleLength = 2):
-            totalVPSupply += math.floor(vpValue * 0.1 + 1)
+        for _, vp_value in state['history'].find_all('victory_points', tuple_length = 2):
+            total__vps_upply += math.floor(vp_value * 0.1 + 1)
             
-    averageInfrastructure = totalInfrastructure / supplyArea.count('states')
-    infrastructureTransport = 2.0 * (averageInfrastructure ** 2.0)
-    navalTransport = 3.0 * totalNavalBase
-    transport = max(infrastructureTransport, navalTransport)
+    average_infrastructure = total_infrastructure / supply_area.count('states')
+    infrastructure_transport = 2.0 * (average_infrastructure ** 2.0)
+    naval_transport = 3.0 * total_naval_base
+    transport = max(infrastructure_transport, naval_transport)
     
-    localSupply = supplyArea['value'] + totalVPSupply
-    supplyAreaLocalSupply[supplyArea['id']] = localSupply
-    supplyAreaTransport[supplyArea['id']] = transport
+    local_supply = supply_area['value'] + total__vps_upply
+    supply_area_local_supply[supply_area['id']] = local_supply
+    supply_area_transport[supply_area['id']] = transport
 
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_basedir('HoI4'))
 
 # provinces -> state id
-groupsLocal = {}
-colormapLocal = {}
-groupsTransport = {}
-colormapTransport = {}
+groups_local = {}
+colormap_local = {}
+groups_transport = {}
+colormap_transport = {}
 
-for supplyAreaID, provinces in supplyAreaProvinces.items():
-    localSupply = supplyAreaLocalSupply[supplyAreaID]
-    transport = supplyAreaTransport[supplyAreaID]
+for supply_area_id, provinces in supply_area_provinces.items():
+    local_supply = supply_area_local_supply[supply_area_id]
+    transport = supply_area_transport[supply_area_id]
     k = []
-    for provinceID in provinces:
-        if not provinceMap.isWaterProvince(provinceID):
-            k.append(provinceID)
-            colormapLocal[provinceID] = pyradox.image.colormapRedGreen(localSupply / 25)
-            colormapTransport[provinceID] = pyradox.image.colormapRedGreen(transport / 100)
+    for province_id in provinces:
+        if not province_map.is_water_province(province_id):
+            k.append(province_id)
+            colormap_local[province_id] = pyradox.image.colormap_red_green(local_supply / 25)
+            colormap_transport[province_id] = pyradox.image.colormap_red_green(transport / 100)
     k = tuple(x for x in k)
-    groupsLocal[k] = '%d' % localSupply
-    groupsTransport[k] = '%d' % transport
+    groups_local[k] = '%d' % local_supply
+    groups_transport[k] = '%d' % transport
 
-localImage = provinceMap.generateImage(colormapLocal, defaultLandColor=(255, 255, 255), edgeColor=(63, 63, 63), edgeGroups = groupsLocal.keys())
-provinceMap.overlayText(localImage, groupsLocal, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
-localImage.save('out/local_supply_map.png')
+local_image = province_map.generate_image(colormap_local, default_land_color=(255, 255, 255), edge_color=(63, 63, 63), edge_groups = groups_local.keys())
+province_map.overlay_text(local_image, groups_local, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
+local_image.save('out/local_supply_map.png')
 
-transportImage = provinceMap.generateImage(colormapTransport, defaultLandColor=(255, 255, 255), edgeColor=(63, 63, 63), edgeGroups = groupsTransport.keys())
-provinceMap.overlayText(transportImage, groupsTransport, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
-transportImage.save('out/transport_supply_map.png')
+transport_image = province_map.generate_image(colormap_transport, default_land_color=(255, 255, 255), edge_color=(63, 63, 63), edge_groups = groups_transport.keys())
+province_map.overlay_text(transport_image, groups_transport, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
+transport_image.save('out/transport_supply_map.png')
 

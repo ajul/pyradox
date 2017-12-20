@@ -10,78 +10,78 @@ import json
 
 import unitstats
 
-allYears = pyradox.struct.Tree()
+all_years = pyradox.struct.Tree()
 
-unitType = 'land'
+unit_type = 'land'
 
-for year in unitstats.unitTypeYears[unitType]:
-    units = unitstats.unitsAtYear(year)
-    allYears += units
+for year in unitstats.unit_type_years[unit_type]:
+    units = unitstats.units_at_year(year)
+    all_years += units
 
-with open("out/%s_units_by_year.txt" % unitType, "w") as outFile:
-    columns = [("Unit", unitstats.computeUnitName)] + unitstats.baseColumns[unitType] + [("Unit", unitstats.computeUnitName)]
-    tables = {year : pyradox.struct.Tree() for year in unitstats.unitTypeYears[unitType]}
-    for unitKey, unit in allYears.items():
-        if unit["year"] in unitstats.unitTypeYears[unitType] and unitstats.computeUnitType(unit) == unitType and unitstats.isAvailiable(unit):
-            tables[unit["year"]].append(unitKey, unit)
-    for year in unitstats.unitTypeYears[unitType]:
-        outFile.write("== %d ==\n" % year)
-        outFile.write(pyradox.wiki.makeWikitable(tables[year], columns,
-                                                 sortFunction = lambda item: unitstats.computeUnitName(item[0])))
+with open("out/%s_units_by_year.txt" % unit_type, "w") as out_file:
+    columns = [("Unit", unitstats.compute_unit_name)] + unitstats.base_columns[unit_type] + [("Unit", unitstats.compute_unit_name)]
+    tables = {year : pyradox.struct.Tree() for year in unitstats.unit_type_years[unit_type]}
+    for unit_key, unit in all_years.items():
+        if unit["year"] in unitstats.unit_type_years[unit_type] and unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit):
+            tables[unit["year"]].append(unit_key, unit)
+    for year in unitstats.unit_type_years[unit_type]:
+        out_file.write("== %d ==\n" % year)
+        out_file.write(pyradox.wiki.make_wikitable(tables[year], columns,
+                                                 sort_function = lambda item: unitstats.compute_unit_name(item[0])))
 
-with open("out/%s_units_by_unit.txt" % unitType, "w") as outFile:
-    columns = [("Year", "%(year)d")] + unitstats.baseColumns[unitType]
+with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
+    columns = [("Year", "%(year)d")] + unitstats.base_columns[unit_type]
     tables = {}
-    for unitKey, unit in allYears.items():
-        if unit["year"] not in unitstats.unitTypeYears[unitType]: continue
-        if unitstats.computeUnitType(unit) == unitType and unitstats.isAvailiable(unit) and unit["last_upgrade"] == unit["year"]:
-            if unitKey not in tables: tables[unitKey] = pyradox.struct.Tree()
-            tables[unitKey].append(unit["year"], unit)
-    for unitKey, unitYears in sorted(tables.items(), key=lambda item: unitstats.computeUnitName(item[0])):
-        unitName = unitstats.computeUnitName(unitKey)
-        outFile.write("== %s ==\n" % unitName)
-        outFile.write(pyradox.wiki.makeWikitable(unitYears, columns, sortable=False))
+    for unit_key, unit in all_years.items():
+        if unit["year"] not in unitstats.unit_type_years[unit_type]: continue
+        if unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit) and unit["last_upgrade"] == unit["year"]:
+            if unit_key not in tables: tables[unit_key] = pyradox.struct.Tree()
+            tables[unit_key].append(unit["year"], unit)
+    for unit_key, unit_years in sorted(tables.items(), key=lambda item: unitstats.compute_unit_name(item[0])):
+        unit_name = unitstats.compute_unit_name(unit_key)
+        out_file.write("== %s ==\n" % unit_name)
+        out_file.write(pyradox.wiki.make_wikitable(unit_years, columns, sortable=False))
 
 
 
-jsonOut = open("out/%s_years.json" % unitType,"w")
-dataForJSON = {year : {} for year in unitstats.unitTypeYears[unitType]}
-for unitKey, unit in allYears.items():
-    if unit["year"] in unitstats.unitTypeYears[unitType] and unitstats.computeUnitType(unit) == unitType and unitstats.isAvailiable(unit):
-        dataForJSON[unit["year"]][unitKey] = {}
-        for column in unitstats.baseColumns[unitType] :
-            keyName, contents = column[0], column[1]
+json_out = open("out/%s_years.json" % unit_type,"w")
+data_for_json = {year : {} for year in unitstats.unit_type_years[unit_type]}
+for unit_key, unit in all_years.items():
+    if unit["year"] in unitstats.unit_type_years[unit_type] and unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit):
+        data_for_json[unit["year"]][unit_key] = {}
+        for column in unitstats.base_columns[unit_type] :
+            key_name, contents = column[0], column[1]
             if callable(contents):
                 try:
-                    contentString = contents(unitKey, unit)
+                    content_string = contents(unit_key, unit)
                 except ZeroDivisionError:
-                    contentString = ''
+                    content_string = ''
             elif contents is None:
-                contentString = pyradox.format.humanString(key, True)
+                content_string = pyradox.format.human_string(key, True)
             else:
                 try:
-                    contentString = contents % unit
+                    content_string = contents % unit
                 except TypeError:
-                    contentString = ''
+                    content_string = ''
 
-            dataForJSON[unit["year"]][unitKey][keyName] = contentString
+            data_for_json[unit["year"]][unit_key][key_name] = content_string
 
-jsonOut.write(json.dumps(dataForJSON,indent=2,sort_keys=True))
+json_out.write(json.dumps(data_for_json,indent=2,sort_keys=True))
 
 #CSV output one file per year
 columns = []
-for column in unitstats.baseColumns[unitType] :
+for column in unitstats.base_columns[unit_type] :
     columns.append(column[0]);
 columns.sort()
-printColumns = ["Unit"] + columns
+print_columns = ["Unit"] + columns
 str = ","
-for year in dataForJSON:
-    csvOut = open("out/%s_%s.csv" % (unitType, year),"w")
-    csvOut.write(str.join(printColumns) + "\n")
-    if(len(dataForJSON[year].keys())):
-        for unit in sorted(dataForJSON[year]):
+for year in data_for_json:
+    csv_out = open("out/%s_%s.csv" % (unit_type, year),"w")
+    csv_out.write(str.join(print_columns) + "\n")
+    if(len(data_for_json[year].keys())):
+        for unit in sorted(data_for_json[year]):
             data = [unit]
             for column in columns:
-                data.append(dataForJSON[year][unit][column])
-            csvOut.write(str.join(data) + "\n")
+                data.append(data_for_json[year][unit][column])
+            csv_out.write(str.join(data) + "\n")
 

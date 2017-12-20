@@ -7,6 +7,6 @@ import pyradox
 import warnings
 
 warnings.simplefilter("ignore", pyradox.txt.ParseWarning)
-savetree = pyradox.parseFile('in/1820.eu4')
+savetree = pyradox.parse_file('in/1820.eu4')
 
-print(sum(x for x in savetree.findWalk("losses") if isinstance(x, int)))
+print(sum(x for x in savetree.find_walk("losses") if isinstance(x, int)))

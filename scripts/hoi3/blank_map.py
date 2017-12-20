@@ -7,10 +7,10 @@ import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
         
-provinceMap = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flipY = True)
+province_map = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flip_y = True)
 
 colormap = {}
 
-out = provinceMap.generateImage(colormap, defaultLandColor=(255, 255, 255))
-pyradox.image.saveUsingPalette(out, 'out/blank_map.png')
+out = province_map.generate_image(colormap, default_land_color=(255, 255, 255))
+pyradox.image.save_using_palette(out, 'out/blank_map.png')
 

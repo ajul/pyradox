@@ -1,4 +1,4 @@
 import sys
 sys.path.append("../..")
 import pyradox.config
-pyradox.config.setDefaultGame('HoI4')
+pyradox.config.set_default_game('HoI4')

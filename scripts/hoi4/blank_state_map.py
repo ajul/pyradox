@@ -9,18 +9,18 @@ import pyradox.image
 from PIL import Image
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'), verbose=False)
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'), verbose=False)
 
 # provinces -> state id
 groups = {}
 
 for state in states.values():
-    k = tuple(provinceID for provinceID in state.findAll('provinces'))
+    k = tuple(province_id for province_id in state.find_all('provinces'))
     groups[k] = str(state['id'])
 
 # Load the province map using the default location set in pyradox.config.
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_basedir('HoI4'))
 
-out = provinceMap.generateImage({}, defaultLandColor=(255, 255, 255), edgeGroups = groups.keys())
+out = province_map.generate_image({}, default_land_color=(255, 255, 255), edge_groups = groups.keys())
 
-pyradox.image.saveUsingPalette(out, 'out/blank_state_map.png')
+pyradox.image.save_using_palette(out, 'out/blank_state_map.png')

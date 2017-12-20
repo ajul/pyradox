@@ -8,14 +8,14 @@ import pyradox.image
 import pyradox.txt
 import pyradox.worldmap
 
-definitionCSV = os.path.join(pyradox.config.getBasedir('HoI4'), 'map', 'definition.csv')
-terrains = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
+definition_csv = os.path.join(pyradox.config.get_basedir('HoI4'), 'map', 'definition.csv')
+terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
-colorOverride = {
+color_override = {
     'desert' : (255, 63, 0), # more red to avoid confusion with plains
     }
 
-symbolOverride = {
+symbol_override = {
     'desert' : '⛭',
     'hills' : '△',
     'mountain' : '▲',
@@ -32,18 +32,18 @@ symbolOverride = {
 colormap = {}
 textmap = {}
 
-with open(definitionCSV) as definitionFile:
-    csvReader = csv.reader(definitionFile, delimiter = ';')
-    for row in csvReader:
-        provinceID = int(row[0])
-        terrainKey = row[6]
-        if terrainKey in colorOverride:
-            colormap[provinceID] = colorOverride[terrainKey]
+with open(definition_csv) as definition_file:
+    csv_reader = csv.reader(definition_file, delimiter = ';')
+    for row in csv_reader:
+        province_id = int(row[0])
+        terrain_key = row[6]
+        if terrain_key in color_override:
+            colormap[province_id] = color_override[terrain_key]
         else:
-            colormap[provinceID] = tuple(c for c in terrains[terrainKey]['color'])
-        textmap[provinceID] = symbolOverride[terrainKey]
+            colormap[province_id] = tuple(c for c in terrains[terrain_key]['color'])
+        textmap[province_id] = symbol_override[terrain_key]
 
-provinceMap = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.getBasedir('HoI4'))
-out = provinceMap.generateImage(colormap, defaultLandColor=(255, 255, 255))
-provinceMap.overlayText(out, textmap, fontfile = "unifont-8.0.01.ttf", fontsize = 16, antialias = False, defaultOffset = (4, -2))
-pyradox.image.saveUsingPalette(out, 'out/terrain_map.png')
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_basedir('HoI4'))
+out = province_map.generate_image(colormap, default_land_color=(255, 255, 255))
+province_map.overlay_text(out, textmap, fontfile = "unifont-8.0.01.ttf", fontsize = 16, antialias = False, default_offset = (4, -2))
+pyradox.image.save_using_palette(out, 'out/terrain_map.png')

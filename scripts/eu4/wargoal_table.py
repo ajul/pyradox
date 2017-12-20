@@ -7,15 +7,15 @@ import pyradox.format
 import pyradox.image
 import pyradox
 
-tree = pyradox.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'wargoal_types', '00_wargoal_types.txt'))
+tree = pyradox.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'wargoal_types', '00_wargoal_types.txt'))
 
-def leftColumns(wargoal, data, side = None):
+def left_columns(wargoal, data, side = None):
     result = '|-\n'
     if side is None:
-        result += '| %s\n' % pyradox.format.humanString(wargoal, True)
+        result += '| %s\n' % pyradox.format.human_string(wargoal, True)
     else:
-        result += '| %s (%s)\n' % (pyradox.format.humanString(wargoal, True), side)
-    result += '| %s\n' % pyradox.format.humanString(data["type"], True)
+        result += '| %s (%s)\n' % (pyradox.format.human_string(wargoal, True), side)
+    result += '| %s\n' % pyradox.format.human_string(data["type"], True)
 
     if 'allow_leader_change' in data:
         result += '| {{Icon|yes}}\n'
@@ -24,16 +24,16 @@ def leftColumns(wargoal, data, side = None):
 
     return result
 
-def rightColumns(wargoal, poData):
+def right_columns(wargoal, po_data):
     result = ''
-    result += '| %d%%\n' % (poData['badboy_factor'] * 100)
-    result += '| %d%%\n' % (poData['prestige_factor'] * 100)
-    result += '| %d%%\n' % (poData['peace_cost_factor'] * 100)
+    result += '| %d%%\n' % (po_data['badboy_factor'] * 100)
+    result += '| %d%%\n' % (po_data['prestige_factor'] * 100)
+    result += '| %d%%\n' % (po_data['peace_cost_factor'] * 100)
 
     result += '|'
-    for offer, value in poData.items():
+    for offer, value in po_data.items():
         if offer[:3] == 'po_' and value is True:
-            result += '\n* %s' % pyradox.format.humanString(offer[3:], True)
+            result += '\n* %s' % pyradox.format.human_string(offer[3:], True)
     result += '\n'
     return result
 
@@ -41,19 +41,19 @@ w = '{|class = "wikitable sortable"\n'
 w += '! Wargoal !! Type !! Warleader<br/>can change !! Aggressive<br/>Expansion !! Prestige !! Cost !! Peace offers\n'
 for wargoal, data in tree.items():
     if 'attacker' in data:
-        attackerRight = rightColumns(wargoal, data['attacker'])
-        defenderRight = rightColumns(wargoal, data['defender'])
-        if attackerRight == defenderRight:
-            w += leftColumns(wargoal, data)
-            w += attackerRight
+        attacker_right = right_columns(wargoal, data['attacker'])
+        defender_right = right_columns(wargoal, data['defender'])
+        if attacker_right == defender_right:
+            w += left_columns(wargoal, data)
+            w += attacker_right
         else:
-            w += leftColumns(wargoal, data, 'attacker')
-            w += attackerRight
-            w += leftColumns(wargoal, data, 'defender')
-            w += defenderRight
+            w += left_columns(wargoal, data, 'attacker')
+            w += attacker_right
+            w += left_columns(wargoal, data, 'defender')
+            w += defender_right
     else:
-        w += leftColumns(wargoal, data)
-        w += rightColumns(wargoal, data)
+        w += left_columns(wargoal, data)
+        w += right_columns(wargoal, data)
 
 w += '|}\n'
 print(w)

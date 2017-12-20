@@ -14,37 +14,37 @@ import load.province
 import scipy.stats
 # import province_costs
 
-provinces = load.province.getProvinces()
+provinces = load.province.get_provinces()
 
-def provinceBaseTax(provinceID, province):
+def province_base_tax(province_id, province):
     if 'base_tax' in province and province['base_tax'] > 0:
         return province['base_tax']
     else:
         return None
 
-def provinceBaseProduction(provinceID, province):
+def province_base_production(province_id, province):
     if 'base_production' in province and province['base_production'] > 0:
         return province['base_production']
     else:
         return None
 
-def provinceBaseManpower(provinceID, province):
+def province_base_manpower(province_id, province):
     if 'base_manpower' in province and province['base_manpower'] > 0:
         return province['base_manpower']
     else:
         return None
 
-def provinceBaseDevelopment(provinceID, province):
+def province_base_development(province_id, province):
     result = (
-        (provinceBaseTax(provinceID, province) or 0) +
-        (provinceBaseProduction(provinceID, province) or 0) +
-        (provinceBaseManpower(provinceID, province) or 0))
+        (province_base_tax(province_id, province) or 0) +
+        (province_base_production(province_id, province) or 0) +
+        (province_base_manpower(province_id, province) or 0))
     if result > 0:
         return result
     else:
         return None
 
-def provinceCost(provinceID, province):
+def province_cost(province_id, province):
     cost = 0
     if 'base_tax' in province:
         cost += province['base_tax'] * 0.5
@@ -56,9 +56,9 @@ def provinceCost(provinceID, province):
         cost += province['base_manpower'] * 0.5
 
     if cost > 0:
-        _, terrainData = terrain.getProvinceTerrain(provinceID)
-        if 'nation_designer_cost_multiplier' in terrainData:
-            cost *= terrainData['nation_designer_cost_multiplier']
+        _, terrain_data = terrain.get_province_terrain(province_id)
+        if 'nation_designer_cost_multiplier' in terrain_data:
+            cost *= terrain_data['nation_designer_cost_multiplier']
 
     if 'trade_goods' in province and province['trade_goods'] == 'gold':
         cost += province['base_production'] * 3.0
@@ -71,56 +71,56 @@ def provinceCost(provinceID, province):
     else:
         return None
     
-def nativePopulation(provinceID, province):
+def native_population(province_id, province):
     if 'native_size' in province:
         return province['native_size'] / 10.0
     else:
         return None
 
-def nativeAggressiveness(provinceID, province):
+def native_aggressiveness(province_id, province):
     if 'native_size' in province:
         return province['native_hostileness'] or 0
     else:
         return None
 
-rankMethod = 'dense'
+rank_method = 'dense'
 
-def generateMap(provinceFunction, filename, forceMin = None):
-    numberMap = {int(re.match('\d+', filename).group(0)) :
-                 provinceFunction(int(re.match('\d+', filename).group(0)), province.atDate(pyradox.primitive.Date('1444.11.11')))
+def generate_map(province_function, filename, force_min = None):
+    number_map = {int(re.match('\d+', filename).group(0)) :
+                 province_function(int(re.match('\d+', filename).group(0)), province.at_date(pyradox.primitive.Date('1444.11.11')))
                  for filename, province in provinces.items()
-                 if provinceFunction(int(re.match('\d+', filename).group(0)), province) is not None}
+                 if province_function(int(re.match('\d+', filename).group(0)), province) is not None}
     
-    if forceMin is None:
-        forceMin = min(numberMap.values())
+    if force_min is None:
+        force_min = min(number_map.values())
 
-    effectiveNumbers = [max(x, forceMin) for x in numberMap.values()]
+    effective_numbers = [max(x, force_min) for x in number_map.values()]
         
-    ranks = scipy.stats.rankdata(effectiveNumbers, method = rankMethod)
-    minRank = min(ranks)
-    maxRank = max(ranks)
-    rangeRank = maxRank - minRank
+    ranks = scipy.stats.rankdata(effective_numbers, method = rank_method)
+    min_rank = min(ranks)
+    max_rank = max(ranks)
+    range_rank = max_rank - min_rank
     colors = {}
-    for number, rank in zip(numberMap.values(), ranks):
-        if number < forceMin:
-            colors[number] = pyradox.image.colormapBlueRed(0.0)
+    for number, rank in zip(number_map.values(), ranks):
+        if number < force_min:
+            colors[number] = pyradox.image.colormap_blue_red(0.0)
         else:
-            colors[number] = pyradox.image.colormapBlueRed((rank - minRank) / rangeRank)
-    colorMap = {provinceID : colors[number] for provinceID, number in numberMap.items()}
-    textMap = {provinceID : ('%d' % round(number)) for provinceID, number in numberMap.items()}
+            colors[number] = pyradox.image.colormap_blue_red((rank - min_rank) / range_rank)
+    color_map = {province_id : colors[number] for province_id, number in number_map.items()}
+    text_map = {province_id : ('%d' % round(number)) for province_id, number in number_map.items()}
 
-    provinceMap = pyradox.worldmap.ProvinceMap()
-    image = provinceMap.generateImage(colorMap)
-    provinceMap.overlayText(image, textMap, fontfile = "tahoma.ttf", defaultFontColor=(255, 255, 255), fontsize = 9, antialias = False)
-    pyradox.image.saveUsingPalette(image, filename)
+    province_map = pyradox.worldmap.ProvinceMap()
+    image = province_map.generate_image(color_map)
+    province_map.overlay_text(image, text_map, fontfile = "tahoma.ttf", default_font_color=(255, 255, 255), fontsize = 9, antialias = False)
+    pyradox.image.save_using_palette(image, filename)
         
-generateMap(provinceBaseTax, 'out/base_tax_map.png', forceMin = 1.0)
-generateMap(provinceBaseProduction, 'out/base_production_map.png', forceMin = 1.0)
-generateMap(provinceBaseManpower, 'out/base_manpower_map.png', forceMin = 1.0)
-generateMap(provinceBaseDevelopment, 'out/base_development_map.png', forceMin = 3.0)
-generateMap(provinceCost, 'out/custom_nation_cost_map.png', forceMin = 1.0)
-# generateMap(nativePopulation, 'out/native_population_map.png')
-generateMap(nativeAggressiveness, 'out/native_aggressiveness_map.png')
+generate_map(province_base_tax, 'out/base_tax_map.png', force_min = 1.0)
+generate_map(province_base_production, 'out/base_production_map.png', force_min = 1.0)
+generate_map(province_base_manpower, 'out/base_manpower_map.png', force_min = 1.0)
+generate_map(province_base_development, 'out/base_development_map.png', force_min = 3.0)
+generate_map(province_cost, 'out/custom_nation_cost_map.png', force_min = 1.0)
+# generate_map(native_population, 'out/native_population_map.png')
+generate_map(native_aggressiveness, 'out/native_aggressiveness_map.png')
 
 
 

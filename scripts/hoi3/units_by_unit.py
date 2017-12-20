@@ -8,28 +8,28 @@ import pyradox.wiki
 from unitstats import *
 
 files = {}
-for unitType in baseColumns.keys():
-    files[unitType] = open("out/%s_units_by_unit.txt" % unitType, "w")
+for unit_type in base_columns.keys():
+    files[unit_type] = open("out/%s_units_by_unit.txt" % unit_type, "w")
 
-unitData = {}
+unit_data = {}
 
 for year in range(1936, 1948):
-    unitData[year] = unitsAtYear(year)
+    unit_data[year] = units_at_year(year)
 
-byUnit = pyradox.struct.Tree()
+by_unit = pyradox.struct.Tree()
 
-for year, data in unitData.items():
+for year, data in unit_data.items():
     for unit, stats in data.items():
-        if unit not in byUnit.keys(): byUnit[unit] = pyradox.struct.Tree()
-        byUnit[unit][year] = stats
+        if unit not in by_unit.keys(): by_unit[unit] = pyradox.struct.Tree()
+        by_unit[unit][year] = stats
 
-for unitType, unitFile in files.items():
-    for unit, data in byUnit.items():
-        if data[1936]["type"] != unitType: continue
-        unitFile.write("== %s ==\n" % pyradox.format.humanString(unit, True))
-        unitFile.write(pyradox.wiki.makeWikitable(data, baseColumns[unitType], lambda k, v: v["active"]))
-        unitFile.write("=== Derived statistics ===\n")
-        unitFile.write(pyradox.wiki.makeWikitable(data, derivedColumns[unitType], lambda k, v: v["active"]))
+for unit_type, unit_file in files.items():
+    for unit, data in by_unit.items():
+        if data[1936]["type"] != unit_type: continue
+        unit_file.write("== %s ==\n" % pyradox.format.human_string(unit, True))
+        unit_file.write(pyradox.wiki.make_wikitable(data, base_columns[unit_type], lambda k, v: v["active"]))
+        unit_file.write("=== Derived statistics ===\n")
+        unit_file.write(pyradox.wiki.make_wikitable(data, derived_columns[unit_type], lambda k, v: v["active"]))
 
-for unitFile in files.values():
-    unitFile.close()
+for unit_file in files.values():
+    unit_file.close()

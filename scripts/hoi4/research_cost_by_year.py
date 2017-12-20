@@ -9,28 +9,28 @@ import numpy
 import matplotlib.pyplot as plt
 
 years = [0] + list(range(1936, 1951, 1))
-researchDays = numpy.zeros_like(years)
+research_days = numpy.zeros_like(years)
 
-techs = load.tech.getTechs()["technologies"]
-for techKey, tech in techs.items():
+techs = load.tech.get_techs()["technologies"]
+for tech_key, tech in techs.items():
     if not isinstance(tech, pyradox.struct.Tree): continue
     if tech['doctrine']: continue
-    startYear = tech['start_year'] or 0
-    if startYear < years[1]:
-        startYear = 0
-    yearIndex = years.index(startYear)
-    researchDays[yearIndex] += tech['research_cost']
+    start_year = tech['start_year'] or 0
+    if start_year < years[1]:
+        start_year = 0
+    year_index = years.index(start_year)
+    research_days[year_index] += tech['research_cost']
 
 
 figsize = (16, 9)
 dpi = 120
-barWidth = 0.8
+bar_width = 0.8
 
 fig = plt.figure(figsize=figsize)
 ax = plt.subplot(111)
 
 x = numpy.arange(len(years))
-bars = ax.bar(x - barWidth / 2, researchDays, barWidth, color = 'b')
+bars = ax.bar(x - bar_width / 2, research_days, bar_width, color = 'b')
 
 ax.set_title('Total research cost by tech year (no doctrines)')
 ax.set_xlim(-1, len(years))

@@ -5,17 +5,17 @@ import copy
 import load.tech
 import json
 
-defaultYear = 1918
+default_year = 1918
 
-techs = load.tech.getTechs()["technologies"]
+techs = load.tech.get_techs()["technologies"]
 
 #
 # folders = [ "land_doctrine_folder","naval_doctrine_folder","air_doctrine_folder" ]
 folders = [ "land_doctrine_folder" ]
 
-data = techs.rawData();
+data = techs.raw_data();
 
-techPaths = {};
+tech_paths = {};
 
 children = {};
 parents = {};
@@ -24,29 +24,29 @@ doctrines = {};
 
 for folder in folders :
     doctrines[folder] = {};
-    techPaths[folder] = {};
-    for techKey in data :
-        tech=data[techKey]
+    tech_paths[folder] = {};
+    for tech_key in data :
+        tech=data[tech_key]
         if(type(tech) is dict):
             if( 'folder' in tech):
-                techFolder = tech["folder"]
-                isDoctrine = False
-                if(type(techFolder) is dict):
-                    if techFolder["name"] == folder :
-                        isDoctrine = True
+                tech_folder = tech["folder"]
+                is_doctrine = False
+                if(type(tech_folder) is dict):
+                    if tech_folder["name"] == folder :
+                        is_doctrine = True
                 #else :
                     #Skipping there are no doctrines in multiple folders
-                if(isDoctrine) :
-                    doctrines[folder][techKey] = tech
+                if(is_doctrine) :
+                    doctrines[folder][tech_key] = tech
                     if( 'path' in tech ):
-                        if(not techKey in children):
-                            children[techKey] = {}
+                        if(not tech_key in children):
+                            children[tech_key] = {}
                         paths = tech["path"];
                         if(type(paths) is dict):
                             paths = [paths]
                         for path in paths :
-                            children[techKey][path["leads_to_tech"]] = 1
-                            parents[path["leads_to_tech"]] = techKey
+                            children[tech_key][path["leads_to_tech"]] = 1
+                            parents[path["leads_to_tech"]] = tech_key
 
 
 output = {};
@@ -61,8 +61,8 @@ ignore = {
     "xor" : 1,
 }
 
-def processNode(counter,doctrine,techKey,path,effects) :
-    tech = doctrines[doctrine][techKey];
+def process_node(counter,doctrine,tech_key,path,effects) :
+    tech = doctrines[doctrine][tech_key];
     for key in tech :
         if(not key in ignore):
             if(not key in effects):
@@ -71,37 +71,37 @@ def processNode(counter,doctrine,techKey,path,effects) :
     if(not counter in output[doctrine]):
         output[doctrine][counter] = []
     output[doctrine][counter].append([path,effects])
-    if(techKey in children) :
-        for child in children[techKey]:
-#             if(not "xor" in doctrines[doctrine][child] and ( len(children[techKey]) > 1 )   ) :
+    if(tech_key in children) :
+        for child in children[tech_key]:
+#             if(not "xor" in doctrines[doctrine][child] and ( len(children[tech_key]) > 1 )   ) :
                 #If we are not in xor mode (naval doctrine) we want to gather all things on same level and merge
 #                print(child)
 #            else :
-                newPath = copy.deepcopy(path)
-                newEffects = copy.deepcopy(effects)
-                if(len(children[techKey]) > 1):
-                    newPath.append(child)
-                processNode(counter+1,doctrine,child,newPath,newEffects)
+                new_path = copy.deepcopy(path)
+                new_effects = copy.deepcopy(effects)
+                if(len(children[tech_key]) > 1):
+                    new_path.append(child)
+                process_node(counter+1,doctrine,child,new_path,new_effects)
 
 def merge(existing,new):
-    newType = type(new)
-    existingType = type(existing)
-    if(newType is int or newType is float) :
+    new_type = type(new)
+    existing_type = type(existing)
+    if(new_type is int or new_type is float) :
         if(existing is None):
             existing = 0
         return existing+new
-    elif(newType is list):
+    elif(new_type is list):
         if(existing is None):
             existing = []
         for value in new :
             existing.append(value)
         return existing
-    elif(newType is str):
+    elif(new_type is str):
         if(existing is None):
             existing = []
         existing.append(new);
         return existing;
-    elif(newType is dict):
+    elif(new_type is dict):
         if(existing is None):
             existing = {}
         for key in new :
@@ -110,7 +110,7 @@ def merge(existing,new):
             existing[key] = merge(existing[key],new[key])
         return existing
     else :
-        print(newType,new)
+        print(new_type,new)
 
     return None
 
@@ -118,9 +118,9 @@ def merge(existing,new):
 
 for doctrine in doctrines :
     output[doctrine] = {};
-    for techKey in doctrines[doctrine] :
-        if(not techKey in parents):
+    for tech_key in doctrines[doctrine] :
+        if(not tech_key in parents):
             #Lets start down this tree
-            processNode(0,doctrine,techKey,[techKey],{})
+            process_node(0,doctrine,tech_key,[tech_key],{})
 
 print(json.dumps(output["land_doctrine_folder"][4],indent=2,sort_keys=True))

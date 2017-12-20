@@ -2,42 +2,42 @@ import _initpath
 import load.tech
 import load.unit
 
-techs = load.tech.getTechs()
+techs = load.tech.get_techs()
 
-def unitsAtYear(year):
-    units = load.unit.getUnits()
+def units_at_year(year):
+    units = load.unit.get_units()
     
-    for unitKey, unitData in units.items():
-        if "active" not in unitData.keys(): unitData["active"] = True
-        unitData["num_upgrades"] = 0
+    for unit_key, unit_data in units.items():
+        if "active" not in unit_data.keys(): unit_data["active"] = True
+        unit_data["num_upgrades"] = 0
     
     for tech in techs.values():
-        level = load.tech.getTechLevel(tech, year)
+        level = load.tech.get_tech_level(tech, year)
         if level == 0: continue
         
-        for unitKey, effects in tech.items():
-            if unitKey == "activate_unit" and effects in units.keys():
+        for unit_key, effects in tech.items():
+            if unit_key == "activate_unit" and effects in units.keys():
                 units[effects]["active"] = True # activate unit
-            if unitKey not in units.keys(): continue
+            if unit_key not in units.keys(): continue
 
-            unitData = units[unitKey]
-            unitData["num_upgrades"] += level
+            unit_data = units[unit_key]
+            unit_data["num_upgrades"] += level
             
             for effect, amount in effects.items():
-                if effect not in unitData: continue
+                if effect not in unit_data: continue
                 if isinstance(amount, pyradox.struct.Tree): continue
-                unitData[effect] += level * amount
+                unit_data[effect] += level * amount
 
-    for unitKey, unitData in units.items():
-        multiplier = 1.00 + unitData["num_upgrades"] * 0.01
-        unitData["year"] = year
-        unitData["build_cost_ic"] *= multiplier
-        unitData["build_time"] *= multiplier
-        unitData["supply_consumption"] *= multiplier
-        unitData["fuel_consumption"] *= multiplier
+    for unit_key, unit_data in units.items():
+        multiplier = 1.00 + unit_data["num_upgrades"] * 0.01
+        unit_data["year"] = year
+        unit_data["build_cost_ic"] *= multiplier
+        unit_data["build_time"] *= multiplier
+        unit_data["supply_consumption"] *= multiplier
+        unit_data["fuel_consumption"] *= multiplier
     return units
 
-baseColumns = {
+base_columns = {
     "land" : (
         ("Unit", None),
         ("IC", "%(build_cost_ic).3f"),
@@ -122,58 +122,58 @@ baseColumns = {
         )
     }
 
-derivedColumns = {
+derived_columns = {
     "land" : (
         ("Year", "%(year)d"),
-        ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
-        ("Soft Att./kICd", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("k_ic_d", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
+        ("Soft Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Soft Att./MP", lambda k, v: '%0.3f' % (v["soft_attack"] / v["build_cost_manpower"])),
         ("Soft Att./Cons.", lambda k, v: '%0.3f' % (v["soft_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         
-        ("Hard Att./kICd", lambda k, v: '%0.3f' % (1000 * v["hard_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Hard Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["hard_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Hard Att./MP", lambda k, v: '%0.3f' % (v["hard_attack"] / v["build_cost_manpower"])),
         ("Hard Att./Cons.", lambda k, v: '%0.3f' % (v["hard_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     "naval" : (
         ("Year", "%(year)d"),
-        ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
+        ("k_ic_d", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
         
-        ("Sea Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sea Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Sea Att./MP", lambda k, v: '%0.3f' % (v["sea_attack"] / v["build_cost_manpower"])),
         ("Sea Att./Cons.", lambda k, v: '%0.3f' % (v["sea_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
 
-        ("Air Att./kICd", lambda k, v: '%0.3f' % (1000 * v["air_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Air Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["air_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Air Att./MP", lambda k, v: '%0.3f' % (v["air_attack"] / v["build_cost_manpower"])),
         ("Air Att./Cons.", lambda k, v: '%0.3f' % (v["air_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
 
-        ("Sub Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sub_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sub Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["sub_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Sub Att./MP", lambda k, v: '%0.3f' % (v["sub_attack"] / v["build_cost_manpower"])),
         ("Sub Att./Cons.", lambda k, v: '%0.3f' % (v["sub_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),
     "air" : (
         ("Year", "%(year)d"),
-        ("kICd", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
-        ("Soft Att./kICd", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("k_ic_d", lambda k, v: '%0.3f' % (0.001 * v["build_cost_ic"] * v["build_time"])),
+        ("Soft Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["soft_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Soft Att./MP", lambda k, v: '%0.3f' % (v["soft_attack"] / v["build_cost_manpower"])),
         ("Soft Att./Cons.", lambda k, v: '%0.3f' % (v["soft_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         
-        ("Hard Att./kICd", lambda k, v: '%0.3f' % (1000 * v["hard_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Hard Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["hard_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Hard Att./MP", lambda k, v: '%0.3f' % (v["hard_attack"] / v["build_cost_manpower"])),
         ("Hard Att./Cons.", lambda k, v: '%0.3f' % (v["hard_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
 
-        ("Strat. Att./kICd", lambda k, v: '%0.3f' % (1000 * v["strategic_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Strat. Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["strategic_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Strat. Att./MP", lambda k, v: '%0.3f' % (v["strategic_attack"] / v["build_cost_manpower"])),
         ("Strat. Att./Cons.", lambda k, v: '%0.3f' % (v["strategic_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         
-        ("Air Att./kICd", lambda k, v: '%0.3f' % (1000 * v["air_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Air Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["air_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Air Att./MP", lambda k, v: '%0.3f' % (v["air_attack"] / v["build_cost_manpower"])),
         ("Air Att./Cons.", lambda k, v: '%0.3f' % (v["air_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         
-        ("Sea Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sea Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["sea_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Sea Att./MP", lambda k, v: '%0.3f' % (v["sea_attack"] / v["build_cost_manpower"])),
         ("Sea Att./Cons.", lambda k, v: '%0.3f' % (v["sea_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
 
-        ("Sub Att./kICd", lambda k, v: '%0.3f' % (1000 * v["sub_attack"] / (v["build_cost_ic"] * v["build_time"]))),
+        ("Sub Att./k_ic_d", lambda k, v: '%0.3f' % (1000 * v["sub_attack"] / (v["build_cost_ic"] * v["build_time"]))),
         ("Sub Att./MP", lambda k, v: '%0.3f' % (v["sub_attack"] / v["build_cost_manpower"])),
         ("Sub Att./Cons.", lambda k, v: '%0.3f' % (v["sub_attack"] / (v["supply_consumption"] + v["fuel_consumption"]))),
         ),

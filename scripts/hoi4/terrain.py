@@ -6,26 +6,26 @@ import pyradox.struct
 import pyradox.txt
 import pyradox.wiki
 
-terrains = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
+terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
-def computeUnitStatFunction(statKey):
-    def computeUnitStat(terrainKey, terrain):
+def compute_unit_stat_function(stat_key):
+    def compute_unit_stat(terrain_key, terrain):
         if "units" not in terrain: return ""
-        return pyradox.wiki.coloredPercentString(terrain["units"][statKey] or 0.0)
+        return pyradox.wiki.colored_percent_string(terrain["units"][stat_key] or 0.0)
 
-    return computeUnitStat
+    return compute_unit_stat
 
 columns = (
     ("Terrain", lambda k, v: "[[File:terrain %s.png]] %s" % (k, k.title())),
     ("Movement cost", "%(movement_cost)0.2f"),
-    ("Attrition", lambda k, v: pyradox.wiki.coloredPercentString(v["attrition"] or 0.0, color = "red")),
-    #("Combat width", lambda k, v: pyradox.format.coloredPercentString(v["combat_width"] or 0.0)),
-    ("Attack", computeUnitStatFunction("attack")),
-    ("Enemy air superiority", lambda k, v: pyradox.wiki.coloredPercentString(v["enemy_army_bonus_air_superiority_factor"] or 0.0)),
+    ("Attrition", lambda k, v: pyradox.wiki.colored_percent_string(v["attrition"] or 0.0, color = "red")),
+    #("Combat width", lambda k, v: pyradox.format.colored_percent_string(v["combat_width"] or 0.0)),
+    ("Attack", compute_unit_stat_function("attack")),
+    ("Enemy air superiority", lambda k, v: pyradox.wiki.colored_percent_string(v["enemy_army_bonus_air_superiority_factor"] or 0.0)),
     )
 
 file = open("out/terrain.txt", "w")
 
-file.write(pyradox.wiki.makeWikitable(terrains, columns, lambda k, v: "sound_type" in v and not v["is_water"]))
+file.write(pyradox.wiki.make_wikitable(terrains, columns, lambda k, v: "sound_type" in v and not v["is_water"]))
 
 file.close()

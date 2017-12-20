@@ -7,7 +7,7 @@ import pyradox.txt
 import pyradox.yml
 
 # Parse the military tech file.
-tree = pyradox.txt.parseFile(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'technologies', 'mil.txt'))
+tree = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'technologies', 'mil.txt'))
 
 # Base statistics.
 stats = {
@@ -31,7 +31,7 @@ w += '\n|-\n'
 w += '! Fire !! Shock !! Fire !! Shock !! Fire !! Shock\n'
 
 # Find all techs in the file, update values, and output.
-for level, tech in enumerate(tree.findAll('technology')):
+for level, tech in enumerate(tree.find_all('technology')):
     stats['level'] = level
     for key, value in tech.items():
         if key == 'year':

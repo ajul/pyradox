@@ -7,17 +7,17 @@ import pyradox.txt
 import pyradox.yml
 
 
-resultTree = pyradox.struct.Tree()
+result_tree = pyradox.struct.Tree()
 
-for groupName, groupData in pyradox.txt.parseMerge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')).items():
-    if 'trigger' not in groupData: continue
-    trigger = groupData['trigger']
-    for tag in trigger.findAll('tag'):
-        resultTree[tag] = groupName
+for group_name, group_data in pyradox.txt.parse_merge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')).items():
+    if 'trigger' not in group_data: continue
+    trigger = group_data['trigger']
+    for tag in trigger.find_all('tag'):
+        result_tree[tag] = group_name
     if 'or' in trigger:
-        for tag in trigger['or'].findAll('tag'):
-            resultTree[tag] = groupName
+        for tag in trigger['or'].find_all('tag'):
+            result_tree[tag] = group_name
 
 outfile = open('out/idea_map.txt', mode = 'w')
-outfile.write(str(resultTree))
+outfile.write(str(result_tree))
 outfile.close()

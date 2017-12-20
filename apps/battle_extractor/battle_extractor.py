@@ -11,7 +11,7 @@ import pyradox.primitive
 import pyradox.table
 import pyradox.txt
 
-warHeadings = [
+war_headings = [
     'war_name',
     'start_year', 'start_month', 'start_day',
     'end_year', 'end_month', 'end_day',
@@ -20,7 +20,7 @@ warHeadings = [
     'friendly_losses', 'enemy_losses',
     ]
 
-battleHeadings = [
+battle_headings = [
     'war_name', 'battle_name',
     'year', 'month', 'day',
     'country', 'enemy', 'side', 'won',
@@ -30,170 +30,170 @@ battleHeadings = [
     'friendly_losses', 'enemy_losses',
     ]
 
-shipWords = ['ship', 'transport', 'galley', 'commerce_raider', 'cruiser', 'dreadnought', 'frigate', 'ironclad', 'man_o_war', 'monitor']
+ship_words = ['ship', 'transport', 'galley', 'commerce_raider', 'cruiser', 'dreadnought', 'frigate', 'ironclad', 'man_o_war', 'monitor']
 
-def isNaval(battleData):
-    for key in (battleData['attacker'] + battleData['defender']).keys():
-        if any(word in key for word in shipWords): return True
+def is_naval(battle_data):
+    for key in (battle_data['attacker'] + battle_data['defender']).keys():
+        if any(word in key for word in ship_words): return True
     return False
 
-def findBelligerents(warData):
+def find_belligerents(war_data):
     # return country, side, is_war_leader
-    foundAttackerWarLeader = False
-    foundDefenderWarLeader = False
+    found_attacker_war_leader = False
+    found_defender_war_leader = False
 
-    for date, events in warData['history'].items():
+    for date, events in war_data['history'].items():
         if not isinstance(date, pyradox.primitive.Date): continue
         for key, value in events.items():
             if key == 'add_attacker':
-                yield value, 'attacker', not foundAttackerWarLeader
-                foundAttackerWarLeader = True
+                yield value, 'attacker', not found_attacker_war_leader
+                found_attacker_war_leader = True
             elif key == 'add_defender':
-                yield value, 'defender', not foundDefenderWarLeader
-                foundDefenderWarLeader = True
+                yield value, 'defender', not found_defender_war_leader
+                found_defender_war_leader = True
 
-def findWarStartDate(warData):
-    for date, events in warData['history'].items():
+def find_war_start_date(war_data):
+    for date, events in war_data['history'].items():
         if isinstance(date, pyradox.primitive.Date): return date
 
-def findWarEndDate(warData):
-    for date in reversed([x for x in warData['history'].keys()]):
+def find_war_end_date(war_data):
+    for date in reversed([x for x in war_data['history'].keys()]):
         if isinstance(date, pyradox.primitive.Date): return date
 
-def findStrength(sideData):
-    return sum(value for key, value in sideData.items() if isinstance(value, int) and key not in ('losses',))
+def find_strength(side_data):
+    return sum(value for key, value in side_data.items() if isinstance(value, int) and key not in ('losses',))
 
-def processBattle(battleTable, warLosses, warName, date, battleData):
+def process_battle(battle_table, war_losses, war_name, date, battle_data):
     if date is None:
         year, month, day = '', '', ''
     else:
         year, month, day = date.year, date.month, date.day
 
-    attackerData = battleData['attacker']
-    defenderData = battleData['defender']
+    attacker_data = battle_data['attacker']
+    defender_data = battle_data['defender']
 
-    warLosses[0] += attackerData['losses']
-    warLosses[1] += defenderData['losses']
+    war_losses[0] += attacker_data['losses']
+    war_losses[1] += defender_data['losses']
 
-    battleTable.addRow({
-        'war_name' : warName,
-        'battle_name' : battleData['name'] or '',
+    battle_table.add_row({
+        'war_name' : war_name,
+        'battle_name' : battle_data['name'] or '',
         'year' : year,
         'month' : month,
         'day' : day,
-        'country' : attackerData['country'] or '',
-        'enemy' : defenderData['country'] or '',
+        'country' : attacker_data['country'] or '',
+        'enemy' : defender_data['country'] or '',
         'side' : 'attacker',
-        'won' : battleData['result'],
-        'type' : 'naval' if isNaval(battleData) else 'land', # land or naval
-        'friendly_leader' : attackerData['commander'] or attackerData['leader'] or '',
-        'enemy_leader' : defenderData['commander'] or defenderData['leader'] or '',
-        'friendly_strength' : findStrength(attackerData),
-        'enemy_strength' : findStrength(defenderData),
-        'friendly_losses' : attackerData['losses'],
-        'enemy_losses' : defenderData['losses'],
+        'won' : battle_data['result'],
+        'type' : 'naval' if is_naval(battle_data) else 'land', # land or naval
+        'friendly_leader' : attacker_data['commander'] or attacker_data['leader'] or '',
+        'enemy_leader' : defender_data['commander'] or defender_data['leader'] or '',
+        'friendly_strength' : find_strength(attacker_data),
+        'enemy_strength' : find_strength(defender_data),
+        'friendly_losses' : attacker_data['losses'],
+        'enemy_losses' : defender_data['losses'],
     })
 
-    battleTable.addRow({
-        'war_name' : warName,
-        'battle_name' : battleData['name'] or '',
+    battle_table.add_row({
+        'war_name' : war_name,
+        'battle_name' : battle_data['name'] or '',
         'year' : year,
         'month' : month,
         'day' : day,
-        'country' : defenderData['country'] or '',
-        'enemy' : attackerData['country'] or '',
+        'country' : defender_data['country'] or '',
+        'enemy' : attacker_data['country'] or '',
         'side' : 'defender',
-        'won' : not battleData['result'],
-        'type' : 'naval' if isNaval(battleData) else 'land', # land or naval
-        'friendly_leader' : defenderData['commander'] or defenderData['leader'] or '', 
-        'enemy_leader' : attackerData['commander'] or attackerData['leader'] or '',
-        'friendly_strength' : findStrength(defenderData),
-        'enemy_strength' : findStrength(attackerData),
-        'friendly_losses' : defenderData['losses'],
-        'enemy_losses' : attackerData['losses'],
+        'won' : not battle_data['result'],
+        'type' : 'naval' if is_naval(battle_data) else 'land', # land or naval
+        'friendly_leader' : defender_data['commander'] or defender_data['leader'] or '', 
+        'enemy_leader' : attacker_data['commander'] or attacker_data['leader'] or '',
+        'friendly_strength' : find_strength(defender_data),
+        'enemy_strength' : find_strength(attacker_data),
+        'friendly_losses' : defender_data['losses'],
+        'enemy_losses' : attacker_data['losses'],
     })
 
-def extract(inFilename, outFilenameBase = None):
-    if outFilenameBase is None:
-        outFilenameBase = inFileName
+def extract(in_filename, out_filename_base = None):
+    if out_filename_base is None:
+        out_filename_base = in_file_name
     
     # open and read the save
-    if zipfile.is_zipfile(inFilename):
-        inFile = zipfile.ZipFile(inFilename)
-        for info in inFile.infolist():
+    if zipfile.is_zipfile(in_filename):
+        in_file = zipfile.ZipFile(in_filename)
+        for info in in_file.infolist():
             if info.filename != 'meta':
-                data = inFile.read(info).decode(pyradox.txt.encoding)
-        inFile.close()
+                data = in_file.read(info).decode(pyradox.txt.encoding)
+        in_file.close()
     else:
-        inFile = open(inFilename, encoding=pyradox.txt.encoding)
-        data = inFile.read()
-        inFile.close()
+        in_file = open(in_filename, encoding=pyradox.txt.encoding)
+        data = in_file.read()
+        in_file.close()
     m = re.search('(^(active|previous)_war\s*=.*?)^(?=\w+)(?!(active|previous)_war)', data, flags = re.DOTALL | re.MULTILINE)
     if m is None:
         raise Exception("War data not found.")
 
-    data = pyradox.txt.parse(m.group(1), filename=inFilename)
+    data = pyradox.txt.parse(m.group(1), filename=in_filename)
 
-    warTable = pyradox.table.Table(warHeadings)
-    battleTable = pyradox.table.Table(battleHeadings)
+    war_table = pyradox.table.Table(war_headings)
+    battle_table = pyradox.table.Table(battle_headings)
 
-    for warType, warData in data.items():
-        warName = warData['name']
+    for war_type, war_data in data.items():
+        war_name = war_data['name']
 
-        startDate = findWarStartDate(warData)
-        if startDate is None:
-            startYear, startMonth, startDay = '', '', ''
+        start_date = find_war_start_date(war_data)
+        if start_date is None:
+            start_year, start_month, start_day = '', '', ''
         else:
-            startYear, startMonth, startDay = startDate.year, startDate.month, startDate.day
-        if warType == 'active_war':
-            endYear = 'present'
-            endMonth = 'present'
-            endDay = 'present'
+            start_year, start_month, start_day = start_date.year, start_date.month, start_date.day
+        if war_type == 'active_war':
+            end_year = 'present'
+            end_month = 'present'
+            end_day = 'present'
         else:
-            endDate = findWarEndDate(warData)
-            if endDate is None:
-                endYear, endMonth, endDay = '', '', ''
+            end_date = find_war_end_date(war_data)
+            if end_date is None:
+                end_year, end_month, end_day = '', '', ''
             else:
-                endYear, endMonth, endDay = endDate.year, endDate.month, endDate.day
+                end_year, end_month, end_day = end_date.year, end_date.month, end_date.day
 
-        warLosses = [0, 0]
-        numBattles = 0
+        war_losses = [0, 0]
+        num_battles = 0
 
-        for date, events in warData['history'].items():
+        for date, events in war_data['history'].items():
             if isinstance(date, pyradox.primitive.Date):
-                for eventType, battleData in events.items():
-                    if eventType == 'battle':
-                        processBattle(battleTable, warLosses, warName, date, battleData)
-                        numBattles += 1
+                for event_type, battle_data in events.items():
+                    if event_type == 'battle':
+                        process_battle(battle_table, war_losses, war_name, date, battle_data)
+                        num_battles += 1
             else:
                 if date == 'battle':
-                    processBattle(battleTable, warLosses, warName, startDate, events)
-                    numBattles += 1
+                    process_battle(battle_table, war_losses, war_name, start_date, events)
+                    num_battles += 1
 
-        for country, side, isWarLeader in findBelligerents(warData):
-            warTable.addRow({
-                'war_name' : warName,
-                'start_year' : startYear,
-                'start_month' : startMonth,
-                'start_day' : startDay,
-                'end_year' : endYear,
-                'end_month' : endMonth,
-                'end_day' : endDay,
-                'number_of_battles' : numBattles,
+        for country, side, is_war_leader in find_belligerents(war_data):
+            war_table.add_row({
+                'war_name' : war_name,
+                'start_year' : start_year,
+                'start_month' : start_month,
+                'start_day' : start_day,
+                'end_year' : end_year,
+                'end_month' : end_month,
+                'end_day' : end_day,
+                'number_of_battles' : num_battles,
                 'country' : country,
                 'side' : side,
-                'is_war_leader' : isWarLeader,
-                'friendly_losses' : warLosses[0] if side == 'attacker' else warLosses[1],
-                'enemy_losses' : warLosses[0] if side == 'defender' else warLosses[1],
+                'is_war_leader' : is_war_leader,
+                'friendly_losses' : war_losses[0] if side == 'attacker' else war_losses[1],
+                'enemy_losses' : war_losses[0] if side == 'defender' else war_losses[1],
                 })
 
-    outWarFile = open(outFilenameBase + '.war.csv', mode='w', encoding=pyradox.txt.encoding)
-    outWarFile.write(warTable.toCSV(separator=','))
-    outWarFile.close()
+    out_war_file = open(out_filename_base + '.war.csv', mode='w', encoding=pyradox.txt.encoding)
+    out_war_file.write(war_table.to_csv(separator=','))
+    out_war_file.close()
 
-    outBattleFile = open(outFilenameBase + '.battle.csv', mode='w', encoding=pyradox.txt.encoding)
-    outBattleFile.write(battleTable.toCSV(separator=','))
-    outBattleFile.close()
+    out_battle_file = open(out_filename_base + '.battle.csv', mode='w', encoding=pyradox.txt.encoding)
+    out_battle_file.write(battle_table.to_csv(separator=','))
+    out_battle_file.close()
 
 if __name__ == '__main__':
     if len(sys.argv) >= 3:
@@ -206,15 +206,15 @@ if __name__ == '__main__':
         # use in/ and out/ dirs
         dirname = 'in'
         for filename in os.listdir(dirname):
-            inFilename = os.path.join(dirname, filename)
-            outFilenameBase = os.path.join('out', filename)
-            if os.path.isfile(inFilename):
+            in_filename = os.path.join(dirname, filename)
+            out_filename_base = os.path.join('out', filename)
+            if os.path.isfile(in_filename):
                 try:
-                    extract(inFilename, outFilenameBase)
+                    extract(in_filename, out_filename_base)
                 except:
-                    print('Failed to extract data from %s.' % inFilename)
+                    print('Failed to extract data from %s.' % in_filename)
                     traceback.print_exc()
                 else:
-                    print('Extracted data from %s and written to %s.' % (inFilename, outFilenameBase))
+                    print('Extracted data from %s and written to %s.' % (in_filename, out_filename_base))
                 
                 

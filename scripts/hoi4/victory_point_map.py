@@ -13,16 +13,16 @@ from PIL import Image
 #date = pyradox.primitive.Date('1936.1.1')
 date = pyradox.primitive.Date('1939.8.14')
 
-vpImages = pyradox.image.splitStrip(Image.open('in/onmap_victorypoints_strip.png'), subwidth = 29)
-capitalIcon = vpImages[4]
-majorIcon = vpImages[9]
-minorIcon = vpImages[14]
+vp_images = pyradox.image.split_strip(Image.open('in/onmap_victorypoints_strip.png'), subwidth = 29)
+capital_icon = vp_images[4]
+major_icon = vp_images[9]
+minor_icon = vp_images[14]
 
-def computeCountryTag(filename):
+def compute_country_tag(filename):
     m = re.match('.*([A-Z]{3})\s*-.*\.txt$', filename)
     return m.group(1)
 
-def computeColor(values):
+def compute_color(values):
     if isinstance(values[0], int):
         # rgb
         r = values[0]
@@ -36,72 +36,72 @@ def computeColor(values):
 
 # find all capitals and country colors
 
-# stateID -> [tag]
-capitalStates = {}
-countryColors = {}
+# state_id -> [tag]
+capital_states = {}
+country_colors = {}
 
-countryColorFile = pyradox.txt.parseFile(os.path.join(pyradox.config.getBasedir('HoI4'), 'common', 'countries', 'colors.txt'))
+country_color_file = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'countries', 'colors.txt'))
 
-for filename, country in pyradox.txt.parseDir(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'countries')):
-    tag = computeCountryTag(filename)
-    if tag in countryColorFile:
-        countryColors[tag] = computeColor([x for x in countryColorFile[tag].findAll('color')])
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+    tag = compute_country_tag(filename)
+    if tag in country_color_file:
+        country_colors[tag] = compute_color([x for x in country_color_file[tag].find_all('color')])
     else:
         print('HACK FOR %s' % tag)
-        countryColors[tag] = (165, 102, 152)
-    print(tag, countryColors[tag])
-    if country['capital'] not in capitalStates: capitalStates[country['capital']] = []
-    capitalStates[country['capital']].append(tag)
+        country_colors[tag] = (165, 102, 152)
+    print(tag, country_colors[tag])
+    if country['capital'] not in capital_states: capital_states[country['capital']] = []
+    capital_states[country['capital']].append(tag)
 
 # Load states.
-states = pyradox.txt.parseMerge(os.path.join(pyradox.config.getBasedir('HoI4'), 'history', 'states'))
-provinceMap = pyradox.worldmap.ProvinceMap()
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'))
+province_map = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
 iconmap = {}
 textmap = {}
 iconoffsetmap = {}
 for state in states.values():
-    history = state['history'].atDate(date)
+    history = state['history'].at_date(date)
     controller = history['controller'] or history['owner']
-    controllerColor = countryColors[controller]
+    controller_color = country_colors[controller]
 
     # color the province
-    for provinceID in state.findAll('provinces'):
-        if not provinceMap.isWaterProvince(provinceID):
-            colormap[provinceID] = controllerColor
+    for province_id in state.find_all('provinces'):
+        if not province_map.is_water_province(province_id):
+            colormap[province_id] = controller_color
 
-    needCapital = (state['id'] in capitalStates and controller in capitalStates[state['id']])
+    need_capital = (state['id'] in capital_states and controller in capital_states[state['id']])
 
-    if state['id'] in capitalStates and not controller in capitalStates[state['id']]:
-        print("Country %s overriding %s" % (controller, capitalStates[state['id']]))
+    if state['id'] in capital_states and not controller in capital_states[state['id']]:
+        print("Country %s overriding %s" % (controller, capital_states[state['id']]))
         
-    for provinceID, vp in history.findAll('victory_points', tupleLength = 2):
+    for province_id, vp in history.find_all('victory_points', tuple_length = 2):
         # write number of vps
-        textmap[provinceID] = str(vp)
+        textmap[province_id] = str(vp)
 
         # set icon
-        if needCapital:
-            iconmap[provinceID] = capitalIcon
-            iconoffsetmap[provinceID] = (0, -2)
-            needCapital = False
+        if need_capital:
+            iconmap[province_id] = capital_icon
+            iconoffsetmap[province_id] = (0, -2)
+            need_capital = False
         elif vp > 5:
-            iconmap[provinceID] = majorIcon
+            iconmap[province_id] = major_icon
         else:
-            iconmap[provinceID] = minorIcon
+            iconmap[province_id] = minor_icon
 
     # backup capital
-    if needCapital:
-        capitalProvinceID = state['provinces'][0]
-        iconmap[capitalProvinceID] = capitalIcon
-        iconoffsetmap[capitalProvinceID] = (0, -2)
-        textmap[capitalProvinceID] = '0'
+    if need_capital:
+        capital_province_id = state['provinces'][0]
+        iconmap[capital_province_id] = capital_icon
+        iconoffsetmap[capital_province_id] = (0, -2)
+        textmap[capital_province_id] = '0'
 
-out = provinceMap.generateImage(colormap, defaultWaterColor=(32, 32, 63))
+out = province_map.generate_image(colormap, default_water_color=(32, 32, 63))
 
-pyradox.image.saveUsingPalette(out, 'out/political_map.png')
+pyradox.image.save_using_palette(out, 'out/political_map.png')
 
-provinceMap.overlayIcons(out, iconmap, offsetmap = iconoffsetmap)
-provinceMap.overlayText(out, textmap, fontfile = "tahoma.ttf", fontsize = 9, antialias = False, defaultFontColor=(0, 255, 0), defaultOffset = (0, -3))
+province_map.overlay_icons(out, iconmap, offsetmap = iconoffsetmap)
+province_map.overlay_text(out, textmap, fontfile = "tahoma.ttf", fontsize = 9, antialias = False, default_font_color=(0, 255, 0), default_offset = (0, -3))
 
-pyradox.image.saveUsingPalette(out, 'out/victory_point_map.png')
+pyradox.image.save_using_palette(out, 'out/victory_point_map.png')

@@ -8,17 +8,17 @@ import pyradox.wiki
 from unitstats import *
 
 files = {}
-for unitType in baseColumns.keys():
-    files[unitType] = open("out/%s_units_by_year.txt" % unitType, "w")
+for unit_type in base_columns.keys():
+    files[unit_type] = open("out/%s_units_by_year.txt" % unit_type, "w")
 
 for year in range(1936, 1948):
-    units = unitsAtYear(year)
+    units = units_at_year(year)
 
-    for unitType, unitFile in files.items():
-        unitFile.write("== %d ==\n" % year)
-        unitFile.write(pyradox.wiki.makeWikitable(units, baseColumns[unitType], lambda k, v: v["type"] == unitType and v["active"]))
-        unitFile.write("=== Derived statistics ===\n")
-        unitFile.write(pyradox.wiki.makeWikitable(units, derivedColumns[unitType], lambda k, v: v["type"] == unitType and v["active"]))
+    for unit_type, unit_file in files.items():
+        unit_file.write("== %d ==\n" % year)
+        unit_file.write(pyradox.wiki.make_wikitable(units, base_columns[unit_type], lambda k, v: v["type"] == unit_type and v["active"]))
+        unit_file.write("=== Derived statistics ===\n")
+        unit_file.write(pyradox.wiki.make_wikitable(units, derived_columns[unit_type], lambda k, v: v["type"] == unit_type and v["active"]))
 
-for unitFile in files.values():
-    unitFile.close()
+for unit_file in files.values():
+    unit_file.close()

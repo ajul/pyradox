@@ -8,22 +8,22 @@ import pyradox.yml
 
 import ideaoptions
 
-def valueString(bonus, value):
-    if bonus not in ideaoptions.bonusTypes: print(bonus)
-    if ideaoptions.isBeneficial(bonus, value):
+def value_string(bonus, value):
+    if bonus not in ideaoptions.bonus_types: print(bonus)
+    if ideaoptions.is_beneficial(bonus, value):
         color = "green"
     else:
         color = "red"
-    if ideaoptions.isPercentBonus(bonus):
+    if ideaoptions.is_percent_bonus(bonus):
         return '{{%s|%+0.1f%%}}' % (color, value * 100.0)
     elif isinstance(value, int):
         return '{{%s|%+d}}'% (color, value)
     elif isinstance(value, float):
         return '{{%s|%+0.2f}}'% (color, value)
     else:
-        return '{{%s|%s}}' % (color, pyradox.primitive.makeTokenString(value))
+        return '{{%s|%s}}' % (color, pyradox.primitive.make_token_string(value))
 
-localizationSources = ['EU4', 'text', 'modifers']
+localization_sources = ['EU4', 'text', 'modifers']
 
 default_max_level = 4
 
@@ -37,20 +37,20 @@ for i in range(default_max_level):
 result = result[:-1]
 result += '\n'
 
-for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
-    for ideaSet in fileData.values():
+for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
+    for idea_set in file_data.values():
         # start category
         
-        for idea, ideaData in ideaSet.items():
+        for idea, idea_data in idea_set.items():
             if idea == 'category':
-                powerType = ideaData.lower()
+                power_type = idea_data.lower()
                 continue
 
             # compile idea stats
 
             max_level = default_max_level
             costs = [0, 5, 15, 30] # cost indexed by level (0-based)
-            for key, value in ideaData.items():
+            for key, value in idea_data.items():
                 if key in ('default', 'chance'):
                     continue
                 elif key == 'max_level':
@@ -59,19 +59,19 @@ for fileName, fileData in pyradox.txt.parseDir(os.path.join(pyradox.config.based
                     level = int(key[len('level_cost_'):]) - 1
                     costs[level] = value
                 else:
-                    localizedKey = (
-                        pyradox.yml.getLocalization('modifier_%s' % key, localizationSources)
-                        or pyradox.yml.getLocalization('yearly_%s' % key, localizationSources)
-                        or pyradox.yml.getLocalization(key, localizationSources)
+                    localized_key = (
+                        pyradox.yml.get_localization('modifier_%s' % key, localization_sources)
+                        or pyradox.yml.get_localization('yearly_%s' % key, localization_sources)
+                        or pyradox.yml.get_localization(key, localization_sources)
                         )
-                    if not localizedKey:
-                        localizedKey = pyradox.format.humanTitle(key)
-                        print("Missing title: " + key + ' => ' + localizedKey)
-                    bonusValueString = valueString(key, value)
+                    if not localized_key:
+                        localized_key = pyradox.format.human_title(key)
+                        print("Missing title: " + key + ' => ' + localized_key)
+                    bonus_value_string = value_string(key, value)
 
             # write to string
             result += '|-\n'
-            result += '| %s || %s || {{icon|%s}} ' % (localizedKey, bonusValueString, powerType)
+            result += '| %s || %s || {{icon|%s}} ' % (localized_key, bonus_value_string, power_type)
             for i in range(default_max_level):
                 if i < max_level:
                     result += '|| %d ' % costs[i]
