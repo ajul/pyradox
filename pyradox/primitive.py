@@ -51,7 +51,10 @@ class Time():
     """
     
     def __init__(self, year = None, month = None, day = None, hour = None):
-        if isinstance(year, str):
+        if isinstance(year, Time):
+            # copy constructor
+            self.data = [x for x in year.data]
+        elif isinstance(year, str):
             # is actually string containing time data
             self.data = [int(x) for x in year.split('.')]
         else:
@@ -128,7 +131,7 @@ class Time():
         return year_days + month_days + self.day - 1
         
     def hours_since_1_ad(self):
-        return self.days_since1ad() * HOURS_PER_DAY + self.hours - 1
+        return self.days_since_1_ad() * HOURS_PER_DAY + self.hours - 1
         
     @staticmethod
     def from_days_since_1_ad(days):
