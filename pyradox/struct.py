@@ -31,13 +31,6 @@ class Tree():
             
             self.in_group = in_group
 
-        #For JSON output
-        def raw_data(self):
-            if isinstance(self.value, Tree) or isinstance(self.value, List):
-                return self.value.raw_data()
-            else:
-                return self.value
-
         def prettyprint(self, level, indent_string, include_comments):
             result = ''
             if include_comments:
@@ -116,19 +109,15 @@ class Tree():
     def items(self, comments = False):
         """
         Iterator over (key, value) pairs of this tree.
-        If comments = True, comments are emitted also.
         """
-        if comments:
-            for item in self._data: yield item.key, item.value, item.pre_comments, item.line_comment
-        else:
-            for item in self._data: yield item.key, item.value
+        for item in self._data: yield item.key, item.value
         
-    def comments(self):
-        """Iterator over (key, value) pairs of this tree."""
+    def item_comments(self):
+        """Iterator over (pre_comments, line_comment) in this tree."""
         for item in self._data: yield item.pre_comments, item.line_comment
 
     def __contains__(self, key):
-        """True iff key is in the top level of the tree."""
+        """True iff key is in (the top level of) the tree."""
         return self.contains(key)
         
     def contains(self, key, *args, **kwargs):
@@ -157,10 +146,13 @@ class Tree():
         """Return the ith value."""
         return self._data[i].value
 
-    def index_of(self, key):
-        for i, item in enumerate(self._data):
+    def index(self, key, reverse = True):
+        """Returns the index of the key. Last by default."""
+        it = enumerate(self._data)
+        if reverse: it = reversed(it)
+        for i, item in it:
             if match(key, item.key): return i
-        return None
+        raise ValueError('Tree does not contain key %s.' % key)
         
     def count(self, key):
         """Count the number of items with matching key."""
@@ -217,18 +209,18 @@ class Tree():
         self._data.insert(i, Tree._Item(key, value))
 
     def __setitem__(self, key, value):
-        """Replaces the first item with the key if it exists; otherwise appends it"""
-        for i, item in enumerate(self._data):
+        """Replaces the LAST item with the key if it exists; otherwise appends it"""
+        for i, item in reversed(enumerate(self._data)):
             if match(key, item.key):
                 self._data[i] = Tree._Item(key, value)
                 return
         else:
             self.append(key, value)
 
-    def __delitem__(self, key):
-        """Delete an item from the tree"""
+    def __delitem__(self, key, reverse = True):
+        """Delete an item from the tree by key."""
         # TODO: delete all?
-        idx = self.index_of(key)
+        idx = self.index(key, reverse = reverse)
         if idx is not None: del self._data[idx]
     
     def __iadd__(self, other):
@@ -244,21 +236,26 @@ class Tree():
     # TODO: update
     
     def weak_update(self, other):
-        # only updates if key isn't already in self
+        """
+        Copies all items from the other tree whose keys don't already exist in this tree.
+        """
         for key, value in other.items():
             if key not in self:
                 self.append(key, copy.deepcopy(value))
                 
     def merge_item(self, key, value, merge_levels = 0):
         if key in self and isinstance(self[key], Tree):
-            #print('Merge', value, 'into', self[key])
             self[key].merge(value, merge_levels)
-            #print('Result', self[key])
         else:
             self[key] = copy.deepcopy(value)
     
-    # -1 for fully recursive merge
     def merge(self, other, merge_levels = 0):
+        """
+        Recursively merges another tree into this one.
+        merge_levels = 0: Same as adding a copy of the other tree onto the end of this one.
+        merge_levels > 0: Tree values will be recursively merged for this many levels, at which point it will add a copy as above.
+        merge_levels = -1: Fully recursive.
+        """
         if merge_levels == 0:
             self += copy.deepcopy(other)
         else:
@@ -348,9 +345,9 @@ class Tree():
     # other methods
     def at_time(self, time = False, merge_levels = -1):
         """
-        returns a deep copy of this tree with all date blocks at or before the specified date deep copied and promoted to the top and the rest omitted
-        if date is True, use all date blocks
-        if date is False, use no date blocks
+        Returns a deep copy of this tree with all date blocks at or before the specified date deep copied and promoted to the top and the rest omitted.
+        if date is True, use all date blocks.
+        if date is False, use no date blocks.
         """
         # cast to date
         if time not in (True, False):
@@ -368,8 +365,7 @@ class Tree():
         for item in self._data:
             if isinstance(item.key, pyradox.primitive.Time):
                 if time is True or item.key <= time:
-                    for item in item.value._data:
-                        result.merge_item(item.key, item.value, merge_levels)
+                    result.merge(item.value, merge_levels = merge_levels)
         return result
             
 def match(x, spec):
