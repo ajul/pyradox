@@ -3,7 +3,6 @@ import re
 import os
 import inspect
 import copy
-import json
 
 class Tree():
     """
@@ -12,12 +11,11 @@ class Tree():
     Keys are stored with case but are matched non-case-sensitive.
     """
     
-    class __item():
+    class _Item():
         """
         Internal class to keep track of items.
         pre_comments appear before the item, one per line.
         line_comments appear on the same line as the item.
-        post_comments appear after the item, one per line.
         """
         def __init__(self, key, value, operator = None, in_group = False, pre_comments = None, line_comment = None):
             self.key = key
@@ -99,7 +97,7 @@ class Tree():
         if iterator is None:
             self._data = []
         else:
-            self._data = [Tree.__item(key, value) for (key, value) in iterator]
+            self._data = [Tree._Item(key, value) for (key, value) in iterator]
         
         if end_comments is None:
             self.end_comments = []
@@ -172,14 +170,14 @@ class Tree():
         return result
         
     def _find(self, key, *args, **kwargs):
-        """Internal single find function. Returns a __item."""
+        """Internal single find function. Returns a _Item."""
         it = self._find_all(key, *args, **kwargs)
         result = next(it, None)
         if result is None: raise KeyError('Key %s not found.' % key)
         return result 
         
     def _find_all(self, key, reverse = False, recurse = False):
-        """Internal iterative find function. Iterates over __items."""
+        """Internal iterative find function. Iterates over _Items."""
         it = self._data
         if reverse: it = reversed(it)
         for item in it:
@@ -212,17 +210,17 @@ class Tree():
     # write methods
     def append(self, key, value, **kwargs):
         """Append a new key, value pair"""
-        self._data.append(Tree.__item(key, value, **kwargs))
+        self._data.append(Tree._Item(key, value, **kwargs))
 
     def insert(self, i, key, value):
         """Insert a new key, value pair at a numeric position"""
-        self._data.insert(i, Tree.__item(key, value))
+        self._data.insert(i, Tree._Item(key, value))
 
     def __setitem__(self, key, value):
         """Replaces the first item with the key if it exists; otherwise appends it"""
         for i, item in enumerate(self._data):
             if match(key, item.key):
-                self._data[i] = Tree.__item(key, value)
+                self._data[i] = Tree._Item(key, value)
                 return
         else:
             self.append(key, value)
@@ -312,21 +310,6 @@ class Tree():
         """Produces a string in the original .txt format."""
         return self.prettyprint(0)
 
-    def raw_data(self):
-        raw = {}
-        for item in self._data:
-            if(item.key in raw):
-                if type(raw[item.key]) is list :
-                    raw[item.key].append(item.raw_data())
-                else :
-                    raw[item.key] = [raw[item.key], item.raw_data()]
-            else :
-                raw[item.key] = item.raw_data()
-        return raw
-
-    def json(self):
-        return json.dumps(self.raw_data(),indent=2,sort_keys=True)
-
     def prettyprint(self, level = 0, indent_string = '    ', include_comments = True):
         result = ''
         group_key = None # The key corresponding to the current group. None if no group in progress.
@@ -363,28 +346,28 @@ class Tree():
         return result
 
     # other methods
-    def at_date(self, date = False, merge_levels = -1):
+    def at_time(self, time = False, merge_levels = -1):
         """
         returns a deep copy of this tree with all date blocks at or before the specified date deep copied and promoted to the top and the rest omitted
         if date is True, use all date blocks
         if date is False, use no date blocks
         """
         # cast to date
-        if date not in (True, False):
-            date = pyradox.primitive.Date(date)
+        if time not in (True, False):
+            time = pyradox.primitive.Time(time)
         
         result = Tree()
         # non-dates
         for item in self._data:
-            if not isinstance(item.key, pyradox.primitive.Date):
+            if not isinstance(item.key, pyradox.primitive.Time):
                 result.append(item.key, copy.deepcopy(item.value))
 
         # dates
-        if date is False: return result
+        if time is False: return result
         
         for item in self._data:
-            if isinstance(item.key, pyradox.primitive.Date):
-                if date is True or item.key <= date:
+            if isinstance(item.key, pyradox.primitive.Time):
+                if time is True or item.key <= time:
                     for item in item.value._data:
                         result.merge_item(item.key, item.value, merge_levels)
         return result
