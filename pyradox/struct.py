@@ -19,7 +19,7 @@ class Tree():
         line_comments appear on the same line as the item.
         post_comments appear after the item, one per line.
         """
-        def __init__(self, key, value, operator = None, in_group = False, pre_comments = None, line_comment = None, post_comments = None):
+        def __init__(self, key, value, operator = None, in_group = False, pre_comments = None, line_comment = None):
             self.key = key
             self.value = value
             
@@ -27,9 +27,6 @@ class Tree():
             else: self.pre_comments = pre_comments
             
             self.line_comment = line_comment
-            
-            if post_comments is None: self.post_comments = []
-            else: self.post_comments = post_comments
             
             if operator is None: self.operator = '='
             else: self.operator = operator
@@ -65,10 +62,6 @@ class Tree():
                 
             result += '\n'
             
-            if include_comments:
-                for post_comment in self.post_comments:
-                    result += '%s#%s\n' % (indent_string * level, pre_comment)
-            
             return result
             
         def prettyprint_group(self, level, indent_string, include_comments):
@@ -95,11 +88,6 @@ class Tree():
                 need_indent = True
                 result += "#%s" % (self.line_comment)
             
-            if include_comments:
-                for post_comment in self.post_comments:
-                    need_indent = True
-                    result += '\n%s#%s' % (indent_string * level, post_comment)
-            
             if need_indent:
                 result += '\n'
             
@@ -112,6 +100,11 @@ class Tree():
             self._data = []
         else:
             self._data = [Tree.__item(key, value) for (key, value) in iterator]
+        
+        if end_comments is None:
+            self.end_comments = []
+        else:
+            self.end_comments = end_comments
         
     # iterator methods
     def keys(self):
@@ -281,9 +274,6 @@ class Tree():
     
     def get_line_comment(self, key):
         return self._find(key).line_comment
-        
-    def get_post_comments(self, key):
-        return self._find(key).post_comments
     
     def set_pre_comments(self, key, pre_comments):
         self._find(key).pre_comments = pre_comments
@@ -291,26 +281,17 @@ class Tree():
     def set_line_comment(self, key, line_comment):
         self._find(key).line_comment = line_comment
         
-    def set_post_comments(self, key, post_comments):
-        self._find(key).post_comments = post_comments
-        
     def get_pre_comments_at(self, i):
         return self._data[i].pre_comments
     
     def get_line_comment_at(self, i):
         return self._data[i].line_comment
-        
-    def get_post_comments_at(self, i):
-        return self._data[i].post_comments
     
     def set_pre_comments_at(self, i, pre_comments):
         self._data[i].pre_comments = pre_comments
     
     def set_line_comment_at(self, i, line_comment):
         self._data[i].line_comment = line_comment
-        
-    def set_post_comments_at(self, i, post_comments):
-        self._data[i].post_comments = post_comments
         
     # operator
     
@@ -375,6 +356,9 @@ class Tree():
         # If last item was in a group, close it.
         if group_key is not None:
             result += indent_string * level + '}\n'
+            
+        for end_comment in self.end_comments:
+            result += '%s#%s\n' % (indent_string * level, end_comment)
 
         return result
 

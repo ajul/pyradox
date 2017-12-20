@@ -131,16 +131,17 @@ class TreeParseState():
     
     def parse(self):
         """ Called once to parse. """
-        while self.pos < len(self.token_data):
-            if self.next is not None:
-                self.next() # Keep parsing.
-            else:
-                self.append_post_comments()
-                return self.result, self.pos
+        while self.pos < len(self.token_data) and self.next is not None:
+            self.next() # Keep parsing.
+        
+        # End of tree reached.
+        if self.next is None:
+            self.result.end_comments = self.pending_comments
+            return self.result, self.pos
         
         # End of file reached.
         if self.is_top_level:
-            self.append_post_comments()
+            self.result.end_comments = self.pending_comments
             return self.result
         else:
             raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (self.filename, self.get_previous_line_number() + 1))
@@ -165,18 +166,12 @@ class TreeParseState():
         Appends a line comment if not already set; otherwise appends to post_comments.
         """
         
+        if len(self.result) == 0: return
+        
         if self.result.get_line_comment_at(-1) is None:
             self.result.set_line_comment_at(-1, comment)
         else:
             self.result.get_post_comments_at(-1).append(comment)
-        
-    def append_post_comments(self):
-        """
-        Consumes pending comments and adds them to the last item's post_comments.
-        """
-        post_comments = self.result.get_post_comments_at(-1) 
-        post_comments += self.pending_comments
-        self.pending_comments = []
         
     def process_key(self):
         token_type, token_string, token_line_number = self.consume()
@@ -332,7 +327,6 @@ class TreeParseState():
             else:
                 self.pending_comments.append(token_string[1:])
         elif token_type == "end":
-            self.append_post_comments()
             self.next = self.process_key
         elif token_type == "begin":
             raise ParseError('%s, line %d: Error: Cannot nest inside a group.' % (filename, token_line_number + 1))
