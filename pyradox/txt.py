@@ -8,7 +8,7 @@ import warnings
 
 from pyradox.error import ParseError, ParseWarning
 
-gameEncodings = {
+game_encodings = {
     'EU4' : ['cp1252', 'utf_8_sig'],
     'HoI3' : ['cp1252', 'utf_8_sig'],
     'HoI3_vanilla' : ['cp1252', 'utf_8_sig'],
@@ -32,29 +32,29 @@ def readlines(filename, encodings):
 def parse(s, filename=""):
     """Parse a string."""
     lines = s.splitlines()
-    tokenData = lex(lines, filename)
-    return parseTree(tokenData, filename)
+    token_data = lex(lines, filename)
+    return parse_tree(token_data, filename)
 
-def parseFile(filename, verbose=False, game=None):
+def parse_file(filename, verbose=False, game=None):
     """Parse a single file and return a Tree."""
-    if game is None: game = pyradox.config.getDefaultGame()
-    encodings = gameEncodings[game]
+    if game is None: game = pyradox.config.get_default_game()
+    encodings = game_encodings[game]
     
     lines = readlines(filename, encodings)
     if verbose: print('Parsing file %s.' % filename)
-    tokenData = lex(lines, filename)
-    return parseTree(tokenData, filename)
+    token_data = lex(lines, filename)
+    return parse_tree(token_data, filename)
     
-def parseDir(dirname, *args, **kwargs):
+def parse_dir(dirname, *args, **kwargs):
     """Given a directory, iterate over the content of the .txt files in that directory as Trees"""
     for filename in os.listdir(dirname):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                yield filename, parseFile(fullpath, *args, **kwargs)
+                yield filename, parse_file(fullpath, *args, **kwargs)
 
-def parseMerge(dirname, mergeLevels = 0, *args, **kwargs):
+def parse_merge(dirname, merge_levels = 0, *args, **kwargs):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
     result = pyradox.struct.Tree()
     for filename in os.listdir(dirname):
@@ -62,231 +62,231 @@ def parseMerge(dirname, mergeLevels = 0, *args, **kwargs):
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                tree = parseFile(fullpath, *args, **kwargs)
-                result.merge(tree, mergeLevels)
+                tree = parse_file(fullpath, *args, **kwargs)
+                result.merge(tree, merge_levels)
     return result
 
-def parseWalk(dirname, *args, **kwargs):
+def parse_walk(dirname, *args, **kwargs):
     """Given a directory, recursively iterate over the content of the .txt files in that directory as Trees"""
     for root, dirs, files in os.walk(dirname):
         for filename in files:
             fullpath = os.path.join(root, filename)
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                yield filename, parseFile(fullpath, *args, **kwargs)
+                yield filename, parse_file(fullpath, *args, **kwargs)
 
 # open questions:
 # what characters are allowed in key strings?
 # in value strings?
 # are there escape characters?
 
-tokenTypes = [
+token_types = [
     # keysymbols
     ('whitespace', r'\s+'),
     ('operator', r'[=><]'),
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
-    ] + pyradox.primitive.tokenPatterns
+    ] + pyradox.primitive.token_patterns
 
-omnibusPattern = ''
-for tokenType, p in tokenTypes:
-    omnibusPattern += '(?P<' + tokenType + '>' + p + ')'
-    omnibusPattern += '|'
-omnibusPattern += '(.+)'
+omnibus_pattern = ''
+for token_type, p in token_types:
+    omnibus_pattern += '(?P<' + token_type + '>' + p + ')'
+    omnibus_pattern += '|'
+omnibus_pattern += '(.+)'
 
-omnibusPattern = re.compile(omnibusPattern)
+omnibus_pattern = re.compile(omnibus_pattern)
 
-def lex(fileLines, filename):
-    return list(lexIter(fileLines, filename))
+def lex(file_lines, filename):
+    return list(lex_iter(file_lines, filename))
 
-def lexIter(fileLines, filename):
-    """Lexer. Given the contents of a file, produces a list of (tokenType, tokenString, lineNumber)."""
+def lex_iter(file_lines, filename):
+    """Lexer. Given the contents of a file, produces a list of (token_type, token_string, line_number)."""
     return (
-        (m.lastgroup, m.group(0), lineNumber)
-        for lineNumber, line in enumerate(fileLines)
-        for m in omnibusPattern.finditer(line) if m.lastgroup not in ('whitespace',)
+        (m.lastgroup, m.group(0), line_number)
+        for line_number, line in enumerate(file_lines)
+        for m in omnibus_pattern.finditer(line) if m.lastgroup not in ('whitespace',)
         )
         
 class TreeParseState():
-    def __init__(self, tokenData, filename, startPos, isTopLevel):
-        self.tokenData = tokenData          # The tokenized version of the file. List of (tokenType, tokenString, tokenLineNumber) tuples.
+    def __init__(self, token_data, filename, start_pos, is_top_level):
+        self.token_data = token_data          # The tokenized version of the file. List of (token_type, token_string, token_line_number) tuples.
         self.filename = filename            # File the tree is being parsed from. Used for warning and error messages.
-        self.isTopLevel = isTopLevel        # True iff this tree is the top level of the file.
+        self.is_top_level = is_top_level        # True iff this tree is the top level of the file.
     
         self.result = pyradox.struct.Tree() # The resulting tree.
         
-        self.pos = startPos                 # Current token position.
-        self.pendingComments = []           # Comments pending assignment.
+        self.pos = start_pos                 # Current token position.
+        self.pending_comments = []           # Comments pending assignment.
         self.key = None                     # The key currently being processed.
-        self.keyString = None               # The original token string for that key.
+        self.key_string = None               # The original token string for that key.
         self.operator = None                # The operator currently being processed. Usually '='.
-        self.next = self.processKey         # The next case to execute.
+        self.next = self.process_key         # The next case to execute.
     
-    def getPreviousLineNumber(self):
+    def get_previous_line_number(self):
         """ Line number of the token just before the one consumed. Returns -1 if the token just consumed was the first one."""
-        if len(self.tokenData) > 0 and self.pos > 1:
-            return self.tokenData[self.pos-2][2]
+        if len(self.token_data) > 0 and self.pos > 1:
+            return self.token_data[self.pos-2][2]
         return -1
     
     def parse(self):
         """ Called once to parse. """
-        while self.pos < len(self.tokenData):
+        while self.pos < len(self.token_data):
             if self.next is not None:
                 self.next() # Keep parsing.
             else:
-                self.appendPostComments()
+                self.append_post_comments()
                 return self.result, self.pos
         
         # End of file reached.
-        if self.isTopLevel:
-            self.appendPostComments()
+        if self.is_top_level:
+            self.append_post_comments()
             return self.result
         else:
-            raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (self.filename, self.getPreviousLineNumber() + 1))
+            raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (self.filename, self.get_previous_line_number() + 1))
     
     def consume(self):
         """ Read the next tuple from the list and advance the position counter. """
-        tokenType, tokenString, tokenLineNumber = self.tokenData[self.pos]
+        token_type, token_string, token_line_number = self.token_data[self.pos]
         self.pos += 1
-        return tokenType, tokenString, tokenLineNumber
+        return token_type, token_string, token_line_number
         
-    def appendToResult(self, value, **kwargs):
+    def append_to_result(self, value, **kwargs):
         """ 
         Append the current value to result. 
         key and operator are set by internal state. 
         Also consumes any pending comments.
         """
-        self.result.append(self.key, value, preComments = self.pendingComments, operator = self.operator, **kwargs)
-        self.pendingComments = []
+        self.result.append(self.key, value, pre_comments = self.pending_comments, operator = self.operator, **kwargs)
+        self.pending_comments = []
         
-    def appendLineComment(self, comment):
+    def append_line_comment(self, comment):
         """
-        Appends a line comment if not already set; otherwise appends to postComments.
+        Appends a line comment if not already set; otherwise appends to post_comments.
         """
         
-        if self.result.getLineCommentAt(-1) is None:
-            self.result.setLineCommentAt(-1, comment)
+        if self.result.get_line_comment_at(-1) is None:
+            self.result.set_line_comment_at(-1, comment)
         else:
-            self.result.getPostCommentsAt(-1).append(comment)
+            self.result.get_post_comments_at(-1).append(comment)
         
-    def appendPostComments(self):
+    def append_post_comments(self):
         """
-        Consumes pending comments and adds them to the last item's postComments.
+        Consumes pending comments and adds them to the last item's post_comments.
         """
-        postComments = self.result.getPostCommentsAt(-1) 
-        postComments += self.pendingComments
-        self.pendingComments = []
+        post_comments = self.result.get_post_comments_at(-1) 
+        post_comments += self.pending_comments
+        self.pending_comments = []
         
-    def processKey(self):
-        tokenType, tokenString, tokenLineNumber = self.consume()
+    def process_key(self):
+        token_type, token_string, token_line_number = self.consume()
         
-        if pyradox.primitive.isPrimitiveKeyTokenType(tokenType):
-            self.keyString = tokenString
-            self.key = pyradox.primitive.makePrimitive(tokenString, tokenType)
-            self.next = self.processOperator
-        elif tokenType == 'comment':
-            if tokenLineNumber == self.getPreviousLineNumber():
+        if pyradox.primitive.is_primitive_key_token_type(token_type):
+            self.key_string = token_string
+            self.key = pyradox.primitive.make_primitive(token_string, token_type)
+            self.next = self.process_operator
+        elif token_type == 'comment':
+            if token_line_number == self.get_previous_line_number():
                 # Comment following a previous value.
-                self.appendLineComment(tokenString[1:])
+                self.append_line_comment(token_string[1:])
             else:
-                self.pendingComments.append(tokenString[1:])
-            self.next = self.processKey
-        elif tokenType == 'end':
-            if self.isTopLevel:
+                self.pending_comments.append(token_string[1:])
+            self.next = self.process_key
+        elif token_type == 'end':
+            if self.is_top_level:
                 # top level cannot be ended, warn
-                warnings.warn_explicit('Unmatched closing bracket. Skipping token.', ParseWarning, self.filename, tokenLineNumber + 1)
-                self.next = self.processKey
+                warnings.warn_explicit('Unmatched closing bracket. Skipping token.', ParseWarning, self.filename, token_line_number + 1)
+                self.next = self.process_key
             else:
                 self.next = None
         else:
             #invalid key
-            warnings.warn_explicit('Token "%s" is not valid key. Skipping token.' % tokenString, ParseWarning, self.filename, tokenLineNumber + 1)
-            self.next = self.processKey
+            warnings.warn_explicit('Token "%s" is not valid key. Skipping token.' % token_string, ParseWarning, self.filename, token_line_number + 1)
+            self.next = self.process_key
     
-    def processOperator(self):
+    def process_operator(self):
         # expecting an operator
-        tokenType, tokenString, tokenLineNumber = self.consume()
+        token_type, token_string, token_line_number = self.consume()
         
-        if tokenType == 'operator':
-            self.operator = tokenString
-            self.next = self.processValue
-        elif tokenType == 'comment':
-            self.pendingComments.append(tokenString[1:])
-            self.next = self.processOperator
+        if token_type == 'operator':
+            self.operator = token_string
+            self.next = self.process_value
+        elif token_type == 'comment':
+            self.pending_comments.append(token_string[1:])
+            self.next = self.process_operator
         else:
             # missing operator; unconsume the token and move on
-            warnings.warn_explicit('Expected operator after key "%s". Treating operator as "=" and token "%s" as value.' % (self.keyString, tokenString), ParseWarning, self.filename, tokenLineNumber + 1)
+            warnings.warn_explicit('Expected operator after key "%s". Treating operator as "=" and token "%s" as value.' % (self.key_string, token_string), ParseWarning, self.filename, token_line_number + 1)
             self.pos -= 1
             self.operator = '='
-            self.next = self.processValue
+            self.next = self.process_value
         
-    def processValue(self):
+    def process_value(self):
         # expecting a value
-        tokenType, tokenString, tokenLineNumber = self.consume()
+        token_type, token_string, token_line_number = self.consume()
         
-        if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
-            maybeColor = self.maybeSubprocessColor(tokenString, tokenLineNumber)
-            if maybeColor is not None:
-                value = maybeColor
+        if pyradox.primitive.is_primitive_value_token_type(token_type):
+            maybe_color = self.maybe_subprocess_color(token_string, token_line_number)
+            if maybe_color is not None:
+                value = maybe_color
             else:
                 # normal value
-                value = pyradox.primitive.makePrimitive(tokenString, tokenType)
-            self.appendToResult(value)
-            self.next = self.processKey
-        elif tokenType == 'begin':
+                value = pyradox.primitive.make_primitive(token_string, token_type)
+            self.append_to_result(value)
+            self.next = self.process_key
+        elif token_type == 'begin':
             # Value is a tree or group. First, determine whether this is a tree or group.
-            lookaheadPos = self.pos
+            lookahead_pos = self.pos
             level = 0
             # Empty brackets are trees.
-            isTree = True
-            while lookaheadPos < len(self.tokenData) and level >= 0:
-                tokenType, tokenString, tokenLineNumber = self.tokenData[lookaheadPos]
-                lookaheadPos += 1
-                if tokenType == 'end':
+            is_tree = True
+            while lookahead_pos < len(self.token_data) and level >= 0:
+                token_type, token_string, token_line_number = self.token_data[lookahead_pos]
+                lookahead_pos += 1
+                if token_type == 'end':
                     level -= 1
-                elif tokenType == 'comment':
+                elif token_type == 'comment':
                     continue
                 else:
                     # Non-empty brackets are groups unless an operator is found.
-                    isTree = False
+                    is_tree = False
                 
-                    if tokenType == 'begin':
+                    if token_type == 'begin':
                         # Assume any nesting indicates a tree.
-                        isTree = True
+                        is_tree = True
                         break
                         # level += 1
-                    elif tokenType == 'operator':
+                    elif token_type == 'operator':
                         # Tree if operator detected at current level.
                         if level == 0: 
-                            isTree = True
+                            is_tree = True
                             break
-            if isTree:
+            if is_tree:
                 # Recurse.
-                value, self.pos = parseTree(self.tokenData, self.filename, self.pos)
-                self.appendToResult(value)
-                self.next = self.processKey
+                value, self.pos = parse_tree(self.token_data, self.filename, self.pos)
+                self.append_to_result(value)
+                self.next = self.process_key
             else:
                 # Go to group state.
-                self.next = self.processGroup
+                self.next = self.process_group
                 
-        elif tokenType == 'comment':
-            self.pendingComments.append(tokenString[1:])
-            self.next = self.processValue
+        elif token_type == 'comment':
+            self.pending_comments.append(token_string[1:])
+            self.next = self.process_value
         else:
-            raise ParseError('%s, line %d: Error: Invalid token type %s after key "%s", expected a value type.' % (self.filename, tokenLineNumber + 1, tokenType, self.keyString))
+            raise ParseError('%s, line %d: Error: Invalid token type %s after key "%s", expected a value type.' % (self.filename, token_line_number + 1, token_type, self.key_string))
         
-    def maybeSubprocessColor(self, colorspaceTokenString, colorspaceTokenLineNumber):
+    def maybe_subprocess_color(self, colorspace_token_string, colorspace_token_line_number):
         # Try to parse a color. 
         # Return the color if this is a color and change the parser state to match. 
         # Otherwise, return None with no change in parser state.
-        colorspace = colorspaceTokenString.lower()
+        colorspace = colorspace_token_string.lower()
         
         if colorspace not in pyradox.color.Color.COLORSPACES:
             return None
         
         # Possible comments to add.
-        maybePreComments = []
+        maybe_pre_comments = []
         
         # Expected sequence of non-comment tokens.
         COLOR_SEQUENCE = [['begin']] + [['int', 'float']] * 3 + [['end']]
@@ -296,57 +296,57 @@ class TreeParseState():
         
         channels = []
         
-        maybePos = self.pos
+        maybe_pos = self.pos
         
-        while maybePos < len(self.tokenData):
-            tokenType, tokenString, tokenLineNumber = self.tokenData[maybePos]
-            maybePos += 1
-            if tokenType == 'comment':
-                maybePreComments.append(tokenString)
-            elif tokenType in COLOR_SEQUENCE[seq]:
-                if tokenType in ['int', 'float']:
-                    channels.append(pyradox.primitive.makePrimitive(tokenString, tokenType))
+        while maybe_pos < len(self.token_data):
+            token_type, token_string, token_line_number = self.token_data[maybe_pos]
+            maybe_pos += 1
+            if token_type == 'comment':
+                maybe_pre_comments.append(token_string)
+            elif token_type in COLOR_SEQUENCE[seq]:
+                if token_type in ['int', 'float']:
+                    channels.append(pyradox.primitive.make_primitive(token_string, token_type))
                 seq += 1
                 if seq >= len(COLOR_SEQUENCE):
                     # Finished color. Update state.
-                    self.pendingComments += maybePreComments
-                    self.pos = maybePos
+                    self.pending_comments += maybe_pre_comments
+                    self.pos = maybe_pos
                     color = pyradox.color.Color(channels, colorspace)
                     return color
             else:
                 # Unexpected token.
                 break
         
-        warnings.warn_explicit('Found colorspace token %s without following color.' % (colorspaceTokenString.lower()), ParseWarning, self.filename, colorspaceTokenLineNumber)
+        warnings.warn_explicit('Found colorspace token %s without following color.' % (colorspace_token_string.lower()), ParseWarning, self.filename, colorspace_token_line_number)
         return None
         
-    def processGroup(self):
-        tokenType, tokenString, tokenLineNumber = self.consume()
+    def process_group(self):
+        token_type, token_string, token_line_number = self.consume()
         
-        if pyradox.primitive.isPrimitiveValueTokenType(tokenType):
-            value = pyradox.primitive.makePrimitive(tokenString, tokenType)
-            self.appendToResult(value, inGroup = True)
-        elif tokenType == "comment":
-            if tokenLineNumber == self.getPreviousLineNumber():
-                self.appendLineComment(tokenString[1:])
+        if pyradox.primitive.is_primitive_value_token_type(token_type):
+            value = pyradox.primitive.make_primitive(token_string, token_type)
+            self.append_to_result(value, in_group = True)
+        elif token_type == "comment":
+            if token_line_number == self.get_previous_line_number():
+                self.append_line_comment(token_string[1:])
             else:
-                self.pendingComments.append(tokenString[1:])
-        elif tokenType == "end":
-            self.appendPostComments()
-            self.next = self.processKey
-        elif tokenType == "begin":
-            raise ParseError('%s, line %d: Error: Cannot nest inside a group.' % (filename, tokenLineNumber + 1))
+                self.pending_comments.append(token_string[1:])
+        elif token_type == "end":
+            self.append_post_comments()
+            self.next = self.process_key
+        elif token_type == "begin":
+            raise ParseError('%s, line %d: Error: Cannot nest inside a group.' % (filename, token_line_number + 1))
         else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, tokenLineNumber + 1, tokenType))
+            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, token_line_number + 1, token_type))
 
-def parseTree(tokenData, filename, startPos = 0):
-    """Given a list of (tokenType, tokenString, lineNumber) from the lexer, produces a Tree."""
-    isTopLevel = (startPos == 0)
+def parse_tree(token_data, filename, start_pos = 0):
+    """Given a list of (token_type, token_string, line_number) from the lexer, produces a Tree."""
+    is_top_level = (start_pos == 0)
      # if starting position is 0, check for extra token at beginning
-    if startPos == 0 and len(tokenData) >= 1 and tokenData[0][1] == 'EU4txt':
-        tokenType, tokenString, lineNumber = tokenData[0]
-        print('%s, line %d: Skipping header token "%s".' % (filename, lineNumber + 1, tokenString))
-        startPos = 1 # skip first token
+    if start_pos == 0 and len(token_data) >= 1 and token_data[0][1] == 'EU4txt':
+        token_type, token_string, line_number = token_data[0]
+        print('%s, line %d: Skipping header token "%s".' % (filename, line_number + 1, token_string))
+        start_pos = 1 # skip first token
     
-    state = TreeParseState(tokenData, filename, startPos, isTopLevel)
+    state = TreeParseState(token_data, filename, start_pos, is_top_level)
     return state.parse()

@@ -1,30 +1,30 @@
 import re
 
-def splitFilename(s):
+def split_filename(s):
     m = re.match(r'(\S*)\s*-?\s*(.*)\..*', s)
     return m.group(1), m.group(2)
 
-def promoteTitle(s):
-    def upperCase(m):
+def promote_title(s):
+    def upper_case(m):
         return m.group(1) + m.group(2).upper()
-    return re.sub(r'(^| )([a-z])', upperCase, s)
+    return re.sub(r'(^| )([a-z])', upper_case, s)
    
-def capitalizeFirst(s):
+def capitalize_first(s):
     if s: return s[0].upper() + s[1:]
     else: return s
 
-def humanString(s, capFirst = False):
+def human_string(s, cap_first = False):
     s = str(s)
     s = re.sub(r'\.txt', r'', s)
     s = re.sub(r'([a-z])([A-Z])', r'\1 \2', s)
     s = re.sub(r'_', r' ', s)
-    if capFirst: s = capitalizeFirst(s)
+    if cap_first: s = capitalize_first(s)
     # if len(s) == 3: s = s.upper()
     return s
 
-def humanTitle(s):
-    s = humanString(s)
-    s = promoteTitle(s)
+def human_title(s):
+    s = human_string(s)
+    s = promote_title(s)
     return s    
 
 

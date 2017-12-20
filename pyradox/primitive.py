@@ -4,21 +4,21 @@ import warnings
 
 from pyradox.error import ParseError, ParseWarning, ValueWarning
 
-def makeBool(tokenString):
+def make_bool(token_string):
     """
     Converts a token string to a boolean.
     """
-    if tokenString in ('yes', 'true'): return True
-    elif tokenString in ('no', 'false'): return False
-    else: raise ValueError('Invalid token string %s for bool.' % tokenString)
+    if token_string in ('yes', 'true'): return True
+    elif token_string in ('no', 'false'): return False
+    else: raise ValueError('Invalid token string %s for bool.' % token_string)
 
-def makeString(tokenString):
+def make_string(token_string):
     """
     Converts a token string to a string by dequoting it.
     """
-    return re.sub(r'^"(.*)"$', r'\1', tokenString)
+    return re.sub(r'^"(.*)"$', r'\1', token_string)
 
-def makeTokenString(value):
+def make_token_string(value):
     """
     Converts a primitive value to a token string.
     """
@@ -94,13 +94,13 @@ class Time():
     def __str__(self):
         return '.'.join(str(x) for x in self.data)
     
-    def humanName(self):
+    def human_name(self):
         result = ''
-        if self.hasHour(): result += '%02d:00, ' % self.hour
+        if self.has_hour(): result += '%02d:00, ' % self.hour
         result += '%d %s %d' % (self.day, MONTH_NAMES_0[self.month-1], self.year)
         return result
     
-    def hasHour(self):
+    def has_hour(self):
         return len(self.data) >= 4
         
     def validate(self, index = None):
@@ -114,50 +114,50 @@ class Time():
             if self.month < 1 or self.month > 12: 
                 raise ValueError('Month not in range 1-12.')
         elif index == 2:
-            daysInMonth = DAYS_PER_MONTH_0[self.month-1]
-            if self.day < 1 or self.day > daysInMonth: 
-                warnings.warn(ValueWarning('Day not in range 1-%d for month %d.' % (daysInMonth, self.month)))
+            days_in_month = DAYS_PER_MONTH_0[self.month-1]
+            if self.day < 1 or self.day > days_in_month: 
+                warnings.warn(ValueWarning('Day not in range 1-%d for month %d.' % (days_in_month, self.month)))
         elif index == 3:
-            if self.hasHour() and (self.hour < 1 or self.hour > 24): 
+            if self.has_hour() and (self.hour < 1 or self.hour > 24): 
                 warnings.warn(ValueWarning('Hour out of standard range 1-24.'))
     
-    def daysSince1AD(self):
+    def days_since_1_ad(self):
         # number of days since 1.1.1
-        yearDays = DAYS_PER_YEAR * (self.year - 1)
-        monthDays = sum(daysPerMonth0[:(self.month-1)])
-        return yearDays + monthDays + self.day - 1
+        year_days = DAYS_PER_YEAR * (self.year - 1)
+        month_days = sum(days_per_month0[:(self.month-1)])
+        return year_days + month_days + self.day - 1
         
-    def hoursSince1AD(self):
-        return self.daysSince1AD() * HOURS_PER_DAY + self.hours - 1
+    def hours_since_1_ad(self):
+        return self.days_since1ad() * HOURS_PER_DAY + self.hours - 1
         
     @staticmethod
-    def fromDaysSince1AD(days):
+    def from_days_since_1_ad(days):
         year = days // DAYS_PER_YEAR + 1
         days = days % DAYS_PER_YEAR
         month = 1
-        for daysInMonth in DAYS_PER_MONTH_0:
-            if days < daysInMonth:
+        for days_in_month in DAYS_PER_MONTH_0:
+            if days < days_in_month:
                 day = days + 1
                 break
-            days -= daysInMonth
+            days -= days_in_month
             month += 1
         return Time(year, month, day)
 
-    def yearsAfter(self, other):
+    def years_after(self, other):
         """the number of year boundaries between this and the other time"""
         return self.year - other.year
 
-    def monthsAfter(self, other):
+    def months_after(self, other):
         """the number of month boundaries between this and the other time"""
-        return self.yearsAfter(other) * 12 + (self.month - other.month)
+        return self.years_after(other) * 12 + (self.month - other.month)
 
-    def daysAfter(self, other):
-        return daysSince1AD(self) - daysSince1AD(other)
+    def days_after(self, other):
+        return days_since1ad(self) - days_since1ad(other)
         
-    def hoursAfter(self, other):
-        return self.daysAfter(other) + self.hours - other.hours
+    def hours_after(self, other):
+        return self.days_after(other) + self.hours - other.hours
 
-tokenPatterns = [
+token_patterns = [
     ('time', r'\d+\.\d+\.\d+(\.\d+)?\b'),
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
     ('int', r'-?\d+\b'),
@@ -165,7 +165,7 @@ tokenPatterns = [
     ('str', r'"([^"\\\n]|\\.)*["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
 ]
 
-keyConstructors = {
+key_constructors = {
     'time' : Time,
     'int' : int,
     'str' : str,
@@ -175,28 +175,28 @@ constructors = {
     'time' : Time,
     'float' : float,
     'int' : int,
-    'bool' : makeBool,
-    'str' : makeString,
+    'bool' : make_bool,
+    'str' : make_string,
     }
     
-def primitiveTypeOf(tokenString):
-    for tokenType, pattern in tokenPatterns:
-        m = re.match(pattern + '$', tokenString)
-        if m: return tokenType
+def primitive_type_of(token_string):
+    for token_type, pattern in token_patterns:
+        m = re.match(pattern + '$', token_string)
+        if m: return token_type
     return None
     
-def isPrimitiveKeyTokenType(tokenType):
-    return tokenType in keyConstructors.keys()
+def is_primitive_key_token_type(token_type):
+    return token_type in key_constructors.keys()
     
-def isPrimitiveValueTokenType(tokenType):
-    return tokenType in constructors.keys()
+def is_primitive_value_token_type(token_type):
+    return token_type in constructors.keys()
 
-def makePrimitive(tokenString, tokenType = None, defaultTokenType = None):
-    if tokenType is None:
-        tokenType = primitiveTypeOf(tokenString)
-        if tokenType is None:
-            if defaultTokenType is None:
-                raise ParseError('Unrecognized token "%s". Should not occur.' % (tokenString,))
+def make_primitive(token_string, token_type = None, default_token_type = None):
+    if token_type is None:
+        token_type = primitive_type_of(token_string)
+        if token_type is None:
+            if default_token_type is None:
+                raise ParseError('Unrecognized token "%s". Should not occur.' % (token_string,))
             else:
-                tokenType = defaultTokenType
-    return constructors[tokenType](tokenString)
+                token_type = default_token_type
+    return constructors[token_type](token_string)

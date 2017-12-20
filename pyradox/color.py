@@ -46,21 +46,21 @@ class Color():
     def __getitem__(self, index):
         return self.channels[index]
         
-    def __getattr__(self, channelName):
+    def __getattr__(self, channel_name):
         """
         Get channel by name/letter.
         """
-        channelName = channelName.lower()
-        if channelName in self.CHANNEL_NAMES: 
-            channelLetter = channelName[0]
-        elif len(channelName) == 1:
-            channelLetter = channelName
+        channel_name = channel_name.lower()
+        if channel_name in self.CHANNEL_NAMES: 
+            channel_letter = channel_name[0]
+        elif len(channel_name) == 1:
+            channel_letter = channel_name
         else:
             raise AttributeError()
             
-        if channelLetter not in self.channels: raise AttributeError()
+        if channel_letter not in self.channels: raise AttributeError()
         
-        return self[self.colorspace.index(channelLetter)]
+        return self[self.colorspace.index(channel_letter)]
         
     def __str__(self):
         if self.COLORSPACE_DATA_TYPES[self.colorspace] is int:

@@ -9,31 +9,31 @@ import pyradox.config
 
 cache = {}
 
-def loadFunctions(game, name, dirpath, mode = None, mergeLevels = 0):
+def load_functions(game, name, dirpath, mode = None, merge_levels = 0):
     if isinstance(dirpath, str): dirpath = (dirpath,)
-    def parseData(basedir = None):
-        if basedir is None: basedir = pyradox.config.getBasedir(game)
+    def parse_data(basedir = None):
+        if basedir is None: basedir = pyradox.config.get_basedir(game)
 
         if mode == "merge":
-            result = pyradox.txt.parseMerge(os.path.join(basedir, *dirpath), mergeLevels = mergeLevels)
+            result = pyradox.txt.parse_merge(os.path.join(basedir, *dirpath), merge_levels = merge_levels)
         elif mode == "walk":
             result = pyradox.struct.Tree()
-            for filename, tree in pyradox.txt.parseWalk(os.path.join(basedir, *dirpath)):
-                tag, rawName = pyradox.format.splitFilename(filename)
+            for filename, tree in pyradox.txt.parse_walk(os.path.join(basedir, *dirpath)):
+                tag, raw_name = pyradox.format.split_filename(filename)
                 result.append(tag, tree)
         else:
             result = pyradox.struct.Tree()
-            for filename, tree in pyradox.txt.parseDir(os.path.join(basedir, *dirpath)):
-                tag, rawName = pyradox.format.splitFilename(filename)
+            for filename, tree in pyradox.txt.parse_dir(os.path.join(basedir, *dirpath)):
+                tag, raw_name = pyradox.format.split_filename(filename)
                 result.append(tag, tree)
             
         print('Loaded %s.' % name)
         return result
 
-    def getData(basedir = None):
-        if basedir is None: basedir = pyradox.config.getBasedir(game)
+    def get_data(basedir = None):
+        if basedir is None: basedir = pyradox.config.get_basedir(game)
         if basedir not in cache: cache[basedir] = {}
-        if name not in cache[basedir]: cache[basedir][name] = parseData(basedir)
+        if name not in cache[basedir]: cache[basedir][name] = parse_data(basedir)
         return copy.deepcopy(cache[basedir][name])
 
-    return parseData, getData
+    return parse_data, get_data

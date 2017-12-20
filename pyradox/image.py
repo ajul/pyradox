@@ -1,6 +1,6 @@
 from PIL import Image
 
-def linearTosRGB(x):
+def linear_to_srgb(x):
     # using floats, returns int
     def component(c):
         if c <= 0.0031308:
@@ -38,33 +38,33 @@ def HSVtoRGB(pixel):
     
     return (r, g, b)
 
-def colormapBlueRed(x):
+def colormap_blue_red(x):
     """Given x between 0 and 1, interpolates between blue and red."""
-    return linearTosRGB((x, 0.0, 1.0 - x))
+    return linear_tos_rgb((x, 0.0, 1.0 - x))
 
-def colormapRedGreen(x):
+def colormap_red_green(x):
     """Given x between 0 and 1, interpolates between red and green."""
-    return linearTosRGB((1.0 - x, x, 0.0))
+    return linear_tos_rgb((1.0 - x, x, 0.0))
 
-def getStripSquare(image, idx):
+def get_strip_square(image, idx):
     """gets the idxth square from a horizontal strip of images"""
-    squareSize = image.size[1]
-    xStart = squareSize * idx
-    result = image.crop((xStart, 0, xStart + squareSize, squareSize))
+    square_size = image.size[1]
+    x_start = square_size * idx
+    result = image.crop((x_start, 0, x_start + square_size, square_size))
     result.load()
     return result
 
-def splitStrip(image, subwidth = None):
+def split_strip(image, subwidth = None):
     """gets a list of subimages from a horizontal strip of images"""
     if subwidth is None:
         subwidth = image.size[1]
     result = []
-    for xStart in range(0, image.size[0], subwidth):
-        subImage = image.crop((xStart, 0, xStart + subwidth, subwidth))
-        subImage.load()
-        result.append(subImage)
+    for x_start in range(0, image.size[0], subwidth):
+        sub_image = image.crop((x_start, 0, x_start + subwidth, subwidth))
+        sub_image.load()
+        result.append(sub_image)
     return result
 
-def saveUsingPalette(image, filename, colors = 256):
+def save_using_palette(image, filename, colors = 256):
     """save image using palette and optimization"""
     image.convert("P", dither = Image.NONE, palette = Image.ADAPTIVE, colors = colors).save(filename, optimize = True)

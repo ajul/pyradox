@@ -9,17 +9,17 @@ _basedirs = {
 
 language = 'english'
 
-_defaultGame = None
+_default_game = None
 
-def setDefaultGame(game):
-    global _defaultGame
-    _defaultGame = game
+def set_default_game(game):
+    global _default_game
+    _default_game = game
 
-def getDefaultGame():
-    if _defaultGame is None:
+def get_default_game():
+    if _default_game is None:
         raise RuntimeError('Default game not set!')
-    return _defaultGame
+    return _default_game
     
-def getBasedir(game = None):
-    if game is None: return _basedirs[getDefaultGame()]
+def get_basedir(game = None):
+    if game is None: return _basedirs[get_default_game()]
     return _basedirs[game]

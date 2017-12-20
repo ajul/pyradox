@@ -12,7 +12,7 @@ encodings = [
     ]
 
 # set of sources already read
-alreadyReadSources = set()
+already_read_sources = set()
 # key -> value
 cache = {}
 
@@ -28,18 +28,18 @@ def readlines(filename):
             f.close()
     raise ParseError("All codecs failed for input file %s." % filename)
         
-def parseLines(lines, filename):
-    for lineNumber, line in enumerate(lines): parseLine(lineNumber, line, filename)
+def parse_lines(lines, filename):
+    for line_number, line in enumerate(lines): parse_line(line_number, line, filename)
 
 def parse(s, filename=""):
     lines = s.splitlines()
-    parseLines(lines, filename)
+    parse_lines(lines, filename)
 
-def parseFile(filename):
+def parse_file(filename):
     lines = readlines(filename)
-    parseLines(lines, filename)
+    parse_lines(lines, filename)
     
-def parseLine(lineNumber, line, filename):
+def parse_line(line_number, line, filename):
     comment = re.match(r'\s*#.*', line)
     if comment is not None: return
     m = re.match(r'\s*([\w\-\.]+):\d?\s*("*)(.*)(\2)\s*', line)
@@ -50,23 +50,23 @@ def parseLine(lineNumber, line, filename):
         # debug
         warnings.warn(ParseWarning('Could not parse line %s' % line))
 
-def getLocalization(key, sources = ['text'], game = None):
-    if game is None: game = pyradox.config.defaultGame
+def get_localization(key, sources = ['text'], game = None):
+    if game is None: game = pyradox.config.default_game
     if isinstance(sources, str):
         sources = [sources]
     for source in sources:
-        if source not in alreadyReadSources:
-            languageKey = 'l_%s' % pyradox.config.language
-            filename = os.path.join(pyradox.config.getBasedir(game), 'localisation', '%s_%s.yml' % (source, languageKey))
+        if source not in already_read_sources:
+            language_key = 'l_%s' % pyradox.config.language
+            filename = os.path.join(pyradox.config.get_basedir(game), 'localisation', '%s_%s.yml' % (source, language_key))
             
-            parseFile(filename)
-            alreadyReadSources.add(source)
+            parse_file(filename)
+            already_read_sources.add(source)
             
         if key.lower() in cache:
-            return pyradox.primitive.makeString(cache[key.lower()])
+            return pyradox.primitive.make_string(cache[key.lower()])
 
     return None
 
-def getLocalizationDesc(key, **kwargs):
-    return getLocalization('%s_desc' % key, **kwargs)
+def get_localization_desc(key, **kwargs):
+    return get_localization('%s_desc' % key, **kwargs)
     
