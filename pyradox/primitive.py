@@ -65,6 +65,7 @@ class Time():
         return self.data < other.data
         
     def __eq__(self, other):
+        if not isinstance(other, Time): return False
         return self.data == other.data
         
     def __iter__(self):
