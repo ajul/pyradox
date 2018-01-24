@@ -40,11 +40,11 @@ def HSVtoRGB(pixel):
 
 def colormap_blue_red(x):
     """Given x between 0 and 1, interpolates between blue and red."""
-    return linear_tos_rgb((x, 0.0, 1.0 - x))
+    return linear_to_srgb((x, 0.0, 1.0 - x))
 
 def colormap_red_green(x):
     """Given x between 0 and 1, interpolates between red and green."""
-    return linear_tos_rgb((1.0 - x, x, 0.0))
+    return linear_to_srgb((1.0 - x, x, 0.0))
 
 def get_strip_square(image, idx):
     """gets the idxth square from a horizontal strip of images"""
