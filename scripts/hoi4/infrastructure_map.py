@@ -11,6 +11,8 @@ from PIL import Image
 
 scale = 2.0
 
+colormap_power = 1.0
+
 # Load states.
 states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'), verbose=False)
 province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
@@ -35,7 +37,8 @@ for state in states.values():
     for province_id in state.find_all('provinces'):
         if not province_map.is_water_province(province_id):
             k.append(province_id)
-            colormap[province_id] = pyradox.image.colormap_red_green(infrastructure / 9)
+            x = (infrastructure / 9.0) ** colormap_power
+            colormap[province_id] = pyradox.image.colormap_red_green(x)
     k = tuple(x for x in k)
     groups[k] = '%d' % infrastructure
 

@@ -11,8 +11,9 @@ from PIL import Image
 
 # Load states.
 states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'), verbose=False)
-state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'state_category'), verbose=False)
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_basedir('HoI4'))
+state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'state_category'), merge_levels = 1, verbose=False)
+state_categories = state_categories['state_categories']
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 # provinces -> state id
 groups = {}
@@ -23,7 +24,7 @@ for state in states.values():
     building_slots = state_categories[state_category_key]['local_building_slots'] or 0
 
     k = []
-    for province_id in state['provinces']:
+    for province_id in state.find_all('provinces'):
         if not province_map.is_water_province(province_id):
             k.append(province_id)
             colormap[province_id] = pyradox.image.colormap_red_green(building_slots / 10)

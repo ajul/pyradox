@@ -19,7 +19,7 @@ def compute_country_tag_and_name(filename):
 countries = {}
 
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
-    country = country.at_date(date)
+    country = country.at_time(date)
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party'] or 'neutrality'
@@ -33,7 +33,7 @@ state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_based
 state_categories = state_categories['state_categories']
 
 for state in states.values():
-    history = state['history'].at_date(date, merge_levels = -1)
+    history = state['history'].at_time(date, merge_levels = -1)
     # if state['id'] == 50: print('state50', history)
     state['owner'] = history['owner']
     state['owner_name'] = countries[history['owner']]['name']
@@ -72,13 +72,14 @@ columns = (
     ('Name', '%(human_name)s'),
     ('Country', '{{flag|%(owner_name)s}}'),
     ('Tag', '%(owner)s'),
-    ('Victory points', '%(victory_point_total)d'),
-    ('Population (M)', lambda k, v: '%0.2f' % ((v['manpower'] or 0) / 1e6) ),
-    ('Infrastructure', '%(infrastructure)d'),
+    ('{{Icon|vp}}', '%(victory_point_total)d'),
+    ('{{Icon|pop|(M)}}', lambda k, v: '%0.2f' % ((v['manpower'] or 0) / 1e6) ),
+    ('{{Icon|infra}}', '%(infrastructure)d'),
+    ('State category', '%(state_category)s'),
     ('Building slots', '%(building_slots)d'),
-    ('Military factories', '%(arms_factory)d'),
-    ('Naval dockyards', '%(dockyard)d'),
-    ('Civilian factories', '%(industrial_complex)d'),
+    ('{{Icon|MIC}}', '%(arms_factory)d'),
+    ('{{Icon|NIC}}', '%(dockyard)d'),
+    ('{{Icon|CIC}}', '%(industrial_complex)d'),
     # ('Total factories', sum_keys_function('arms_factory', 'dockyard', 'industrial_complex')),
     ('{{Icon|Oil}}', '%(oil)d'),
     ('{{Icon|Aluminium}}', '%(aluminium)d'),
@@ -87,8 +88,8 @@ columns = (
     ('{{Icon|Steel}}', '%(steel)d'),
     ('{{Icon|Chromium}}', '%(chromium)d'),
     # ('Total resources', sum_keys_function('oil', 'aluminium', 'rubber', 'tungsten', 'steel', 'chromium')),
-    ('Air base levels', '%(air_base)d'),
-    ('Naval base levels', '%(naval_base)d'),
+    ('{{Icon|Air base}}', '%(air_base)d'),
+    ('{{Icon|Naval base}}', '%(naval_base)d'),
     )
 
 out = open("out/states.txt", "w")
