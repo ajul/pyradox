@@ -210,7 +210,7 @@ class Tree():
 
     def __setitem__(self, key, value):
         """Replaces the LAST item with the key if it exists; otherwise appends it"""
-        for i, item in reversed(enumerate(self._data)):
+        for i, item in reversed(list(enumerate(self._data))):
             if match(key, item.key):
                 self._data[i] = Tree._Item(key, value)
                 return
