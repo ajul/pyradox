@@ -64,9 +64,21 @@ class Time():
     def __lt__(self, other):
         return self.data < other.data
         
+    def __le__(self, other):
+        return self.data <= other.data
+        
+    def __gt__(self, other):
+        return self.data > other.data
+        
+    def __ge__(self, other):
+        return self.data >= other.data
+        
     def __eq__(self, other):
         if not isinstance(other, Time): return False
         return self.data == other.data
+        
+    def __ne__(self, other):
+        return not (self == other)
         
     def __iter__(self):
         for x in self.data: yield x
