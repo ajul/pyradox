@@ -1,6 +1,7 @@
 import _initpath
 import re
 import os
+import json
 import load.tech
 import load.unit
 import pyradox.csv
@@ -114,3 +115,11 @@ else:
     csv_filename = "out/states.csv"
 
 pyradox.csv.write_csv(csv_filename, states, columns, 'excel', sort_function = lambda key, value: value['id'])
+
+if beta:
+    json_filename = "out/states_beta.json"
+else:
+    json_filename = "out/states.json"
+
+with open(json_filename, 'w') as f:
+    json.dump(states.replace_key_with_subkey('state', 'id').to_python(), f)
