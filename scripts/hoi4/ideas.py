@@ -203,7 +203,7 @@ if len(types_to_tabulate) == 1:
     columns = [x for x in columns if x[0] != 'Type']
 
 out = open("out/ideas.txt", "w", encoding = 'utf_8_sig')
-out.write(pyradox.wiki.make_wikitable(result, columns, sort_function = lambda item: item[1]['country'], table_style = None))
+out.write(pyradox.wiki.make_wikitable(result, columns, sort_function = lambda key, value: value['country'], table_style = None))
 out.close()
 
 trait_columns = [
@@ -212,5 +212,5 @@ trait_columns = [
     ]
 
 out = open("out/traits.txt", "w", encoding = 'utf_8_sig')
-out.write(pyradox.wiki.make_wikitable(trait_result, trait_columns, sort_function = lambda item: item[1]['name'], table_style = None))
+out.write(pyradox.wiki.make_wikitable(trait_result, trait_columns, sort_function = lambda key, value: value['name'], table_style = None))
 out.close()

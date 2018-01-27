@@ -3,6 +3,7 @@ import re
 import os
 import load.tech
 import load.unit
+import pyradox.csv
 import pyradox.format
 import pyradox.struct
 import pyradox.wiki
@@ -104,5 +105,12 @@ if beta:
 else:
     out_filename = "out/states.txt"
 out = open(out_filename, "w")
-out.write(pyradox.wiki.make_wikitable(states, columns, sort_function = lambda item: item[1]['id']))
+out.write(pyradox.wiki.make_wikitable(states, columns, sort_function = lambda key, value: value['id']))
 out.close()
+
+if beta:
+    csv_filename = "out/states_beta.csv"
+else:
+    csv_filename = "out/states.csv"
+
+pyradox.csv.write_csv(csv_filename, states, columns, 'excel', sort_function = lambda key, value: value['id'])

@@ -43,6 +43,6 @@ columns = [
 
 out = open("out/initial_laws.txt", "w", encoding = 'utf_8_sig')
 out.write(pyradox.wiki.make_wikitable(result, columns,
-                                     sort_function = lambda item: item[1]['name'],
+                                     sort_function = lambda key, value: value['name'],
                                      table_style = None))
 out.close()

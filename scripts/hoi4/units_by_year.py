@@ -27,7 +27,7 @@ with open("out/%s_units_by_year.txt" % unit_type, "w") as out_file:
     for year in unitstats.unit_type_years[unit_type]:
         out_file.write("== %d ==\n" % year)
         out_file.write(pyradox.wiki.make_wikitable(tables[year], columns,
-                                                 sort_function = lambda item: unitstats.compute_unit_name(item[0])))
+                                                 sort_function = lambda key, value: unitstats.compute_unit_name(key)))
 
 with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
     columns = [("Year", "%(year)d")] + unitstats.base_columns[unit_type]
@@ -37,7 +37,7 @@ with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
         if unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit) and unit["last_upgrade"] == unit["year"]:
             if unit_key not in tables: tables[unit_key] = pyradox.struct.Tree()
             tables[unit_key].append(unit["year"], unit)
-    for unit_key, unit_years in sorted(tables.items(), key=lambda item: unitstats.compute_unit_name(item[0])):
+    for unit_key, unit_years in sorted(tables.items(), key=lambda key, value: unitstats.compute_unit_name(key)):
         unit_name = unitstats.compute_unit_name(unit_key)
         out_file.write("== %s ==\n" % unit_name)
         out_file.write(pyradox.wiki.make_wikitable(unit_years, columns, sortable=False))

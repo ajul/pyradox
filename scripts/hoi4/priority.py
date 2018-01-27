@@ -18,5 +18,5 @@ columns = (
 
 f.write(pyradox.wiki.make_wikitable(units, columns,
                                           filter_function = lambda k, v: compute_unit_type(v) == "land", collapse = True,
-                                          sort_function = lambda item: compute_unit_name(item[0])))
+                                          sort_function = lambda key, value: compute_unit_name(key)))
 f.close()

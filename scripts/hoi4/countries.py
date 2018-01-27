@@ -101,7 +101,7 @@ columns = (
     )
 
 out = open("out/countries.txt", "w")
-out.write(pyradox.wiki.make_wikitable(countries, columns, sort_function = lambda item: item[1]['name']))
+out.write(pyradox.wiki.make_wikitable(countries, columns, sort_function = lambda key, value: value['name']))
 out.close()
 
 print(total)

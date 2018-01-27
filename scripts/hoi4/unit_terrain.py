@@ -90,14 +90,14 @@ file = open("out/unit_terrain.txt", "w")
 file.write("=== Attack ===\n")
 file.write(pyradox.wiki.make_wikitable(units, make_columns("attack"),
                                       filter_function = lambda k, v: compute_unit_type(v) == "land",
-                                      sort_function = lambda item: compute_unit_name(item[0])))
+                                      sort_function = lambda key, value: compute_unit_name(key)))
 file.write("=== Defense ===\n")
 file.write(pyradox.wiki.make_wikitable(units, make_columns("defence"),
                                       filter_function = lambda k, v: compute_unit_type(v) == "land",
-                                      sort_function = lambda item: compute_unit_name(item[0])))
+                                      sort_function = lambda key, value: compute_unit_name(key)))
 file.write("=== Movement ===\n")
 file.write(pyradox.wiki.make_wikitable(units, make_columns("movement"),
                                       filter_function = lambda k, v: compute_unit_type(v) == "land",
-                                      sort_function = lambda item: compute_unit_name(item[0])))
+                                      sort_function = lambda key, value: compute_unit_name(key)))
 
 file.close()

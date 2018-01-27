@@ -36,7 +36,7 @@ columns = {
 for unit_type, unit_file in files.items():
     unit_file.write(pyradox.wiki.make_wikitable(units, columns[unit_type],
                                               filter_function = lambda k, v: compute_unit_type(v) == unit_type, collapse = True,
-                                              sort_function = lambda item: compute_unit_name(item[0])))
+                                              sort_function = lambda key, value: compute_unit_name(key)))
     #unit_file.write("=== Derived statistics ===\n")
     #unit_file.write(pyradox.wiki.make_wikitable(units, derived_columns[unit_type], lambda k, v: compute_unit_type(v) == unit_type and is_availiable(v)))
 
