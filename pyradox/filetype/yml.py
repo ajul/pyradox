@@ -1,10 +1,11 @@
+import pyradox
+import pyradox.token
+
+from pyradox.error import *
+
 import os
 import re
 import warnings
-import pyradox.config
-import pyradox.primitive
-
-from pyradox.error import ParseError, ParseWarning
 
 encodings = [
     'utf_8_sig',
@@ -52,7 +53,6 @@ def parse_line(line_number, line, filename):
             warnings.warn(ParseWarning('Could not parse line %s' % line))
 
 def get_localization(key, sources = ['text'], game = None):
-    if game is None: game = pyradox.config.default_game
     if isinstance(sources, str):
         sources = [sources]
     for source in sources:
@@ -64,7 +64,7 @@ def get_localization(key, sources = ['text'], game = None):
             already_read_sources.add(source)
             
         if key.lower() in cache:
-            return pyradox.primitive.make_string(cache[key.lower()])
+            return pyradox.token.make_string(cache[key.lower()])
 
     return None
 
