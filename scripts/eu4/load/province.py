@@ -1,9 +1,6 @@
 import os
 import math
 
-
-
-import pyradox
 import pyradox
 
 parse_provinces, get_provinces = pyradox.load.load_functions('EU4', 'provinces', ('history', 'provinces'))
