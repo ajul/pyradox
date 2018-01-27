@@ -1,31 +1,11 @@
 from pyradox.datatype import *
 from pyradox.error import *
 
+import re
+
 """
 Token handling. The end-user should not ever have to deal with this directly.
 """
-
-token_patterns = [
-    ('time', r'\d+\.\d+\.\d+(\.\d+)?\b'),
-    ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
-    ('int', r'-?\d+\b'),
-    ('bool', r'(yes|no)\b'),
-    ('str', r'"([^"\\\n]|\\.)*["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
-]
-
-key_constructors = {
-    'time' : Time,
-    'int' : int,
-    'str' : str,
-    }
-
-constructors = {
-    'time' : Time,
-    'float' : float,
-    'int' : int,
-    'bool' : make_bool,
-    'str' : make_string,
-    }
     
 def make_bool(token_string):
     """
@@ -56,6 +36,28 @@ def make_token_string(value):
             return value
     else:
         return str(value)
+    
+token_patterns = [
+    ('time', r'\d+\.\d+\.\d+(\.\d+)?\b'),
+    ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),
+    ('int', r'-?\d+\b'),
+    ('bool', r'(yes|no)\b'),
+    ('str', r'"([^"\\\n]|\\.)*["\n]|[^#=\{\}\s]+'), # allow strings to end with newline instead of "; do escape characters exist?
+]
+
+key_constructors = {
+    'time' : Time,
+    'int' : int,
+    'str' : str,
+    }
+
+constructors = {
+    'time' : Time,
+    'float' : float,
+    'int' : int,
+    'bool' : make_bool,
+    'str' : make_string,
+    }
     
 def primitive_type_of(token_string):
     for token_type, pattern in token_patterns:

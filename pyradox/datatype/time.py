@@ -1,4 +1,3 @@
-from pyradox.datatype import *
 from pyradox.error import *
 
 import collections

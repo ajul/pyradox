@@ -1,6 +1,6 @@
-from pyradox.datatype import *
 from pyradox.error import *
-from pyradox.token import *
+import pyradox.datatype.time
+import pyradox.datatype.util
 
 import re
 import os
@@ -155,14 +155,14 @@ class Tree():
         it = enumerate(self._data)
         if reverse: it = reversed(it)
         for i, item in it:
-            if match(key, item.key): return i
+            if pyradox.datatype.util.match(key, item.key): return i
         raise ValueError('Tree does not contain key %s.' % key)
         
     def count(self, key):
         """Count the number of items with matching key."""
         result = 0
         for i, item in enumerate(self._data):
-            if match(key, item.key): result += 1
+            if pyradox.datatype.util.match(key, item.key): result += 1
         return result
         
     def _find(self, key, *args, **kwargs):
@@ -177,7 +177,7 @@ class Tree():
         it = self._data
         if reverse: it = reversed(it)
         for item in it:
-            if match(key, item.key): yield item
+            if pyradox.datatype.util.match(key, item.key): yield item
             if recurse and isinstance(item.value, Tree):
                 for subitem in item.value._find_all(key, reverse = reverse, recurse = recurse): yield subitem
         
@@ -215,7 +215,7 @@ class Tree():
     def __setitem__(self, key, value):
         """Replaces the LAST item with the key if it exists; otherwise appends it"""
         for i, item in reversed(list(enumerate(self._data))):
-            if match(key, item.key):
+            if pyradox.datatype.util.match(key, item.key):
                 self._data[i] = Tree._Item(key, value)
                 return
         else:
@@ -317,7 +317,7 @@ class Tree():
         
         for item in self._data:
             if group_key is not None: # Last item was in a group.
-                if item.in_group and match(item.key, group_key) and not isinstance(item.value, Tree):
+                if item.in_group and pyradox.datatype.util.match(item.key, group_key) and not isinstance(item.value, Tree):
                     # Continue the previous group.
                     if needs_indent:
                         result += indent_string * (level + 1)
@@ -386,10 +386,10 @@ class Tree():
         group_key = None # The key corresponding to the current group. None if no group in progress.
         
         for item in self._data:
-            python_key = to_python(item.key, duplicate_action = duplicate_action)
-            python_value = to_python(item.value, duplicate_action = duplicate_action)
+            python_key = pyradox.datatype.util.to_python(item.key, duplicate_action = duplicate_action)
+            python_value = pyradox.datatype.util.to_python(item.value, duplicate_action = duplicate_action)
             if group_key is not None: # Last item was in a one_group.
-                if item.in_group and match(item.key, group_key) and not isinstance(item.value, Tree):
+                if item.in_group and pyradox.datatype.util.match(item.key, group_key) and not isinstance(item.value, Tree):
                     # Continue the previous one_group.
                     result[python_key].append(python_value)
                     continue
@@ -431,19 +431,19 @@ class Tree():
         """
         # cast to date
         if time not in (True, False):
-            time = Time(time)
+            time = pyradox.datatype.time.Time(time)
         
         result = Tree()
         # non-dates
         for item in self._data:
-            if not isinstance(item.key, Time):
+            if not isinstance(item.key, pyradox.datatype.time.Time):
                 result.append(item.key, copy.deepcopy(item.value))
 
         # dates
         if time is False: return result
         
         for item in self._data:
-            if isinstance(item.key, Time):
+            if isinstance(item.key, pyradox.datatype.time.Time):
                 if time is True or item.key <= time:
                     result.merge(item.value, merge_levels = merge_levels)
         return result

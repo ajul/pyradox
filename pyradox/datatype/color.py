@@ -1,4 +1,4 @@
-from pyradox.warnings import *
+from pyradox.error import *
 
 import warnings
 
