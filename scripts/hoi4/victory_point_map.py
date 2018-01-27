@@ -62,7 +62,7 @@ iconmap = {}
 textmap = {}
 iconoffsetmap = {}
 for state in states.values():
-    history = state['history'].at_date(date)
+    history = state['history'].at_time(date)
     controller = history['controller'] or history['owner']
     controller_color = country_colors[controller]
 

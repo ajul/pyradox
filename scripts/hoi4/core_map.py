@@ -57,7 +57,7 @@ for state in states.values():
     k = tuple(province_id for province_id in state.find_all('provinces') if not province_map.is_water_province(province_id))
     groups[k] = str(state['id'])
     
-    history = state['history'].at_date(date)
+    history = state['history'].at_time(date)
     controller = history['controller'] or history['owner']
     controller_color = country_colors[controller]
 

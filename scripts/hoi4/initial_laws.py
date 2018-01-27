@@ -18,7 +18,7 @@ economics = pyradox.txt.parse_file(
 result = pyradox.struct.Tree()
 
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
-    country = country.at_date('1936.1.1')
+    country = country.at_time('1936.1.1')
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party']
