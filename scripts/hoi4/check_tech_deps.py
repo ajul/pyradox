@@ -1,10 +1,10 @@
 import _initpath
 import os
-import load.tech
+import hoi4
 
 import pyradox
 
-techs = load.tech.get_techs()["technologies"]
+techs = hoi4.load.get_technologies()
 
 # child tech -> [parent_tech, ...]
 techs_or_dependencies = {}

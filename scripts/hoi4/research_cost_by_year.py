@@ -1,7 +1,7 @@
 import _initpath
 import re
 import os
-import load.tech
+import hoi4
 
 import pyradox
 
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 years = [0] + list(range(1936, 1951, 1))
 research_days = numpy.zeros_like(years)
 
-techs = load.tech.get_techs()["technologies"]
+techs = hoi4.load.get_technologies()
 for tech_key, tech in techs.items():
     if not isinstance(tech, pyradox.Tree): continue
     if tech['doctrine']: continue

@@ -1,18 +1,14 @@
-import _initpath
+import hoi4
 import re
 import pyradox
-import load.equipment
-import load.tech
-import load.unit
-
 
 factories_per_resource = 1.5 / 8.0
 
 default_year = 1918
 
-techs = load.tech.get_techs()["technologies"]
-equipments = load.equipment.get_equipments()["equipments"]
-units = load.unit.get_units()["sub_units"]
+techs = load.tech.get_techs()
+equipments = hoi4.load.get_equipments()
+units = hoi4.load.get_units()
 
 for equipment_key, equipment_value in equipments.items():
     if "archetype" in equipment_value:
@@ -31,7 +27,7 @@ for tech_key, tech in techs.items():
             units[unit_key]["year"] = year
 
 def units_at_year(year):
-    units = load.unit.get_units()["sub_units"]
+    units = hoi4.load.get_units()
     
     # archetype_key -> best equipment
     equipment_models = {}

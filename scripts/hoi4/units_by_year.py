@@ -1,6 +1,6 @@
 import _initpath
-import load.tech
-import load.unit
+import hoi4
+
 import pyradox
 import os.path
 import json

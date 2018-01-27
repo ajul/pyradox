@@ -1,7 +1,7 @@
 import _initpath
 import os
-import load.tech
-import load.unit
+import hoi4
+
 
 import pyradox
 import pyradox
@@ -9,7 +9,7 @@ import pyradox
 
 from unitstats import compute_unit_type, compute_unit_name
 
-units = load.unit.get_units()["sub_units"]
+units = hoi4.load.get_units()
 
 terrains = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 

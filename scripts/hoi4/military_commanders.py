@@ -1,8 +1,8 @@
 import _initpath
 import re
 import os
-import load.tech
-import load.unit
+import hoi4
+
 
 import pyradox
 

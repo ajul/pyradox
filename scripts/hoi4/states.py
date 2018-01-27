@@ -2,8 +2,7 @@ import _initpath
 import re
 import os
 import json
-import load.tech
-import load.unit
+import hoi4
 import pyradox
 
 date = '1936.1.1'

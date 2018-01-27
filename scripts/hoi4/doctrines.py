@@ -2,12 +2,12 @@ import _initpath
 import re
 import copy
 
-import load.tech
+import hoi4
 import json
 
 default_year = 1918
 
-techs = load.tech.get_techs()["technologies"]
+techs = hoi4.load.get_technologies()
 
 #
 # folders = [ "land_doctrine_folder","naval_doctrine_folder","air_doctrine_folder" ]

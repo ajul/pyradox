@@ -1,11 +1,11 @@
 import _initpath
 import re
 import os
-import load.tech
+import hoi4
 
 import pyradox
 
-techs = load.tech.get_techs()["technologies"]
+techs = hoi4.load.get_technologies()
 
 def compute_country_tag_and_name(filename):
     m = re.match('.*([A-Z]{3})\s*-\s*(.*)\.txt$', filename)
