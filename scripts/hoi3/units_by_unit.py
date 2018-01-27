@@ -2,7 +2,7 @@ import _initpath
 import load.tech
 import load.unit
 import pyradox.format
-import pyradox.struct
+import pyradox
 import pyradox.wiki
 
 from unitstats import *
@@ -16,11 +16,11 @@ unit_data = {}
 for year in range(1936, 1948):
     unit_data[year] = units_at_year(year)
 
-by_unit = pyradox.struct.Tree()
+by_unit = pyradox.Tree()
 
 for year, data in unit_data.items():
     for unit, stats in data.items():
-        if unit not in by_unit.keys(): by_unit[unit] = pyradox.struct.Tree()
+        if unit not in by_unit.keys(): by_unit[unit] = pyradox.Tree()
         by_unit[unit][year] = stats
 
 for unit_type, unit_file in files.items():

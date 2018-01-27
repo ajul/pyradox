@@ -2,7 +2,7 @@ import _initpath
 import os
 import pyradox.config
 import pyradox.format
-import pyradox.struct
+import pyradox
 import pyradox.txt
 import pyradox.wiki
 

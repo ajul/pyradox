@@ -4,7 +4,7 @@ import os
 import load.tech
 import load.unit
 import pyradox.format
-import pyradox.struct
+import pyradox
 import pyradox.wiki
 import pyradox.yml
 
@@ -34,7 +34,7 @@ columns = (
     ('Traits', list_commander_traits, None),
     )
 
-commanders = pyradox.struct.Tree()
+commanders = pyradox.Tree()
 
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
     tag, _ = compute_country_tag_and_name(filename)

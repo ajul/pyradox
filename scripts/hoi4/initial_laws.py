@@ -3,7 +3,7 @@ import re
 import os
 import pyradox.config
 import pyradox.primitive
-import pyradox.struct
+import pyradox
 import pyradox.wiki
 import pyradox.yml
 
@@ -15,7 +15,7 @@ economics = pyradox.txt.parse_file(
     os.path.join(pyradox.config.get_game_directory('HoI4'),
                  'common', 'ideas', '_economic.txt'))['ideas']
 
-result = pyradox.struct.Tree()
+result = pyradox.Tree()
 
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
     country = country.at_time('1936.1.1')

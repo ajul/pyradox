@@ -7,7 +7,7 @@ import pyradox.txt
 import pyradox.yml
 
 
-result_tree = pyradox.struct.Tree()
+result_tree = pyradox.Tree()
 
 for group_name, group_data in pyradox.txt.parse_merge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')).items():
     if 'trigger' not in group_data: continue

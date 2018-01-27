@@ -6,15 +6,15 @@ import pyradox.config
 import pyradox.txt
 import pyradox.primitive
 import pyradox.image
-import pyradox.struct
+import pyradox
 
 start_date = pyradox.primitive.Date('1444.11.11')
 
-counts = pyradox.struct.Tree() # province counts
+counts = pyradox.Tree() # province counts
 
-# parse all files in a directory, producing instances of pyradox.struct.Tree
+# parse all files in a directory, producing instances of pyradox.Tree
 for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces')):
-    # pyradox.struct.Tree has many dict methods, such as .keys()
+    # pyradox.Tree has many dict methods, such as .keys()
     if 'base_tax' not in data.keys(): continue
     
     trade_good = 'unknown'

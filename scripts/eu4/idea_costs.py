@@ -63,7 +63,7 @@ for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.ba
 result = '{|class = "wikitable sortable"\n'
 result += '! Idea group !! Linear cost !! Base cost !! Adjusted for<br/>early ideas !! Max level ratio !! Final cost !! Bonuses unaccounted for\n'
 
-result_tree = pyradox.struct.Tree()
+result_tree = pyradox.Tree()
 
 for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
     for idea_set_name, idea_set in file_data.items():
@@ -106,7 +106,7 @@ for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.ba
         result += '|-\n'
         result += '| %s || %0.1f || %0.1f || %0.1f || %0.1f%% || %0.1f || %s \n' % (idea_set_name, total_linear_cost, base_cost, early_cost, max_ratio * 100, final_cost, unaccounted_string)
 
-        idea_set_tree = pyradox.struct.Tree()
+        idea_set_tree = pyradox.Tree()
 
         idea_set_tree['flat'] = total_linear_cost
         idea_set_tree['base'] = base_cost

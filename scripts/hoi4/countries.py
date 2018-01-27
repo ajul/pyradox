@@ -4,7 +4,7 @@ import os
 import load.tech
 import load.unit
 import pyradox.format
-import pyradox.struct
+import pyradox
 import pyradox.wiki
 import pyradox.yml
 
@@ -13,7 +13,7 @@ def compute_country_tag_and_name(filename):
     return m.group(1), m.group(2)
 
 countries = {}
-total = pyradox.struct.Tree()
+total = pyradox.Tree()
 
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
     tag, name = compute_country_tag_and_name(filename)

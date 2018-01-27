@@ -4,7 +4,7 @@ import os
 import load.tech
 import load.unit
 import pyradox.format
-import pyradox.struct
+import pyradox
 import pyradox.wiki
 import pyradox.yml
 
@@ -50,7 +50,7 @@ military_high_command_types = [
 
 types_to_tabulate = military_chief_types
 
-result = pyradox.struct.Tree()
+result = pyradox.Tree()
 
 
 idea_data = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'ideas'), merge_levels = 2)['ideas']
@@ -59,7 +59,7 @@ for idea_type in types_to_tabulate:
     type_name = pyradox.yml.get_localization(idea_type, ['ideas', 'traits'], game = 'HoI4')
     for idea_key, idea in ideas.items():
         if idea_key == 'designer': continue
-        row = pyradox.struct.Tree()
+        row = pyradox.Tree()
         row['type'] = type_name
         
         if 'allowed' not in idea:
@@ -142,7 +142,7 @@ def compute_magnitude_string(effect_key, magnitude, force_color = None):
         return pyradox.wiki.colored_percent_string(magnitude, number_format = '%+0.1f%%', color = color)
 
 # hacky: put each trait we see into a tree
-trait_result = pyradox.struct.Tree()
+trait_result = pyradox.Tree()
 
 def compute_effects(k, v):
     result = '<ul>'
@@ -181,7 +181,7 @@ def compute_effects(k, v):
                 magnitude_string = compute_magnitude_string(effect_key, magnitude)
                 subresult += '<li>%s: %s</li>' % (effect_name, magnitude_string)
         if trait_key not in trait_result.keys():
-            row = pyradox.struct.Tree()
+            row = pyradox.Tree()
             row['name'] = pyradox.yml.get_localization(trait_key, ['ideas', 'traits'], game = 'HoI4').replace('\\n', ' ')
             row['type'] = v['type']
             row['text'] = '<ul>' + subresult + '</ul>'

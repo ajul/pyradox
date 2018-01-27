@@ -8,7 +8,7 @@ import zipfile
 
 sys.path.append("../..")
 import pyradox.primitive
-import pyradox.struct
+import pyradox
 import pyradox.table
 import pyradox.txt
 
@@ -48,7 +48,7 @@ def extract(in_filename, out_filename_base = None):
     for node_data in trade_data.values():
         node = node_data['definitions']
         for country, country_data in node_data.items():
-            if isinstance(country_data, pyradox.struct.Tree):
+            if isinstance(country_data, pyradox.Tree):
                 if 'type' not in country_data: continue
                 money = country_data['money'] or 0.0
                 power = country_data['max_pow'] or 0.0

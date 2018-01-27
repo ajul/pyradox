@@ -3,7 +3,7 @@ import os
 import load.tech
 import load.unit
 import pyradox.format
-import pyradox.struct
+import pyradox
 import pyradox.txt
 import pyradox.wiki
 

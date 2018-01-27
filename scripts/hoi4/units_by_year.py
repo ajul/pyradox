@@ -1,16 +1,13 @@
 import _initpath
 import load.tech
 import load.unit
-import pyradox.format
-import pyradox.struct
-import pyradox.wiki
-import pyradox.yml
+import pyradox
 import os.path
 import json
 
 import unitstats
 
-all_years = pyradox.struct.Tree()
+all_years = pyradox.Tree()
 
 unit_type = 'land'
 
@@ -20,7 +17,7 @@ for year in unitstats.unit_type_years[unit_type]:
 
 with open("out/%s_units_by_year.txt" % unit_type, "w") as out_file:
     columns = [("Unit", unitstats.compute_unit_name)] + unitstats.base_columns[unit_type] + [("Unit", unitstats.compute_unit_name)]
-    tables = {year : pyradox.struct.Tree() for year in unitstats.unit_type_years[unit_type]}
+    tables = {year : pyradox.Tree() for year in unitstats.unit_type_years[unit_type]}
     for unit_key, unit in all_years.items():
         if unit["year"] in unitstats.unit_type_years[unit_type] and unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit):
             tables[unit["year"]].append(unit_key, unit)
@@ -35,7 +32,7 @@ with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
     for unit_key, unit in all_years.items():
         if unit["year"] not in unitstats.unit_type_years[unit_type]: continue
         if unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit) and unit["last_upgrade"] == unit["year"]:
-            if unit_key not in tables: tables[unit_key] = pyradox.struct.Tree()
+            if unit_key not in tables: tables[unit_key] = pyradox.Tree()
             tables[unit_key].append(unit["year"], unit)
     for unit_key, unit_years in sorted(tables.items(), key=lambda key, value: unitstats.compute_unit_name(key)):
         unit_name = unitstats.compute_unit_name(unit_key)

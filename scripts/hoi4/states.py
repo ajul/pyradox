@@ -4,11 +4,7 @@ import os
 import json
 import load.tech
 import load.unit
-import pyradox.csv
-import pyradox.format
-import pyradox.struct
-import pyradox.wiki
-import pyradox.yml
+import pyradox
 
 date = '1936.1.1'
 

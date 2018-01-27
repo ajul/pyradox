@@ -2,7 +2,7 @@ import _initpath
 import os
 import load.tech
 import pyradox.primitive
-import pyradox.struct
+import pyradox
 
 techs = load.tech.get_techs()["technologies"]
 
@@ -10,7 +10,7 @@ techs = load.tech.get_techs()["technologies"]
 techs_or_dependencies = {}
 
 for tech_key, tech in techs.items():
-    if isinstance(tech, pyradox.struct.Tree):
+    if isinstance(tech, pyradox.Tree):
         for path in tech.find_all('path'):
             child_tech_key = path['leads_to_tech']
             if child_tech_key not in techs_or_dependencies:

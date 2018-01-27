@@ -150,10 +150,10 @@ for tag in sorted(government_costs.keys()):
 result += '|}\n'
 print(result)
 
-result_tree = pyradox.struct.Tree()
+result_tree = pyradox.Tree()
 
 for tag in sorted(government_costs.keys()):
-    nation_tree = pyradox.struct.Tree()
+    nation_tree = pyradox.Tree()
     nation_tree['territory'] = territory_costs[tag]
     nation_tree['ruler'] = government_costs[tag][0]
     nation_tree['government'] = government_costs[tag][1]

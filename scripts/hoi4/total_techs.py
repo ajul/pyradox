@@ -3,7 +3,7 @@ import re
 import os
 import load.tech
 import pyradox.primitive
-import pyradox.struct
+import pyradox
 
 techs = load.tech.get_techs()["technologies"]
 

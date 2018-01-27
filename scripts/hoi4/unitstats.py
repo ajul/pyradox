@@ -1,11 +1,10 @@
 import _initpath
 import re
-import pyradox.format
-import pyradox.struct
+import pyradox
 import load.equipment
 import load.tech
 import load.unit
-import pyradox.yml
+
 
 factories_per_resource = 1.5 / 8.0
 
@@ -21,7 +20,7 @@ for equipment_key, equipment_value in equipments.items():
         equipment_value["is_archetype"] = False
         
 for tech_key, tech in techs.items():
-    if not isinstance(tech, pyradox.struct.Tree): continue
+    if not isinstance(tech, pyradox.Tree): continue
     year = tech["start_year"] or default_year
     if "enable_equipments" in tech:
         for equipment_key in tech.find_all("enable_equipments"):
@@ -43,7 +42,7 @@ def units_at_year(year):
         if "active" not in unit_data.keys(): unit_data["active"] = True
     
     for tech_key, tech in techs.items():
-        if not isinstance(tech, pyradox.struct.Tree): continue
+        if not isinstance(tech, pyradox.Tree): continue
         if (tech["start_year"] or year) > year: continue
         if tech["allow"] and tech["allow"]["always"] == False: continue # ignore unallowed techs
         if 'folder' in tech and 'doctrine' in tech['folder']['name']: continue # ignore doctrines
@@ -71,7 +70,7 @@ def units_at_year(year):
 
     # fill in equipment
     for unit_key, unit_data in units.items():
-        unit_data["equipments"] = pyradox.struct.Tree()
+        unit_data["equipments"] = pyradox.Tree()
         for archetype_key in unit_data["need"]:
             if archetype_key in equipment_models:
                 equipment = equipment_models[archetype_key]

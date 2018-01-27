@@ -25,7 +25,7 @@ def units_at_year(year):
             
             for effect, amount in effects.items():
                 if effect not in unit_data: continue
-                if isinstance(amount, pyradox.struct.Tree): continue
+                if isinstance(amount, pyradox.Tree): continue
                 unit_data[effect] += level * amount
 
     for unit_key, unit_data in units.items():

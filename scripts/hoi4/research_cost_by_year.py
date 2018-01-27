@@ -3,7 +3,7 @@ import re
 import os
 import load.tech
 import pyradox.primitive
-import pyradox.struct
+import pyradox
 
 import numpy
 import matplotlib.pyplot as plt
@@ -13,7 +13,7 @@ research_days = numpy.zeros_like(years)
 
 techs = load.tech.get_techs()["technologies"]
 for tech_key, tech in techs.items():
-    if not isinstance(tech, pyradox.struct.Tree): continue
+    if not isinstance(tech, pyradox.Tree): continue
     if tech['doctrine']: continue
     start_year = tech['start_year'] or 0
     if start_year < years[1]:
