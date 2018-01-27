@@ -1,4 +1,4 @@
-import pyradox.struct
+from pyradox.datatype import *
 
 class Table():
     def __init__(self, headings):
@@ -28,12 +28,12 @@ class Table():
         """
         id_heading: Which column to use as the key of each row.
         """
-        result = pyradox.struct.Tree()
+        result = Tree()
         for row in self._data:
             id_value = row[id_heading]
             if id_value == '': continue
                 
-            result[id_heading] = pyradox.struct.Tree()
+            result[id_heading] = Tree()
             for heading in self._headings:
                 if heading == id_heading: continue
                 if heading == '': continue

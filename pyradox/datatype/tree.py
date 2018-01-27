@@ -1,12 +1,12 @@
-import pyradox.primitive
-import pyradox.color
+from pyradox.datatype import *
+from pyradox.error import *
+from pyradox.token import *
+
 import re
 import os
 import inspect
 import copy
 import warnings
-
-from pyradox.error import ValueWarning
 
 class Tree():
     """
@@ -50,7 +50,7 @@ class Tree():
                 result += self.value.prettyprint(level + 1)
                 result += indent_string * level + '}'
             else:
-                result += pyradox.primitive.make_token_string(self.value)
+                result += make_token_string(self.value)
             
             if include_comments and self.line_comment is not None:
                 result += " #%s" % (self.line_comment)
@@ -77,7 +77,7 @@ class Tree():
                 result += '\n%s' % (indent_string * level)
             
             # Output value. At current trees are not valid inside groups.
-            result += pyradox.primitive.make_token_string(self.value) + ' '
+            result += make_token_string(self.value) + ' '
             
             if include_comments and self.line_comment is not None:
                 need_indent = True
@@ -431,34 +431,19 @@ class Tree():
         """
         # cast to date
         if time not in (True, False):
-            time = pyradox.primitive.Time(time)
+            time = Time(time)
         
         result = Tree()
         # non-dates
         for item in self._data:
-            if not isinstance(item.key, pyradox.primitive.Time):
+            if not isinstance(item.key, Time):
                 result.append(item.key, copy.deepcopy(item.value))
 
         # dates
         if time is False: return result
         
         for item in self._data:
-            if isinstance(item.key, pyradox.primitive.Time):
+            if isinstance(item.key, Time):
                 if time is True or item.key <= time:
                     result.merge(item.value, merge_levels = merge_levels)
         return result
-        
-def to_python(value, **kwargs):
-    """
-    Converts a value to a built-in Python type.
-    """
-    if isinstance(value, Tree):
-        return value.to_python(**kwargs)
-    elif isinstance(value, pyradox.primitive.Time) or isinstance(value, pyradox.color.Color):
-        return str(value)
-    else:
-        return value
-            
-def match(x, spec):
-    if isinstance(spec, str) and isinstance(x, str): return x.lower() == spec.lower()
-    else: return x == spec
