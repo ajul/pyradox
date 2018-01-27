@@ -367,7 +367,7 @@ class Tree():
         
     # conversion methods
     
-    def to_python(self, duplicate_action = 'group'):
+    def to_python(self, duplicate_action = 'list'):
         """
         Recursively converts this Tree to built-in Python types.
         groups become lists.
@@ -376,9 +376,9 @@ class Tree():
             'error': Raise an error.
             'overwrite': Silently overwrite.
             'one_group': Take the first group for the key as a list, but error otherwise.
-            'group': Group all as a list.
+            'list': Put all duplicates into a list.
         """
-        allowed_duplicate_actions = ['error', 'overwrite', 'one_group', 'group']
+        allowed_duplicate_actions = ['error', 'overwrite', 'one_group', 'list']
         
         if duplicate_action not in allowed_duplicate_actions:
             raise ValueError('Invalid duplicate action "%s". Must be one of %s.' % (duplicate_action, allowed_duplicate_actions))
@@ -409,7 +409,7 @@ class Tree():
                 
                 # Handle duplicate.
                 if python_key in result:
-                    if duplicate_action == 'group':
+                    if duplicate_action == 'list':
                         # Convert to list if necessary, then append.
                         if not isinstance(result[python_key], list):
                             result[python_key] = [result[python_key]]

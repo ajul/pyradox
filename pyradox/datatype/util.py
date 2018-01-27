@@ -2,7 +2,7 @@ import pyradox.datatype.color
 import pyradox.datatype.time
 import pyradox.datatype.tree
 
-def to_python(value, duplicate_action = 'group'):
+def to_python(value, duplicate_action = 'list'):
     """
     Converts a value to a built-in Python type.
     """
