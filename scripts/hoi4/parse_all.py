@@ -11,7 +11,7 @@ def parse_walk(dirname, verbose=False):
 skip = '\\\\(map|wiki|interface|pdx_launcher|previewer_assets)\\\\'
 
 
-dirname = os.path.join(pyradox.config.get_basedir('HoI4'))
+dirname = os.path.join(pyradox.config.get_game_directory('HoI4'))
 for root, dirs, files in os.walk(dirname):
     if root == dirname: continue
     for filename in files:

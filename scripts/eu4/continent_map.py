@@ -34,7 +34,7 @@ for name, color in color_defs.items():
 print(legend)
 
 continent_map = {}
-for continent, provinces in pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('EU4'), 'map', 'continent.txt'), verbose=False).items():
+for continent, provinces in pyradox.txt.parse_file(os.path.join(pyradox.config.get_game_directory('EU4'), 'map', 'continent.txt'), verbose=False).items():
     for province_id in provinces:
         if province_id in continent_map:
             print('Duplicate continent for province %d' % province_id)

@@ -10,8 +10,8 @@ import pyradox.image
 from PIL import Image
 
 # Load states.
-states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'), verbose=False)
-state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'state_category'), merge_levels = 1, verbose=False)
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'states'), verbose=False)
+state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'state_category'), merge_levels = 1, verbose=False)
 state_categories = state_categories['state_categories']
 province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 

@@ -6,7 +6,7 @@ import pyradox.struct
 import pyradox.txt
 import pyradox.wiki
 
-terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
+terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
 def compute_unit_stat_function(stat_key):
     def compute_unit_stat(terrain_key, terrain):

@@ -34,7 +34,7 @@ def get_default_game():
         raise RuntimeError('Default game not set!')
     return _default_game
     
-def get_basedir(game = None):
+def get_game_directory(game = None):
     if game is None: game = get_default_game()
     if game not in _basedirs:
         # search for game

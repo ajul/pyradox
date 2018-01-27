@@ -11,7 +11,7 @@ from unitstats import compute_unit_type, compute_unit_name
 
 units = load.unit.get_units()["sub_units"]
 
-terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
+terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']
 
 land_terrain_keys = [key for key, value in terrains.items() if "movement_cost" in value and not value["is_water"]]
 

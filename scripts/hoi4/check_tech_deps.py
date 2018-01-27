@@ -60,7 +60,7 @@ def check_years(tech_keys, filename, date):
         if (tech['start_year'] or 0) > date.year:
             print('%s : %s : Tech %s is ahead of time with year %s' % (filename, date, tech_key, tech['start_year']))
 
-for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
     tech_keys = set(country['set_technology'].keys())
     check_deps(tech_keys, filename, pyradox.primitive.Date('1936.1.1'))
     for date, effects in country.items():
@@ -69,7 +69,7 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_b
         tech_keys |= set(effects['set_technology'].keys())
         check_deps(tech_keys, filename, date)
 
-for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
     tech_keys = set(country['set_technology'].keys())
     check_years(tech_keys, filename, pyradox.primitive.Date('1936.1.1'))
     for date, effects in country.items():

@@ -12,8 +12,8 @@ from PIL import Image
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'), verbose=False)
-supply_areas = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'map', 'supplyareas'), verbose=False)
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'states'), verbose=False)
+supply_areas = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'map', 'supplyareas'), verbose=False)
 
 states_by_id = {state['id'] : state for state in states.values()}
 
@@ -52,7 +52,7 @@ for supply_area in supply_areas.values():
     supply_area_local_supply[supply_area['id']] = local_supply
     supply_area_transport[supply_area['id']] = transport
 
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_basedir('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_game_directory('HoI4'))
 
 # provinces -> state id
 groups_local = {}

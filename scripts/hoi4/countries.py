@@ -15,16 +15,16 @@ def compute_country_tag_and_name(filename):
 countries = {}
 total = pyradox.struct.Tree()
 
-for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party']
     country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = 'HoI4')
     countries[tag] = country
 
-states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'))
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'states'))
 state_categories = pyradox.txt.parse_merge(
-    os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'state_category'),
+    os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'state_category'),
     verbose=False)
 
 for state in states.values():

@@ -12,6 +12,8 @@ foo = bar # line comment 0
 = # pre comment
 3 # line comment
 
+empty_tree = {}
+
 # tree test
 tree = {
 # pre comment in tree
