@@ -7,4 +7,3 @@ from pyradox.worldmap import ProvinceMap
 
 import pyradox.format
 import pyradox.image
-import pyradox.load

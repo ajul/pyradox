@@ -15,6 +15,8 @@ class ParadoxDialect(csv.Dialect):
     quoting = csv.QUOTE_NONE # no quotes AFAICT
     strict = True
 
+csv.register_dialect('paradox', ParadoxDialect)
+    
 def parse_file(filename, verbose=False):
     with open(filename, encoding=encoding) as f:
         lines = f.readlines()
@@ -32,17 +34,14 @@ def parse_dir(dirname, verbose=False):
 
 def parse(lines, filename):
     reader = csv.reader(lines, dialect = ParadoxDialect)
-    heading_tokens = next(reader, None)
+    headings = next(reader, None)
     
-    if heading_tokens is None:
+    if headings is None:
         raise ParseError('%s, row 1 (headings): csv file must have at least one row.' % filename)
-    
-    headings = heading_tokens[:-1] # last column is always a dummy value
     
     result = pyradox.Tree()
     
     for row_index, row_tokens in enumerate(reader):
-        row_tokens = row_tokens[:-1] # last column is always a dummy value
         if len(row_tokens) == 0: continue # skip blank lines
         
         if len(row_tokens) != len(headings):
@@ -69,9 +68,6 @@ def write_tree(tree, filename, column_specs, dialect, filter_function = None, so
     filter_function: filter_function(key, value) determines whether to include each item.
     sort_function: sort_function(key, value) determines whether to include each item.
     """
-    
-    if dialect == 'paradox':
-        dialect = ParadoxDialect
     
     with open(filename, 'w', newline='') as f:
         writer = csv.writer(f, dialect = dialect)
