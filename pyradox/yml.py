@@ -42,13 +42,14 @@ def parse_file(filename):
 def parse_line(line_number, line, filename):
     comment = re.match(r'\s*#.*', line)
     if comment is not None: return
-    m = re.match(r'\s*([\w\-\.]+):\d?\s*("*)(.*)(\2)\s*', line)
+    m = re.match(r'\s*([\w\-\.]+):\d?\s*("*)(.*)(\2)\s*$', line)
     if m is not None:
         key, value = m.group(1, 3)
         cache[key.lower()] = value
     else:
-        # debug
-        warnings.warn(ParseWarning('Could not parse line %s' % line))
+        # warn if not blank
+        if not re.match(r'\s*$', line):
+            warnings.warn(ParseWarning('Could not parse line %s' % line))
 
 def get_localization(key, sources = ['text'], game = None):
     if game is None: game = pyradox.config.default_game
