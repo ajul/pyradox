@@ -1,6 +1,6 @@
 import _initpath
 import os
-import pyradox.config
+
 import pyradox
 import load.country
 import load.province

@@ -1,5 +1,5 @@
 import _initpath
-import pyradox.config
+
 import pyradox
 import pyradox.worldmap
 import os

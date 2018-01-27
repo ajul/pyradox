@@ -1,6 +1,6 @@
 import os
 import pyradox.format
-import pyradox.config
+
 import pyradox.load
 import pyradox
 import pyradox

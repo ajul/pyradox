@@ -2,17 +2,17 @@ import _initpath
 import os
 import re
 import collections
-import pyradox.config
+
 import pyradox
 import pyradox.worldmap
 import pyradox.image
 from PIL import Image
 
-# Load the province map using the default location set in pyradox.config.
+# Load the province map using the default location set in pyradox.
 province_map = pyradox.worldmap.ProvinceMap()
 
 colormap = {}
-for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('EU4'), 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
     province_id = int(m.group(0))
     if ('base_tax' in data and data['base_tax'] > 0):

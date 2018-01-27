@@ -1,5 +1,5 @@
 import os
-import pyradox.config
+
 import pyradox.format
 import pyradox.load
 import pyradox

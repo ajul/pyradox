@@ -2,7 +2,7 @@ import _initpath
 import os
 import re
 import collections
-import pyradox.config
+
 import pyradox.image
 
 import pyradox

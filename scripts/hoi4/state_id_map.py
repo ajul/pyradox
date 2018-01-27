@@ -2,7 +2,7 @@ import _initpath
 import os
 import re
 import collections
-import pyradox.config
+
 import pyradox
 import pyradox.worldmap
 import pyradox.image
@@ -11,7 +11,7 @@ from PIL import Image
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'states'))
+states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'))
 province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 # provinces -> state id

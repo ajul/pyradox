@@ -1,10 +1,10 @@
 import _initpath
 
 from PIL import Image
-import pyradox.config
+
 import os
 
-flagdir = os.path.join(pyradox.config.get_game_directory('HoI4'), 'gfx', 'flags')
+flagdir = os.path.join(pyradox.get_game_directory('HoI4'), 'gfx', 'flags')
 
 for filename in os.listdir(flagdir):
     fullpath = os.path.join(flagdir, filename)

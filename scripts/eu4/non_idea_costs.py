@@ -3,7 +3,7 @@ import os
 import re
 import math
 import collections
-import pyradox.config
+
 import pyradox.image
 import pyradox
 

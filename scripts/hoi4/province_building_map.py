@@ -3,7 +3,7 @@ import os
 import math
 import re
 import collections
-import pyradox.config
+
 import pyradox
 import pyradox.worldmap
 import pyradox.image
@@ -14,8 +14,8 @@ building_type = 'naval_base'
 scale = 2.0
 
 # Load states.
-states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'states'), verbose=False)
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.get_game_directory('HoI4'))
+states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'), verbose=False)
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI4'))
 
 colormap = {}
 textmap = {}

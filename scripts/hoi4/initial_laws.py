@@ -1,7 +1,7 @@
 import _initpath
 import re
 import os
-import pyradox.config
+
 
 import pyradox
 import pyradox.wiki
@@ -12,12 +12,12 @@ def compute_country_tag_and_name(filename):
     return m.group(1), m.group(2)
 
 economics = pyradox.txt.parse_file(
-    os.path.join(pyradox.config.get_game_directory('HoI4'),
+    os.path.join(pyradox.get_game_directory('HoI4'),
                  'common', 'ideas', '_economic.txt'))['ideas']
 
 result = pyradox.Tree()
 
-for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_game_directory('HoI4'), 'history', 'countries')):
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'countries')):
     country = country.at_time('1936.1.1')
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
