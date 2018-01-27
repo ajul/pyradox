@@ -8,6 +8,7 @@ language = 'english'
 # Uses glob, but not recursively (no **).
 prefixes = [
     r'/Program Files*/Steam/steamapps/common/', # windows
+    r'/Steam/steamapps/common/',
     r'~/Library/Application Support/Steam/steamapps/common/', # mac
     r'~/*steam/steam/SteamApps/common', # linux
 ]

@@ -1,6 +1,7 @@
 from pyradox.error import *
 import pyradox.datatype.time
 import pyradox.datatype.util
+import pyradox.token
 
 import re
 import os
@@ -50,7 +51,7 @@ class Tree():
                 result += self.value.prettyprint(level + 1)
                 result += indent_string * level + '}'
             else:
-                result += make_token_string(self.value)
+                result += pyradox.token.make_token_string(self.value)
             
             if include_comments and self.line_comment is not None:
                 result += " #%s" % (self.line_comment)
@@ -77,7 +78,7 @@ class Tree():
                 result += '\n%s' % (indent_string * level)
             
             # Output value. At current trees are not valid inside groups.
-            result += make_token_string(self.value) + ' '
+            result += pyradox.token.make_token_string(self.value) + ' '
             
             if include_comments and self.line_comment is not None:
                 need_indent = True

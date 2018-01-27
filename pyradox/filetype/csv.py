@@ -1,5 +1,6 @@
 import pyradox
 import pyradox.format
+import pyradox.token
 from pyradox.error import *
 
 import csv
@@ -32,19 +33,32 @@ def parse_dir(dirname, verbose=False):
 def parse(lines, filename):
     reader = csv.reader(lines, dialect = ParadoxDialect)
     heading_tokens = next(reader, None)
+    
     if heading_tokens is None:
-        raise ParseError('%s, row 1 (headings): csv file must have at least one row' % filename)
-    headings = [x.lower() for x in heading_tokens[:-1]]
-    result = pyradox.Table(headings)
-    for i, row_tokens in enumerate(reader):
-        row_tokens = row_tokens[:-1]
-        if len(row_tokens) == 0: continue
+        raise ParseError('%s, row 1 (headings): csv file must have at least one row.' % filename)
+    
+    headings = heading_tokens[:-1] # last column is always a dummy value
+    
+    result = pyradox.Tree()
+    
+    for row_index, row_tokens in enumerate(reader):
+        row_tokens = row_tokens[:-1] # last column is always a dummy value
+        if len(row_tokens) == 0: continue # skip blank lines
+        
         if len(row_tokens) != len(headings):
-            warnings.warn(ParseWarning('%s, row %d: row length (%d) should be same as headings length (%d)' % (filename, i + 2, len(row_tokens), len(headings))))
-            for i in range(len(row_tokens), len(headings)):
-                row_tokens.append('')
-            row_tokens = row_tokens[:len(headings)]
-        result.add_row([pyradox.token.make_primitive(token, default_token_type = 'str') for token in row_tokens])
+            warnings.warn_explicit('Row length (%d) should be same as headings length (%d).' % (len(row_tokens), len(headings)), ParseWarning, filename, row_index + 2)
+        
+        # first column is the key
+        key = row_tokens[0]
+        tree_row = pyradox.Tree()
+        result[key] = tree_row
+        
+        for col_index in range(min(len(headings), len(row_tokens))):
+            heading = headings[col_index]
+            row_token = row_tokens[col_index]
+            value = pyradox.token.make_primitive(row_token, default_token_type = 'str')
+            tree_row.append(heading, row_token)
+            
     return result 
 
 def write_tree(tree, filename, column_specs, dialect, filter_function = None, sort_function = lambda key, value: key):

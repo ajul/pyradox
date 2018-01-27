@@ -1,4 +1,4 @@
-from pyradox.datatype import Color, Table, Time, Tree
+from pyradox.datatype import Color, Time, Tree
 from pyradox.filetype import csv, json, txt, wiki, yml
 from pyradox.filetype.txt import parse, parse_file, parse_dir, parse_merge
 
