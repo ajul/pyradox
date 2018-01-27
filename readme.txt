@@ -2,7 +2,7 @@ Requires:
 * Unicode-default Python. This includes the default CPython 3, IronPython, and probably Jython, but NOT the default CPython 2.
 * pyradox.worldmap requires PIL (or Pillow).
 
-Some scripts are in /scripts/<gamename>. Make sure they actually run before using them as a base, though, I tend to break things after a while.
+Some scripts are in /scripts/<gamename>. Make sure they actually run before using them as a base, though, I tend to break things after a while. I suggest looking at recently-edited files.
 
 Module summary:
 
