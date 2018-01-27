@@ -1,6 +1,7 @@
 import csv
 import os
 import warnings
+import pyradox.format
 import pyradox.primitive
 import pyradox.struct
 import pyradox.table
@@ -48,4 +49,31 @@ def parse(lines, filename):
             row_tokens = row_tokens[:len(headings)]
         result.add_row([pyradox.primitive.make_primitive(token, default_token_type = 'str') for token in row_tokens])
     return result 
+
+def write_csv(filename, tree, column_specs, dialect, filter_function = None, sort_function = lambda item: item[0]):
+    """
+    Writes a csv file from the given tree.
+    column_specs: A list of (header, format_spec), one tuple per column. format_spec is as per pyradox.format.format_key_value.
+    dialect: What dialect to use. Generally 'excel' or 'paradox'.
+    filter_function: filter_function(item) determines whether to include each item.
+    sort_function: sort_function(item) determines whether to include each item.
+    """
     
+    if dialect == 'paradox':
+        dialect = ParadoxDialect
+    
+    with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f, dialect = dialect)
+        
+        # workaround for excel interpreting leading ID as special file type
+        if dialect == 'excel' and column_specs[0][0][:2] == 'ID':
+            header_row = [column_specs[0][0].lower()] + [header for header, format_spec in column_specs[1:]]
+        else:
+            header_row = [header for header, format_spec in column_specs]
+        
+        writer.writerow(header_row)
+        
+        for key, value in sorted(tree.items(), key = sort_function):
+            if filter_function is not None and not filter_function(key, value): continue
+            
+            writer.writerow([pyradox.format.format_key_value(key, value, format_spec) for header, format_spec in column_specs])

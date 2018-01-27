@@ -2,12 +2,9 @@ import re
 import pyradox.format
 
 def make_wikitable(tree, column_specs, filter_function = None, sort_function = lambda item: item[0], table_style = "text-align: right;", collapse = False, sortable = True):
-    # column_specs: [(header, content, maybe_cell_style) ...]
+    # column_specs: [(header, format_spec, maybe_cell_style) ...]
     # each key, value pair produces a row
-    # content can be one of the following:
-    # * a function f -> f(key, value)
-    # * None -> pyradox.format.human_string(key, True)
-    # * a format string s -> s % value
+    # format_spec is as per pyradox.format.format_key_value
     
     # By default aligns all numbers right and everything else left.
     
@@ -36,21 +33,9 @@ def make_wikitable(tree, column_specs, filter_function = None, sort_function = l
         for column_spec in column_specs:
             result += '| '
             
-                
-            contents = column_spec[1]
+            format_spec = column_spec[1]
             
-            if callable(contents):
-                try:
-                    content_string = contents(key, value)
-                except ZeroDivisionError:
-                    content_string = ''
-            elif contents is None:
-                content_string = pyradox.format.human_string(key, True)
-            else:
-                try:
-                    content_string = contents % value
-                except TypeError:
-                    content_string = ''
+            content_string = pyradox.format.format_key_value(key, value, format_spec)
                     
             if len(column_spec) >= 3:
                 cell_style = column_spec[2]

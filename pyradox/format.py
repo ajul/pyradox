@@ -28,3 +28,24 @@ def human_title(s):
     return s    
 
 
+def format_key_value(key, value, format_spec):
+    """
+    Produces a string from a key-value pair based on the format_spec.
+    value is typically a Tree.
+    format_spec can be:
+        A function f(key, value). In this case the return value is the return value of f.
+        A string s. In this case the return value is s % format_spec.
+        None. In this case the return value is human_string(key, True).
+    """
+    if callable(format_spec):
+        try:
+            return format_spec(key, value)
+        except ZeroDivisionError:
+            return ''
+    elif format_spec is None:
+        return pyradox.format.human_string(key, True)
+    else:
+        try:
+            return format_spec % value
+        except TypeError:
+            return ''
