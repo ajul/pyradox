@@ -38,7 +38,7 @@ def get_default_game():
     return default_game
     
 def get_game_directory(game = None):
-    if game is None: game = getdefault_game()
+    if game is None: game = get_default_game()
     if game not in game_directories:
         # search for game
         game_suffix = game_suffixes[game]
