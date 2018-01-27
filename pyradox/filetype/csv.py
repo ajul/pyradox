@@ -47,13 +47,13 @@ def parse(lines, filename):
         result.add_row([pyradox.token.make_primitive(token, default_token_type = 'str') for token in row_tokens])
     return result 
 
-def write_csv(filename, tree, column_specs, dialect, filter_function = None, sort_function = lambda key, value: key):
+def write_tree(tree, filename, column_specs, dialect, filter_function = None, sort_function = lambda key, value: key):
     """
     Writes a csv file from the given tree.
     column_specs: A list of (header, format_spec), one tuple per column. format_spec is as per pyradox.format.format_key_value.
     dialect: What dialect to use. Generally 'excel' or 'paradox'.
-    filter_function: filter_function(item) determines whether to include each item.
-    sort_function: sort_function(item) determines whether to include each item.
+    filter_function: filter_function(key, value) determines whether to include each item.
+    sort_function: sort_function(key, value) determines whether to include each item.
     """
     
     if dialect == 'paradox':

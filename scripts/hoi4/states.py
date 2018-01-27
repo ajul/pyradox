@@ -110,7 +110,7 @@ if beta:
 else:
     csv_filename = "out/states.csv"
 
-pyradox.csv.write_csv(csv_filename, states, columns, 'excel', sort_function = lambda key, value: value['id'])
+pyradox.csv.write_tree(states, csv_filename, columns, 'excel', sort_function = lambda key, value: value['id'])
 
 if beta:
     json_filename = "out/states_beta.json"
