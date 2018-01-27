@@ -38,6 +38,7 @@ HOURS_PER_DAY = 24
 DAYS_PER_MONTH_0 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] # No leap years.
 DAYS_PER_YEAR = sum(DAYS_PER_MONTH_0)
 TIME_PRECISIONS = ['year', 'month', 'day', 'hour']
+VALID_TIME_COMPONENT_COUNTS = [3, 4]
 MONTH_NAMES_0 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 class Time():
@@ -56,7 +57,10 @@ class Time():
             self.data = [x for x in year.data]
         elif isinstance(year, str):
             # is actually string containing time data
-            self.data = [int(x) for x in year.split('.')]
+            data = [int(x) for x in year.split('.')]
+            if len(data) not in VALID_TIME_COMPONENT_COUNTS:
+                raise ValueError('Time string "%s" has invalid number of components.' % year)
+            self.data = data
         else:
             self.data = [x for x in [year, month, day, hour] if x is not None]
         self.validate()
