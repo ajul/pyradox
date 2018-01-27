@@ -10,6 +10,13 @@ import pyradox.yml
 
 date = '1936.1.1'
 
+beta = False
+
+if beta:
+    game = 'HoI4_beta'
+else:
+    game = 'HoI4'
+
 localization_sources = ['state_names']
 
 def compute_country_tag_and_name(filename):
@@ -18,7 +25,7 @@ def compute_country_tag_and_name(filename):
 
 countries = {}
 
-for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'countries')):
+for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_basedir(game), 'history', 'countries')):
     country = country.at_time(date)
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
@@ -26,8 +33,8 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_b
     country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = 'HoI4')
     countries[tag] = country
 
-states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'history', 'states'))
-state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir('HoI4'), 'common', 'state_category'),
+states = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir(game), 'history', 'states'))
+state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.config.get_basedir(game), 'common', 'state_category'),
                                          verbose=False, merge_levels = 1)
 
 state_categories = state_categories['state_categories']
@@ -37,7 +44,7 @@ for state in states.values():
     # if state['id'] == 50: print('state50', history)
     state['owner'] = history['owner']
     state['owner_name'] = countries[history['owner']]['name']
-    state['human_name'] = pyradox.yml.get_localization(state['name'], localization_sources, game = 'HoI4')
+    state['human_name'] = pyradox.yml.get_localization(state['name'], localization_sources, game = game)
     country = countries[tag]
 
     country['states'] = (country['states'] or 0) + 1
@@ -92,6 +99,10 @@ columns = (
     ('{{Icon|Naval base}}', '%(naval_base)d'),
     )
 
-out = open("out/states.txt", "w")
+if beta:
+    out_filename = "out/states_beta.txt"
+else:
+    out_filename = "out/states.txt"
+out = open(out_filename, "w")
 out.write(pyradox.wiki.make_wikitable(states, columns, sort_function = lambda item: item[1]['id']))
 out.close()
