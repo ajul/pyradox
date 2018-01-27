@@ -1,4 +1,4 @@
-import _initpath
+import hoi4
 
 from PIL import Image
 

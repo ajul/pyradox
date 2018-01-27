@@ -6,7 +6,7 @@ factories_per_resource = 1.5 / 8.0
 
 default_year = 1918
 
-techs = load.tech.get_techs()
+techs = hoi4.load.get_technologies()
 equipments = hoi4.load.get_equipments()
 units = hoi4.load.get_units()
 

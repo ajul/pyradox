@@ -1,4 +1,4 @@
-import _initpath
+import hoi4
 import re
 import copy
 
