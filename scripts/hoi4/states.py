@@ -101,9 +101,8 @@ if beta:
     out_filename = "out/states_beta.txt"
 else:
     out_filename = "out/states.txt"
-out = open(out_filename, "w")
-out.write(pyradox.wiki.make_wikitable(states, columns, sort_function = lambda key, value: value['id']))
-out.close()
+with open(out_filename, "w") as out:
+    out.write(pyradox.wiki.make_wikitable(states, columns, sort_function = lambda key, value: value['id']))
 
 if beta:
     csv_filename = "out/states_beta.csv"
