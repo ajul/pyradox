@@ -15,9 +15,8 @@ class ParadoxDialect(csv.Dialect):
     strict = True
 
 def parse_file(filename, verbose=False):
-    f = open(filename, encoding=encoding)
-    lines = f.readlines()
-    f.close()
+    with open(filename, encoding=encoding) as f:
+        lines = f.readlines()
     if verbose: print('Parsing file %s.' % filename)
     return parse(lines, filename)
     

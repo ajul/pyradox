@@ -18,13 +18,11 @@ game_encodings = {
 def readlines(filename, encodings):
     for encoding in encodings:
         try:
-            f = open(filename, encoding=encoding)
-            lines = f.readlines()
-            f.close()
+            with open(filename, encoding=encoding) as f:
+                lines = f.readlines()
             return lines
         except UnicodeDecodeError:
             warnings.warn(ParseWarning("Failed to decode input file %s using codec %s." % (filename, encoding)))
-            f.close()
     raise ParseError("All codecs failed for input file %s." % filename)
 
 def parse(s, filename=""):
