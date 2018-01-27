@@ -1,8 +1,12 @@
 import pyradox.primitive
+import pyradox.color
 import re
 import os
 import inspect
 import copy
+import warnings
+
+from pyradox.error import ValueWarning
 
 class Tree():
     """
@@ -288,7 +292,7 @@ class Tree():
     def set_line_comment_at(self, i, line_comment):
         self._data[i].line_comment = line_comment
         
-    # operator
+    # operators
     
     def get_operator(self, key):
         return self._find(key).operator
@@ -341,6 +345,82 @@ class Tree():
             result += '%s#%s\n' % (indent_string * level, end_comment)
 
         return result
+        
+    # mutator methods
+    
+    def replaced_key_with_subkey(self, key, subkey):
+        """
+        For every self[key], replace the key for that item with self[key][subkey].
+        """
+        
+        for item in self._find_all(key):
+            item.key = item.value[subkey]
+            
+    def replace_key_with_subkey(self, key, subkey):
+        """
+        Non-destructive version of replaced_key_with_subkey. Returns a copy.
+        """
+        result = copy.deepcopy(self)
+        result.replaced_key_with_subkey(key, subkey)
+        return result
+        
+    # conversion methods
+    
+    def to_python(self, duplicate_action = 'group'):
+        """
+        Recursively converts this Tree to built-in Python types.
+        groups become lists.
+        
+        duplicate_action: Determines the action if a duplicate key is encountered.
+            'error': Raise an error.
+            'overwrite': Silently overwrite.
+            'one_group': Take the first group for the key as a list, but error otherwise.
+            'group': Group all as a list.
+        """
+        allowed_duplicate_actions = ['error', 'overwrite', 'one_group', 'group']
+        
+        if duplicate_action not in allowed_duplicate_actions:
+            raise ValueError('Invalid duplicate action "%s". Must be one of %s.' % (duplicate_action, allowed_duplicate_actions))
+        
+        result = {}
+        group_key = None # The key corresponding to the current group. None if no group in progress.
+        
+        for item in self._data:
+            python_key = to_python(item.key, duplicate_action = duplicate_action)
+            python_value = to_python(item.value, duplicate_action = duplicate_action)
+            if group_key is not None: # Last item was in a one_group.
+                if item.in_group and match(item.key, group_key) and not isinstance(item.value, Tree):
+                    # Continue the previous one_group.
+                    result[python_key].append(python_value)
+                    continue
+                else:
+                    # End the one_group.
+                    group_key = None
+            if item.in_group and duplicate_action == 'one_group':
+                if python_key in result:
+                    raise ValueError('to_python produced duplicate for key "%s". All but the last value will be overwritten.' % python_key)
+                # Start a group.
+                group_key = item.key
+                result[python_key] = []
+                result[python_key].append(python_value)
+            else:
+                # Not in a one_group.
+                
+                # Handle duplicate.
+                if python_key in result:
+                    if duplicate_action == 'group':
+                        # Convert to list if necessary, then append.
+                        if not isinstance(result[python_key], list):
+                            result[python_key] = [result[python_key]]
+                        result[python_key].append(python_value)
+                    elif duplicate_action == 'overwrite':
+                        result[python_key] = python_value
+                    else:
+                        raise ValueError('to_python produced duplicate for key "%s". All but the last value will be overwritten.' % python_key)
+                else:
+                    result[python_key] = python_value
+            
+        return result
 
     # other methods
     def at_time(self, time = False, merge_levels = -1):
@@ -367,6 +447,17 @@ class Tree():
                 if time is True or item.key <= time:
                     result.merge(item.value, merge_levels = merge_levels)
         return result
+        
+def to_python(value, **kwargs):
+    """
+    Converts a value to a built-in Python type.
+    """
+    if isinstance(value, Tree):
+        return value.to_python(**kwargs)
+    elif isinstance(value, pyradox.primitive.Time) or isinstance(value, pyradox.color.Color):
+        return str(value)
+    else:
+        return value
             
 def match(x, spec):
     if isinstance(spec, str) and isinstance(x, str): return x.lower() == spec.lower()
