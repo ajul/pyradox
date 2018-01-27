@@ -60,3 +60,26 @@ def get_game_directory(game):
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), game_suffix)
     return game_directories[game]
+
+def combine_path_and_game(path, game = None):
+    """
+    Determines the absolute path and game from each other.
+    
+    path: A string, or a sequence of path components which will be joined.
+    
+    If game is None, path is a full path and the game is determined from that.
+    Or game can be supplied, in which case path can be a path relative to the game directory.
+    """
+    
+    try:
+        path = os.fspath(path)
+    except:
+        if not isinstance(path, (str, bytes)):
+            path = os.path.join(*path)
+    
+    if game is None:
+        path = os.path.abspath(path)
+        game = get_game_from_path(path)
+    elif not os.path.isabs(path):
+        path = os.path.join(get_game_directory(game), path)
+    return path, game

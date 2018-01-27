@@ -23,12 +23,12 @@ def compute_country_tag_and_name(filename):
 
 countries = {}
 
-for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory(game), 'history', 'countries')):
+for filename, country in pyradox.txt.parse_dir(('history', 'countries'), game = game):
     country = country.at_time(date)
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party'] or 'neutrality'
-    country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = 'HoI4')
+    country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = game)
     countries[tag] = country
 
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory(game), 'history', 'states'))

@@ -1,4 +1,5 @@
 import pyradox
+import pyradox.config
 import pyradox.token
 from pyradox.error import *
 
@@ -31,34 +32,43 @@ def parse(s, filename=""):
     token_data = lex(lines, filename)
     return parse_tree(token_data, filename)
 
-def parse_file(filename, verbose=False, game=None):
-    """Parse a single file and return a Tree."""
-    if game is None: game = pyradox.get_game_from_path(filename)
+def parse_file(path, game=None, verbose=False):
+    """
+    Parse a single file and return a Tree.
+    path, game: 
+        If game is None, path is a full path and the game is determined from that.
+        Or game can be supplied, in which case path is a path relative to the game directory.
+    """
+    path, game = pyradox.config.combine_path_and_game(path, game)
     encodings = game_encodings[game]
     
-    lines = readlines(filename, encodings)
-    if verbose: print('Parsing file %s.' % filename)
-    token_data = lex(lines, filename)
-    return parse_tree(token_data, filename)
+    lines = readlines(path, encodings)
+    if verbose: print('Parsing file %s.' % path)
+    token_data = lex(lines, path)
+    return parse_tree(token_data, path)
     
-def parse_dir(dirname, *args, **kwargs):
+def parse_dir(path, game=None, *args, **kwargs):
     """Given a directory, iterate over the content of the .txt files in that directory as Trees"""
-    for filename in os.listdir(dirname):
-        fullpath = os.path.join(dirname, filename)
+    path, game = pyradox.config.combine_path_and_game(path, game)
+    
+    for filename in os.listdir(path):
+        fullpath = os.path.join(path, filename)
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                yield filename, parse_file(fullpath, *args, **kwargs)
+                yield filename, parse_file(fullpath, game = game, *args, **kwargs)
 
-def parse_merge(dirname, merge_levels = 0, *args, **kwargs):
+def parse_merge(path, game=None, merge_levels = 0, *args, **kwargs):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
+    path, game = pyradox.config.combine_path_and_game(path, game)
+    
     result = pyradox.Tree()
-    for filename in os.listdir(dirname):
-        fullpath = os.path.join(dirname, filename)
+    for filename in os.listdir(path):
+        fullpath = os.path.join(path, filename)
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
-                tree = parse_file(fullpath, *args, **kwargs)
+                tree = parse_file(fullpath, game = game, *args, **kwargs)
                 result.merge(tree, merge_levels)
     return result
 
