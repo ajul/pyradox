@@ -20,8 +20,14 @@ class Table():
             
     def get_headings(self):
         return self._headings
+        
+    def get_heading_index(self, heading):
+        return self._headings.index(heading)
             
     def to_tree(self, id_heading):
+        """
+        id_heading: Which column to use as the key of each row.
+        """
         result = pyradox.struct.Tree()
         for row in self._data:
             id_value = row[id_heading]
