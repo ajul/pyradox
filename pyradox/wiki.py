@@ -1,7 +1,7 @@
 import re
 import pyradox.format
 
-def make_wikitable(tree, column_specs, filter_function = None, sort_function = lambda item: item[0], table_style = "text-align: right;", collapse = False, sortable = True):
+def make_wikitable(tree, column_specs, filter_function = None, sort_function = lambda key, value: key, table_style = "text-align: right;", collapse = False, sortable = True):
     # column_specs: [(header, format_spec, maybe_cell_style) ...]
     # each key, value pair produces a row
     # format_spec is as per pyradox.format.format_key_value
@@ -27,7 +27,7 @@ def make_wikitable(tree, column_specs, filter_function = None, sort_function = l
         result += '! %s \n' % header
 
     # body
-    for key, value in sorted(tree.items(), key = sort_function):
+    for key, value in sorted(tree.items(), key = lambda item: sort_function(*item)):
         if filter_function is not None and not filter_function(key, value): continue
         result += '|-\n'
         for column_spec in column_specs:
