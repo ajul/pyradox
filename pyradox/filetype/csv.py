@@ -1,6 +1,7 @@
 import pyradox
 import pyradox.format
 import pyradox.token
+import pyradox.filetype.table
 from pyradox.error import *
 
 import csv
@@ -60,7 +61,7 @@ def parse(lines, filename):
             
     return result 
 
-def write_tree(tree, filename, column_specs, dialect, filter_function = None, sort_function = lambda key, value: key):
+def write_tree(tree, filename, column_specs, dialect, filter_function = None, sort_function = None):
     """
     Writes a csv file from the given tree.
     column_specs: A list of (header, format_spec), one tuple per column. format_spec is as per pyradox.format.format_key_value.
@@ -80,7 +81,5 @@ def write_tree(tree, filename, column_specs, dialect, filter_function = None, so
         
         writer.writerow(header_row)
         
-        for key, value in sorted(tree.items(), key = lambda item: sort_function(*item)):
-            if filter_function is not None and not filter_function(key, value): continue
-            
-            writer.writerow([pyradox.format.format_key_value(key, value, format_spec) for header, format_spec in column_specs])
+        for key, value in pyradox.filetype.table.filter_and_sort_tree(tree, filter_function, sort_function):
+            writer.writerow([pyradox.filetype.table.apply_format_spec(key, value, format_spec) for header, format_spec in column_specs])
