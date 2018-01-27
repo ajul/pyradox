@@ -43,7 +43,7 @@ def format_key_value(key, value, format_spec):
         except ZeroDivisionError:
             return ''
     elif format_spec is None:
-        return pyradox.format.human_string(key, True)
+        return human_string(key, True)
     else:
         try:
             return format_spec % value

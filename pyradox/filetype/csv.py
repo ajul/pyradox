@@ -1,12 +1,10 @@
+import pyradox
+import pyradox.format
+from pyradox.error import *
+
 import csv
 import os
 import warnings
-import pyradox.format
-import pyradox.primitive
-import pyradox.struct
-import pyradox.table
-
-from pyradox.error import ParseError, ParseWarning
 
 encoding = 'cp1252'
 
@@ -38,7 +36,7 @@ def parse(lines, filename):
     if heading_tokens is None:
         raise ParseError('%s, row 1 (headings): csv file must have at least one row' % filename)
     headings = [x.lower() for x in heading_tokens[:-1]]
-    result = pyradox.table.Table(headings)
+    result = pyradox.Table(headings)
     for i, row_tokens in enumerate(reader):
         row_tokens = row_tokens[:-1]
         if len(row_tokens) == 0: continue
@@ -47,7 +45,7 @@ def parse(lines, filename):
             for i in range(len(row_tokens), len(headings)):
                 row_tokens.append('')
             row_tokens = row_tokens[:len(headings)]
-        result.add_row([pyradox.primitive.make_primitive(token, default_token_type = 'str') for token in row_tokens])
+        result.add_row([pyradox.token.make_primitive(token, default_token_type = 'str') for token in row_tokens])
     return result 
 
 def write_csv(filename, tree, column_specs, dialect, filter_function = None, sort_function = lambda key, value: key):

@@ -1,6 +1,10 @@
 from pyradox.datatype import *
 from pyradox.error import *
 
+"""
+Token handling. The end-user should not ever have to deal with this directly.
+"""
+
 token_patterns = [
     ('time', r'\d+\.\d+\.\d+(\.\d+)?\b'),
     ('float', r'-?(\d+\.\d*|\d*\.\d+)\b'),

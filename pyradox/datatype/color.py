@@ -1,6 +1,6 @@
-import warnings
+from pyradox.warnings import *
 
-from pyradox.warnings import ValueWarning
+import warnings
 
 class Color():
     """

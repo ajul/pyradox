@@ -1,5 +1,6 @@
-import re
 import pyradox.format
+
+import re
 
 def make_wikitable(tree, column_specs, filter_function = None, sort_function = lambda key, value: key, table_style = "text-align: right;", collapse = False, sortable = True):
     # column_specs: [(header, format_spec, maybe_cell_style) ...]

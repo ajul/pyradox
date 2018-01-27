@@ -57,8 +57,8 @@ def get_localization(key, sources = ['text'], game = None):
         sources = [sources]
     for source in sources:
         if source not in already_read_sources:
-            language_key = 'l_%s' % pyradox.config.language
-            filename = os.path.join(pyradox.config.get_game_directory(game), 'localisation', '%s_%s.yml' % (source, language_key))
+            language_key = 'l_%s' % pyradox.get_language()
+            filename = os.path.join(pyradox.get_game_directory(game), 'localisation', '%s_%s.yml' % (source, language_key))
             
             parse_file(filename)
             already_read_sources.add(source)

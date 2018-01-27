@@ -1,12 +1,10 @@
-import pyradox.config
-import pyradox.primitive
-import pyradox.struct
-import pyradox.color
+import pyradox
+import pyradox.token
+from pyradox.error import *
+
 import re
 import os
 import warnings
-
-from pyradox.error import ParseError, ParseWarning
 
 game_encodings = {
     'EU4' : ['cp1252', 'utf_8_sig'],
@@ -37,7 +35,7 @@ def parse(s, filename=""):
 
 def parse_file(filename, verbose=False, game=None):
     """Parse a single file and return a Tree."""
-    if game is None: game = pyradox.config.get_default_game()
+    if game is None: game = pyradox.get_default_game()
     encodings = game_encodings[game]
     
     lines = readlines(filename, encodings)
@@ -56,7 +54,7 @@ def parse_dir(dirname, *args, **kwargs):
 
 def parse_merge(dirname, merge_levels = 0, *args, **kwargs):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
-    result = pyradox.struct.Tree()
+    result = pyradox.Tree()
     for filename in os.listdir(dirname):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
@@ -87,7 +85,7 @@ token_types = [
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
-    ] + pyradox.primitive.token_patterns
+    ] + pyradox.token.token_patterns
 
 omnibus_pattern = ''
 for token_type, p in token_types:
@@ -114,7 +112,7 @@ class TreeParseState():
         self.filename = filename            # File the tree is being parsed from. Used for warning and error messages.
         self.is_top_level = is_top_level        # True iff this tree is the top level of the file.
     
-        self.result = pyradox.struct.Tree() # The resulting tree.
+        self.result = pyradox.Tree() # The resulting tree.
         
         self.pos = start_pos                 # Current token position.
         self.pending_comments = []           # Comments pending assignment.
@@ -176,9 +174,9 @@ class TreeParseState():
     def process_key(self):
         token_type, token_string, token_line_number = self.consume()
         
-        if pyradox.primitive.is_primitive_key_token_type(token_type):
+        if pyradox.token.is_primitive_key_token_type(token_type):
             self.key_string = token_string
-            self.key = pyradox.primitive.make_primitive(token_string, token_type)
+            self.key = pyradox.token.make_primitive(token_string, token_type)
             self.next = self.process_operator
         elif token_type == 'comment':
             if token_line_number == self.get_previous_line_number():
@@ -220,13 +218,13 @@ class TreeParseState():
         # expecting a value
         token_type, token_string, token_line_number = self.consume()
         
-        if pyradox.primitive.is_primitive_value_token_type(token_type):
+        if pyradox.token.is_primitive_value_token_type(token_type):
             maybe_color = self.maybe_subprocess_color(token_string, token_line_number)
             if maybe_color is not None:
                 value = maybe_color
             else:
                 # normal value
-                value = pyradox.primitive.make_primitive(token_string, token_type)
+                value = pyradox.token.make_primitive(token_string, token_type)
             self.append_to_result(value)
             self.next = self.process_key
         elif token_type == 'begin':
@@ -277,7 +275,7 @@ class TreeParseState():
         # Otherwise, return None with no change in parser state.
         colorspace = colorspace_token_string.lower()
         
-        if colorspace not in pyradox.color.Color.COLORSPACES:
+        if colorspace not in pyradox.Color.COLORSPACES:
             return None
         
         # Possible comments to add.
@@ -300,13 +298,13 @@ class TreeParseState():
                 maybe_pre_comments.append(token_string)
             elif token_type in COLOR_SEQUENCE[seq]:
                 if token_type in ['int', 'float']:
-                    channels.append(pyradox.primitive.make_primitive(token_string, token_type))
+                    channels.append(pyradox.token.make_primitive(token_string, token_type))
                 seq += 1
                 if seq >= len(COLOR_SEQUENCE):
                     # Finished color. Update state.
                     self.pending_comments += maybe_pre_comments
                     self.pos = maybe_pos
-                    color = pyradox.color.Color(channels, colorspace)
+                    color = pyradox.Color(channels, colorspace)
                     return color
             else:
                 # Unexpected token.
@@ -318,8 +316,8 @@ class TreeParseState():
     def process_group(self):
         token_type, token_string, token_line_number = self.consume()
         
-        if pyradox.primitive.is_primitive_value_token_type(token_type):
-            value = pyradox.primitive.make_primitive(token_string, token_type)
+        if pyradox.token.is_primitive_value_token_type(token_type):
+            value = pyradox.token.make_primitive(token_string, token_type)
             self.append_to_result(value, in_group = True)
         elif token_type == "comment":
             if token_line_number == self.get_previous_line_number():

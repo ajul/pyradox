@@ -1,9 +1,10 @@
+import pyradox
+
 import csv
 import os
 import collections
 import warnings
-import pyradox.config
-import pyradox.txt
+
 from PIL import Image, ImageFilter, ImageChops, ImageFont, ImageDraw
 
 class MapWarning(Warning):
@@ -49,7 +50,7 @@ def generate_edge_image(image, edge_width=1):
 class ProvinceMap():
     def __init__(self, game = None, flip_y = False):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
-        basedir = pyradox.config.get_game_directory(game)
+        basedir = pyradox.get_game_directory(game)
         
         provinces_bmp = os.path.join(basedir, 'map', 'provinces.bmp')
         definition_csv = os.path.join(basedir, 'map', 'definition.csv')
@@ -68,7 +69,7 @@ class ProvinceMap():
             self._adjacency = {} # lazy evaluation
 
             water_keys = ('sea_starts', 'lakes')
-            default_tree = pyradox.txt.parse_file(default_map, verbose=False)
+            default_tree = pyradox.parse_file(default_map, verbose=False)
             max_province = default_tree['max_provinces']
             
             for key in water_keys:
@@ -94,7 +95,7 @@ class ProvinceMap():
         self.positions = {}
         max_y = self.province_image.size[1] # use image coords
         positions_txt = os.path.join(basedir, 'map', 'positions.txt')
-        positions_tree = pyradox.txt.parse_file(positions_txt, verbose=False)
+        positions_tree = pyradox.parse_file(positions_txt, verbose=False)
         if len(positions_tree) > 0:
             
             for province_id, data in positions_tree.items():
