@@ -7,8 +7,9 @@ language = 'english'
 # If you know the location of your games but it is not being found automatically, add it to the top of this list.
 # Uses glob, but not recursively (no **).
 _prefixes = [
-    r'/Program Files*/Steam/steamapps/common/',
-    r'~/Library/Application Support/Steam/steamapps/common/',
+    r'/Program Files*/Steam/steamapps/common/', # windows
+    r'~/Library/Application Support/Steam/steamapps/common/', # mac
+    r'~/*steam/steam/SteamApps/common', # linux
 ]
 
 _game_directories = {
