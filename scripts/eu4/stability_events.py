@@ -4,7 +4,7 @@ import os
 import pyradox.format
 
 import pyradox
-import pyradox.yml
+
 
 def get_stability_likely(conditions):
     result = [0 for x in range(7)]

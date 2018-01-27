@@ -4,7 +4,7 @@ import os
 import pyradox.format
 
 import pyradox
-import pyradox.yml
+
 import load.country
 
 idea_map = pyradox.txt.parse_file('out/idea_map.txt')

@@ -5,7 +5,7 @@ import pyradox
 import load.country
 import load.province
 
-import pyradox.yml
+
 
 def output_row(data):
     result = "|-\n"

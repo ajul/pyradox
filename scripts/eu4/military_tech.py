@@ -4,7 +4,7 @@ import os
 import pyradox.format
 
 import pyradox
-import pyradox.yml
+
 
 # Parse the military tech file.
 tree = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'technologies', 'mil.txt'))

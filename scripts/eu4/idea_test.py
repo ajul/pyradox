@@ -4,7 +4,7 @@ import os
 import pyradox.format
 
 import pyradox
-import pyradox.yml
+
 
 undefined_bonuses = set()
 

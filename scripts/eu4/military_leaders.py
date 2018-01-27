@@ -5,7 +5,7 @@ import pyradox
 import load.country
 import load.province
 
-import pyradox.yml
+
 
 def leader_row(leader):
     result = "|-\n"

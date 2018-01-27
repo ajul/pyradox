@@ -7,7 +7,7 @@ import pyradox.format
 import pyradox.image
 import pyradox
 
-import pyradox.yml
+
 import pyradox.worldmap
 import province_costs
 

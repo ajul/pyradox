@@ -4,7 +4,7 @@ import os
 import pyradox.format
 
 import pyradox
-import pyradox.yml
+
 
 
 result_tree = pyradox.Tree()

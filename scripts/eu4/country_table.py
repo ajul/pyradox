@@ -5,7 +5,7 @@ import pyradox
 import load.country
 import load.province
 
-import pyradox.yml
+
 
 # Load countries and provinces.
 countries = load.country.get_countries()

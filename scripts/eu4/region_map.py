@@ -6,7 +6,7 @@ import collections
 import pyradox.format
 import pyradox
 import pyradox.worldmap
-import pyradox.yml
+
 from PIL import Image
         
 province_map = pyradox.worldmap.ProvinceMap()

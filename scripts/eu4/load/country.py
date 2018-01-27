@@ -4,7 +4,7 @@ import pyradox.format
 import pyradox.load
 import pyradox
 import pyradox
-import pyradox.yml
+
 
 parse_countries, get_countries = pyradox.load.load_functions('EU4', 'countries', ('history', 'countries'))
 
