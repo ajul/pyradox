@@ -27,9 +27,9 @@ for unit_type, unit_file in files.items():
     for unit, data in by_unit.items():
         if data[1936]["type"] != unit_type: continue
         unit_file.write("== %s ==\n" % pyradox.format.human_string(unit, True))
-        unit_file.write(pyradox.wiki.make_wikitable(data, base_columns[unit_type], lambda k, v: v["active"]))
+        unit_file.write(pyradox.table.make_table(data, 'wiki', base_columns[unit_type], lambda k, v: v["active"]))
         unit_file.write("=== Derived statistics ===\n")
-        unit_file.write(pyradox.wiki.make_wikitable(data, derived_columns[unit_type], lambda k, v: v["active"]))
+        unit_file.write(pyradox.table.make_table(data, 'wiki', derived_columns[unit_type], lambda k, v: v["active"]))
 
 for unit_file in files.values():
     unit_file.close()

@@ -16,7 +16,7 @@ columns = (
     ("Type", lambda k, v: '<br/>'.join(v['type'])),
     )
 
-f.write(pyradox.wiki.make_wikitable(units, columns,
+f.write(pyradox.table.make_table(units, 'wiki', columns,
                                           filter_function = lambda k, v: compute_unit_type(v) == "land", collapse = True,
                                           sort_function = lambda key, value: compute_unit_name(key)))
 f.close()

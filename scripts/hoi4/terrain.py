@@ -26,6 +26,6 @@ columns = (
 
 file = open("out/terrain.txt", "w")
 
-file.write(pyradox.wiki.make_wikitable(terrains, columns, lambda k, v: "sound_type" in v and not v["is_water"]))
+file.write(pyradox.table.make_table(terrains, 'wiki', columns, lambda k, v: "sound_type" in v and not v["is_water"]))
 
 file.close()

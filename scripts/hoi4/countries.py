@@ -6,7 +6,7 @@ import hoi4
 
 import pyradox
 
-
+game = 'HoI4'
 
 def compute_country_tag_and_name(filename):
     m = re.match('.*([A-Z]{3})\s*-\s*(.*)\.txt$', filename)
@@ -18,14 +18,15 @@ total = pyradox.Tree()
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'countries')):
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
-    ruling_party = country['set_politics']['ruling_party']
+    ruling_party = country['set_politics']['ruling_party'] or 'neutrality'
     country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = 'HoI4')
     countries[tag] = country
 
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'))
-state_categories = pyradox.txt.parse_merge(
-    os.path.join(pyradox.get_game_directory('HoI4'), 'common', 'state_category'),
-    verbose=False)
+state_categories = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory(game), 'common', 'state_category'),
+                                         verbose=False, merge_levels = 1)
+
+state_categories = state_categories['state_categories']
 
 for state in states.values():
     history = state['history']
@@ -78,7 +79,7 @@ def sum_keys_function(*sum_keys):
 columns = (
     ('Country', '{{flag|%(name)s}}'),
     ('Tag', '%(tag)s'),
-    ('Ruling party', lambda k, v: v['set_politics']['ruling_party'].title()),
+    ('Ruling party', lambda k, v: (v['set_politics']['ruling_party'] or 'neutrality').title()),
     ('States', '%(states)d'),
     ('Research slots', lambda k, v: '%d' % (v['set_research_slots'] or 2)),
     ('Core population (M)', lambda k, v: ('%0.2f' % (v['core_manpower'] / 1e6)) if 'core_manpower' in v else '' ),
@@ -101,7 +102,7 @@ columns = (
     )
 
 out = open("out/countries.txt", "w")
-out.write(pyradox.wiki.make_wikitable(countries, columns, sort_function = lambda key, value: value['name']))
+out.write(pyradox.table.make_table(countries, 'wiki', columns, sort_function = lambda key, value: value['name']))
 out.close()
 
 print(total)

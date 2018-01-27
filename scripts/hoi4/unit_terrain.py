@@ -1,13 +1,10 @@
 import hoi4
 import os
-import hoi4
-
 
 import pyradox
-import pyradox
 
 
-from unitstats import compute_unit_type, compute_unit_name
+from hoi4.unitstats import compute_unit_type, compute_unit_name
 
 units = hoi4.load.get_units()
 
@@ -75,28 +72,28 @@ def make_columns(stat_key, include_last = True):
         [("Unit", compute_unit_name),
          ("Type", lambda k, v: "Support" if compute_is_support(v) else "Combat"),
          ] +
-        [(terrain_key.title(), compute_unit_stat_function(terrain_key, stat_key), None) for terrain_key in land_terrain_keys] +
+        [(terrain_key.title(), compute_unit_stat_function(terrain_key, stat_key)) for terrain_key in land_terrain_keys] +
         [
-            ("Small river", compute_small_river_stat_function(stat_key), None),
-            ("Large river", compute_large_river_stat_function(stat_key), None)])
+            ("Small river", compute_small_river_stat_function(stat_key)),
+            ("Large river", compute_large_river_stat_function(stat_key))])
     if include_last:
         result += [
-            ("Amphibious", compute_amphibious_stat_function(stat_key), None),
-            ("Fort", compute_unit_stat_function("fort", stat_key), None)]
+            ("Amphibious", compute_amphibious_stat_function(stat_key)),
+            ("Fort", compute_unit_stat_function("fort", stat_key))]
     return result
 
 file = open("out/unit_terrain.txt", "w")
 
 file.write("=== Attack ===\n")
-file.write(pyradox.wiki.make_wikitable(units, make_columns("attack"),
+file.write(pyradox.table.make_table(units, 'wiki', make_columns("attack"),
                                       filter_function = lambda k, v: compute_unit_type(v) == "land",
                                       sort_function = lambda key, value: compute_unit_name(key)))
 file.write("=== Defense ===\n")
-file.write(pyradox.wiki.make_wikitable(units, make_columns("defence"),
+file.write(pyradox.table.make_table(units, 'wiki', make_columns("defence"),
                                       filter_function = lambda k, v: compute_unit_type(v) == "land",
                                       sort_function = lambda key, value: compute_unit_name(key)))
 file.write("=== Movement ===\n")
-file.write(pyradox.wiki.make_wikitable(units, make_columns("movement"),
+file.write(pyradox.table.make_table(units, 'wiki', make_columns("movement"),
                                       filter_function = lambda k, v: compute_unit_type(v) == "land",
                                       sort_function = lambda key, value: compute_unit_name(key)))
 

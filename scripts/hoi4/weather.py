@@ -72,9 +72,9 @@ ground_effect_columns = (
 
 file = open("out/weather.txt", "w")
 
-file.write(pyradox.wiki.make_wikitable(static_modifiers, precipitation_columns, filter_function = is_precipitation))
+file.write(pyradox.table.make_table(static_modifiers, 'wiki', precipitation_columns, filter_function = is_precipitation))
 
-file.write(pyradox.wiki.make_wikitable(static_modifiers, temperature_columns, filter_function = is_temperature))
+file.write(pyradox.table.make_table(static_modifiers, 'wiki', temperature_columns, filter_function = is_temperature))
 
-file.write(pyradox.wiki.make_wikitable(static_modifiers, ground_effect_columns, filter_function = is_ground_effect))
+file.write(pyradox.table.make_table(static_modifiers, 'wiki', ground_effect_columns, filter_function = is_ground_effect))
 file.close()

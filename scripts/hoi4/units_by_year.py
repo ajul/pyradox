@@ -20,7 +20,7 @@ with open("out/%s_units_by_year.txt" % unit_type, "w") as out_file:
             tables[unit["year"]].append(unit_key, unit)
     for year in hoi4.unitstats.unit_type_years[unit_type]:
         out_file.write("== %d ==\n" % year)
-        out_file.write(pyradox.wiki.make_wikitable(tables[year], columns,
+        out_file.write(pyradox.table.make_table(tables[year], 'wiki', columns,
                                                  sort_function = lambda key, value: hoi4.unitstats.compute_unit_name(key)))
 
 with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
@@ -34,7 +34,7 @@ with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
     for unit_key, unit_years in sorted(tables.items(), key=lambda item: hoi4.unitstats.compute_unit_name(item[0])):
         unit_name = hoi4.unitstats.compute_unit_name(unit_key)
         out_file.write("== %s ==\n" % unit_name)
-        out_file.write(pyradox.wiki.make_wikitable(unit_years, columns, sortable=False))
+        out_file.write(pyradox.table.make_table(unit_years, 'wiki', columns, sortable=False))
 
 
 

@@ -46,5 +46,5 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_dir
             commanders.append(commander_type_key, leader)
 
 out = open("out/military_commanders.txt", "w", encoding="utf-8")
-out.write(pyradox.wiki.make_wikitable(commanders, columns, sort_function = lambda key, value: (value['country'], key, value['name'])))
+out.write(pyradox.table.make_table(commanders, 'wiki', columns, sort_function = lambda key, value: (value['country'], key, value['name'])))
 out.close()
