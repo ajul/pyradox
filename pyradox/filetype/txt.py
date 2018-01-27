@@ -35,7 +35,7 @@ def parse(s, filename=""):
 
 def parse_file(filename, verbose=False, game=None):
     """Parse a single file and return a Tree."""
-    if game is None: game = pyradox.get_default_game()
+    if game is None: game = pyradox.get_game_from_path(filename)
     encodings = game_encodings[game]
     
     lines = readlines(filename, encodings)

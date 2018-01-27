@@ -23,22 +23,29 @@ game_suffixes = {
 
 game_directories = {}
 
-default_game = None
-
 def get_language():
     return language
 
-def set_default_game(game):
-    global default_game
-    default_game = game
-
-def get_default_game():
-    if default_game is None:
-        raise RuntimeError('Default game not set!')
-    return default_game
+def path_to_list(path):
+    return os.path.normpath(path).split(os.sep)
     
-def get_game_directory(game = None):
-    if game is None: game = get_default_game()
+def is_subpath(subpath, path):
+    subpath = path_to_list(subpath)
+    path = path_to_list(path)
+    
+    for i in range(len(path)):
+        if subpath == path[i:i+len(subpath)]:
+            return True
+    
+    return False
+    
+def get_game_from_path(path):
+    for game, game_suffix in game_suffixes.items():
+        if is_subpath(game_suffix, path):
+            return game
+    raise KeyError('Could not find game corresponding to path "%s".' % path)
+    
+def get_game_directory(game):
     if game not in game_directories:
         # search for game
         game_suffix = game_suffixes[game]
