@@ -1,4 +1,4 @@
-import pyradox.load
+
 
 parse_techs, get_techs = pyradox.load.load_functions('HoI3', 'technologies', 'technologies', mode="merge")
 

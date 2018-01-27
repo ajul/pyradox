@@ -3,12 +3,12 @@ import os
 import re
 import collections
 
-import pyradox.format
-import pyradox.image
+
+
 import pyradox
 
 
-import pyradox.worldmap
+
 import province_costs
 
 sources = ['EU4', 'text', 'nw2', 'res_publica', "aow"]

@@ -5,7 +5,7 @@ import collections
 import province_costs
 
 import pyradox
-import pyradox.worldmap
+
 from PIL import Image
 
 draw_id_s = False

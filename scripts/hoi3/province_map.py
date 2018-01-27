@@ -3,10 +3,10 @@ import os
 import re
 import collections
 
-import pyradox.image
+
 
 import pyradox
-import pyradox.worldmap
+
 import load.province
 
 vanilla_provinces = load.province.get_provinces(basedir = pyradox.get_game_directory('HoI3_vanilla'))

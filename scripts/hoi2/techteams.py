@@ -1,5 +1,5 @@
 import _initpath
-import pyradox.csv
+
 """
 countries = {}
 

@@ -3,9 +3,9 @@ import os
 import re
 import collections
 
-import pyradox.image
+
 import pyradox
-import pyradox.worldmap
+
 
 colors = (
     ('', (127, 0, 255)), # purple

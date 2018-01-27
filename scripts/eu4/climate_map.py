@@ -4,7 +4,7 @@ import re
 import collections
 
 import pyradox
-import pyradox.worldmap
+
 
 color_defs = collections.OrderedDict([
     ('default', (127, 127, 127)),

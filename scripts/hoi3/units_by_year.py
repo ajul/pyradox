@@ -1,9 +1,9 @@
 import _initpath
 import load.tech
 import load.unit
-import pyradox.format
+
 import pyradox
-import pyradox.wiki
+
 
 from unitstats import *
 

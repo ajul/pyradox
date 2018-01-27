@@ -3,7 +3,7 @@ import os
 import re
 import collections
 import pyradox
-import pyradox.worldmap
+
 
 basedir = r'D:\Steam\steamapps\common\Europa Universalis IV'
         

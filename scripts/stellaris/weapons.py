@@ -1,6 +1,6 @@
 import _initpath
 
-import pyradox.csv
+
 import os
 
 weapon_path = os.path.join(

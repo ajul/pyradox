@@ -4,8 +4,8 @@ import re
 import collections
 
 import pyradox
-import pyradox.worldmap
-import pyradox.image
+
+
 from PIL import Image
 
 def compute_country_tag(filename):

@@ -3,9 +3,9 @@ import os
 import re
 import collections
 
-import pyradox.format
+
 import pyradox
-import pyradox.worldmap
+
 
 from PIL import Image
         

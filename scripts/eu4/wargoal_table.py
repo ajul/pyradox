@@ -3,8 +3,8 @@ import os
 import re
 import collections
 
-import pyradox.format
-import pyradox.image
+
+
 import pyradox
 
 tree = pyradox.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'wargoal_types', '00_wargoal_types.txt'))

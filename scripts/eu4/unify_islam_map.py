@@ -2,7 +2,7 @@ import _initpath
 import os
 
 import pyradox
-import pyradox.worldmap
+
 
 colormap = {}
 tree = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'decisions', 'Muslim.txt'))

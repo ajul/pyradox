@@ -4,10 +4,10 @@ import re
 import math
 import collections
 
-import pyradox.image
+
 import pyradox
 
-import pyradox.worldmap
+
 
 import load.province
 

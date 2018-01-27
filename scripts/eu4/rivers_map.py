@@ -5,7 +5,7 @@ import collections
 from PIL import Image
 
 import pyradox
-import pyradox.worldmap
+
 
 base_bmp = os.path.join(pyradox.get_game_directory('EU4'), 'map', 'rivers.bmp')
 rivers_map = Image.open(base_bmp).convert('RGB')

@@ -4,9 +4,9 @@ import re
 import collections
 
 import pyradox
-import pyradox.worldmap
 
-import pyradox.image
+
+
 from PIL import Image
 
 start_date = pyradox.Date('1444.11.11')

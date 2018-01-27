@@ -3,9 +3,9 @@ import os
 import re
 import collections
 
-import pyradox.image
+
 import pyradox
-import pyradox.worldmap
+
         
 province_map = pyradox.worldmap.ProvinceMap(pyradox.get_game_directory('HoI3'), flip_y = True)
 

@@ -4,9 +4,9 @@ import os
 import re
 import collections
 
-import pyradox.image
+
 import pyradox
-import pyradox.worldmap
+
 
 definition_csv = os.path.join(pyradox.get_game_directory('HoI4'), 'map', 'definition.csv')
 terrains = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']

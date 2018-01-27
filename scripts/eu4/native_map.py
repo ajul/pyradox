@@ -3,9 +3,9 @@ import os
 import re
 import collections
 
-import pyradox.image
+
 import pyradox
-import pyradox.worldmap
+
 
 min_native_size = 0
 max_native_size = 9000

@@ -5,8 +5,8 @@ import re
 import collections
 
 import pyradox
-import pyradox.worldmap
-import pyradox.image
+
+
 from PIL import Image
 
 building_type = 'naval_base'

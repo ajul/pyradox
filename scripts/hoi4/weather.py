@@ -4,9 +4,9 @@ import os
 import re
 import collections
 
-import pyradox.format
-import pyradox.image
-import pyradox.wiki
+
+
+
 import pyradox
 
 static_modifiers = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('HoI4'), 'common', 'static_modifiers.txt'))
