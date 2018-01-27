@@ -4,7 +4,7 @@ import re
 import collections
 import province_costs
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 from PIL import Image
 

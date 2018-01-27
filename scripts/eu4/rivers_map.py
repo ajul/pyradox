@@ -4,7 +4,7 @@ import re
 import collections
 from PIL import Image
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 
 base_bmp = os.path.join(pyradox.config.basedirs['EU4'], 'map', 'rivers.bmp')

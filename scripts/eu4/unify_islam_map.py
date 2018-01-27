@@ -1,7 +1,7 @@
 import _initpath
 import os
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 
 colormap = {}

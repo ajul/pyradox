@@ -2,7 +2,7 @@ import _initpath
 import re
 import os
 import load.tech
-import pyradox.primitive
+
 import pyradox
 
 import numpy

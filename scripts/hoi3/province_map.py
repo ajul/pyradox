@@ -4,8 +4,8 @@ import re
 import collections
 import pyradox.config
 import pyradox.image
-import pyradox.primitive
-import pyradox.txt
+
+import pyradox
 import pyradox.worldmap
 import load.province
 
@@ -52,12 +52,12 @@ for mode in province_contents:
 
     colormap = {}
     for province_id, data in vanilla_provinces.items():
-        data = data.at_date(pyradox.primitive.Date('1936.1.1'))
+        data = data.at_date(pyradox.Date('1936.1.1'))
         if mode in data.keys():
             colormap[int(province_id)] = pyradox.image.colormap_red_green((data[mode] - val_min) / val_range)
             
     for province_id, data in tfh_provinces.items():
-        data = data.at_date(pyradox.primitive.Date('1936.1.1'))
+        data = data.at_date(pyradox.Date('1936.1.1'))
         if mode in data.keys():
             colormap[int(province_id)] = pyradox.image.colormap_red_green((data[mode] - val_min) / val_range)
 

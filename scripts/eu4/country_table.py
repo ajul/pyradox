@@ -1,10 +1,10 @@
 import _initpath
 import os
 import pyradox.config
-import pyradox.txt
+import pyradox
 import load.country
 import load.province
-import pyradox.primitive
+
 import pyradox.yml
 
 # Load countries and provinces.

@@ -1,6 +1,6 @@
 import _initpath
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 import os
 from PIL import Image

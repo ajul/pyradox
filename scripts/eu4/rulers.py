@@ -1,10 +1,10 @@
 import _initpath
 import os
 import pyradox.config
-import pyradox.txt
+import pyradox
 import load.country
 import load.province
-import pyradox.primitive
+
 import pyradox.yml
 
 def output_row(data):
@@ -25,7 +25,7 @@ for tag, country in countries.items():
     if country_name is None: print('Missing localization: ' + tag)
 
     for date, data in country.items():
-        if not isinstance(date, pyradox.primitive.Date): continue
+        if not isinstance(date, pyradox.Date): continue
         for ruler in data.find_all('monarch'):
             if "leader" in ruler:
                 for key in leader_keys:

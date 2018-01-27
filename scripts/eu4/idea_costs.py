@@ -2,8 +2,8 @@ import _initpath
 import os
 import pyradox.config
 import pyradox.format
-import pyradox.primitive
-import pyradox.txt
+
+import pyradox
 import pyradox.yml
 
 import ideaoptions

@@ -5,8 +5,8 @@ import collections
 import pyradox.config
 import pyradox.format
 import pyradox.image
-import pyradox.txt
-import pyradox.primitive
+import pyradox
+
 import pyradox.yml
 import pyradox.worldmap
 import province_costs
@@ -29,7 +29,7 @@ culture_data = {}
 culture_group_data = {}
 
 for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
-    data = data.at_date(pyradox.primitive.Date('1444.11.11'))
+    data = data.at_date(pyradox.Date('1444.11.11'))
     if 'culture' not in data:
         if 'base_tax' in data:
             print('No culture defined in %s.' % filename)

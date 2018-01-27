@@ -7,7 +7,7 @@ import pyradox.config
 import pyradox.format
 import pyradox.image
 import pyradox.wiki
-import pyradox.txt
+import pyradox
 
 static_modifiers = pyradox.txt.parse_file(os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'static_modifiers.txt'))
 

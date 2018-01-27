@@ -4,7 +4,7 @@ import re
 import collections
 import pyradox.config
 import pyradox.image
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
         
 province_map = pyradox.worldmap.ProvinceMap()

@@ -4,7 +4,7 @@ import re
 import collections
 from PIL import Image
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 
 tree = pyradox.txt.parse_file(os.path.join(pyradox.config.get_game_directory('EU4'), 'map', 'terrain.txt'))

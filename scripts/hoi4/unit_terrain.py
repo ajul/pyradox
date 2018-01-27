@@ -4,7 +4,7 @@ import load.tech
 import load.unit
 import pyradox.format
 import pyradox
-import pyradox.txt
+import pyradox
 import pyradox.wiki
 
 from unitstats import compute_unit_type, compute_unit_name

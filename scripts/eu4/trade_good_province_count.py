@@ -3,12 +3,12 @@ import os
 import re
 import collections
 import pyradox.config
-import pyradox.txt
-import pyradox.primitive
+import pyradox
+
 import pyradox.image
 import pyradox
 
-start_date = pyradox.primitive.Date('1444.11.11')
+start_date = pyradox.Date('1444.11.11')
 
 counts = pyradox.Tree() # province counts
 

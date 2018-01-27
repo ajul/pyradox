@@ -5,8 +5,8 @@ import math
 import collections
 import pyradox.config
 import pyradox.image
-import pyradox.txt
-import pyradox.primitive
+import pyradox
+
 import pyradox.worldmap
 
 import load.country
@@ -35,11 +35,11 @@ def province_cost(province):
     else:
         return None
 
-def ruler_cost(country, date = pyradox.primitive.Date('1444.11.11')):
+def ruler_cost(country, date = pyradox.Date('1444.11.11')):
     monarch = None
     heir = None
     for key, value in country.items():
-        if isinstance(key, pyradox.primitive.Date):
+        if isinstance(key, pyradox.Date):
             if key > date: break
             if 'monarch' in value:
                 monarch = value['monarch']
@@ -68,7 +68,7 @@ def ruler_cost(country, date = pyradox.primitive.Date('1444.11.11')):
 
 governments = pyradox.txt.parse_merge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'governments'))
 
-def government_cost(country, date = pyradox.primitive.Date('1444.11.11')):
+def government_cost(country, date = pyradox.Date('1444.11.11')):
     country = country.at_date(date)
     if 'government' not in country: return 0.0
     government = governments[country['government']]
@@ -101,7 +101,7 @@ fallback_continents = {
 
 tech_groups = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'technology.txt'))['groups']
 
-def technology_cost(country, date = pyradox.primitive.Date('1444.11.11')):
+def technology_cost(country, date = pyradox.Date('1444.11.11')):
     country = country.at_date(date)
     if 'valid_for_nation_designer' in tech_groups[country['technology_group']] and not tech_groups[country['technology_group']]['valid_for_nation_designer']:
         return 0.0
@@ -131,7 +131,7 @@ provinces = load.province.get_provinces()
 territory_costs = {tag : 0.0 for tag in countries.keys()}
 
 for filename, province in provinces.items():
-    province = province.at_date(pyradox.primitive.Date('1444.11.11'))
+    province = province.at_date(pyradox.Date('1444.11.11'))
     if 'owner' not in province: continue
     territory_costs[province['owner']] += province_cost(province)
     

@@ -3,13 +3,13 @@ import os
 import re
 import collections
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
-import pyradox.primitive
+
 import pyradox.image
 from PIL import Image
 
-start_date = pyradox.primitive.Date('1444.11.11')
+start_date = pyradox.Date('1444.11.11')
 
 # get trade goods
 resource_images = pyradox.image.split_strip(Image.open('in/resources.png'))

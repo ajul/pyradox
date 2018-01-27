@@ -5,8 +5,8 @@ import math
 import collections
 import pyradox.config
 import pyradox.image
-import pyradox.txt
-import pyradox.primitive
+import pyradox
+
 import pyradox.worldmap
 
 import load.province
@@ -87,7 +87,7 @@ rank_method = 'dense'
 
 def generate_map(province_function, filename, force_min = None):
     number_map = {int(re.match('\d+', filename).group(0)) :
-                 province_function(int(re.match('\d+', filename).group(0)), province.at_date(pyradox.primitive.Date('1444.11.11')))
+                 province_function(int(re.match('\d+', filename).group(0)), province.at_date(pyradox.Date('1444.11.11')))
                  for filename, province in provinces.items()
                  if province_function(int(re.match('\d+', filename).group(0)), province) is not None}
     

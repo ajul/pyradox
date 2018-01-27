@@ -3,7 +3,7 @@ import math
 import pyradox.config
 import pyradox.format
 import pyradox.load
-import pyradox.txt
+import pyradox
 import pyradox
 
 parse_provinces, get_provinces = pyradox.load.load_functions('EU4', 'provinces', ('history', 'provinces'))

@@ -2,7 +2,7 @@ import _initpath
 import re
 import os
 import load.tech
-import pyradox.primitive
+
 import pyradox
 
 techs = load.tech.get_techs()["technologies"]
@@ -29,13 +29,13 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.config.get_g
     tag, name = compute_country_tag_and_name(filename)
     
     tech_keys = set(country['set_technology'].keys())
-    date = pyradox.primitive.Date('1936.1.1')
+    date = pyradox.Date('1936.1.1')
     tech_slots = country['set_research_slots'] or 2
     start_tech_count, start_tech_cost = total_techs(tech_keys, filename, date)
     s += '|-\n'
     s += '| %s || %s || %d || %d || %0.1f ||  \n' % (name, date, tech_slots, start_tech_count, start_tech_cost)
     for date, effects in country.items():
-        if not isinstance(date, pyradox.primitive.Date): continue
+        if not isinstance(date, pyradox.Date): continue
         if 'set_technology' not in effects: continue
         tech_keys |= set(effects['set_technology'].keys())
         tech_slots = country['set_research_slots'] or 2

@@ -3,7 +3,7 @@ import os
 import pyradox.config
 import pyradox.format
 import pyradox
-import pyradox.txt
+import pyradox
 import pyradox.wiki
 
 terrains = pyradox.txt.parse_file(os.path.join(pyradox.config.get_game_directory('HoI4'), 'common', 'terrain', '00_terrain.txt'), verbose=False)['categories']

@@ -3,7 +3,7 @@ import os
 import re
 import collections
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 
 color_defs = collections.OrderedDict([

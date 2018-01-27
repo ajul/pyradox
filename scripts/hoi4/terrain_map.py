@@ -5,7 +5,7 @@ import re
 import collections
 import pyradox.config
 import pyradox.image
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 
 definition_csv = os.path.join(pyradox.config.get_game_directory('HoI4'), 'map', 'definition.csv')

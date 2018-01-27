@@ -4,7 +4,7 @@ import re
 import collections
 import pyradox.config
 import pyradox.format
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 import pyradox.yml
 from PIL import Image

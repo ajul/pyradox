@@ -3,7 +3,7 @@ import os
 import re
 import collections
 import pyradox.config
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 import pyradox.image
 from PIL import Image
@@ -24,7 +24,7 @@ def compute_color(values):
         return pyradox.image.HSVtoRGB(values)
      
 
-date = pyradox.primitive.Date('1936.1.1')
+date = pyradox.Date('1936.1.1')
 scale = 2.0
 
 # state_id -> [tag]

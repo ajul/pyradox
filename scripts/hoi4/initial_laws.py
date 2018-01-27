@@ -2,7 +2,7 @@ import _initpath
 import re
 import os
 import pyradox.config
-import pyradox.primitive
+
 import pyradox
 import pyradox.wiki
 import pyradox.yml

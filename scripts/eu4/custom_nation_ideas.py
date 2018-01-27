@@ -2,8 +2,8 @@ import _initpath
 import os
 import pyradox.config
 import pyradox.format
-import pyradox.primitive
-import pyradox.txt
+
+import pyradox
 import pyradox.yml
 
 import ideaoptions
@@ -21,7 +21,7 @@ def value_string(bonus, value):
     elif isinstance(value, float):
         return '{{%s|%+0.2f}}'% (color, value)
     else:
-        return '{{%s|%s}}' % (color, pyradox.primitive.make_token_string(value))
+        return '{{%s|%s}}' % (color, pyradox.make_token_string(value))
 
 localization_sources = ['EU4', 'text', 'modifers']
 

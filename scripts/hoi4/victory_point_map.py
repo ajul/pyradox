@@ -5,13 +5,13 @@ import re
 import collections
 import pyradox.config
 import pyradox.image
-import pyradox.txt
+import pyradox
 import pyradox.worldmap
 
 from PIL import Image
 
-#date = pyradox.primitive.Date('1936.1.1')
-date = pyradox.primitive.Date('1939.8.14')
+#date = pyradox.Date('1936.1.1')
+date = pyradox.Date('1939.8.14')
 
 vp_images = pyradox.image.split_strip(Image.open('in/onmap_victorypoints_strip.png'), subwidth = 29)
 capital_icon = vp_images[4]

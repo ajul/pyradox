@@ -34,7 +34,7 @@ with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
         if unitstats.compute_unit_type(unit) == unit_type and unitstats.is_availiable(unit) and unit["last_upgrade"] == unit["year"]:
             if unit_key not in tables: tables[unit_key] = pyradox.Tree()
             tables[unit_key].append(unit["year"], unit)
-    for unit_key, unit_years in sorted(tables.items(), key=lambda key, value: unitstats.compute_unit_name(key)):
+    for unit_key, unit_years in sorted(tables.items(), key=lambda item: unitstats.compute_unit_name(item[0])):
         unit_name = unitstats.compute_unit_name(unit_key)
         out_file.write("== %s ==\n" % unit_name)
         out_file.write(pyradox.wiki.make_wikitable(unit_years, columns, sortable=False))
