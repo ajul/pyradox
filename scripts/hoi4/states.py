@@ -118,4 +118,4 @@ else:
     json_filename = "out/states.json"
 
 with open(json_filename, 'w') as f:
-    json.dump(states.replace_key_with_subkey('state', 'id').to_python(), f)
+    pyradox.json.dump_tree(states.replace_key_with_subkey('state', 'id'), f)
