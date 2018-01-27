@@ -190,7 +190,7 @@ class TreeParseState():
         elif token_type == 'end':
             if self.is_top_level:
                 # top level cannot be ended, warn
-                warnings.warn_explicit('Unmatched closing bracket. Skipping token.', ParseWarning, self.filename, token_line_number + 1)
+                warnings.warn_explicit('Unmatched closing bracket at outer level of file. Skipping token.', ParseWarning, self.filename, token_line_number + 1)
                 self.next = self.process_key
             else:
                 self.next = None
