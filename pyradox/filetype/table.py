@@ -1,3 +1,5 @@
+import re
+
 class Dialect:
     @staticmethod
     def table_begin(**kwargs):
@@ -37,9 +39,10 @@ class WikiDialect(Dialect):
     
     @staticmethod
     def row_cell_begin(s):
-        if len(s) > 0 and not is_numeric_string(s):
+        if guess_is_numeric(s):
+            return ''
+        else:
             return 'style="text-align: left;" | '
-        return ''
         
     row_cell_delimiter = ' || '
 
@@ -67,7 +70,20 @@ dialects = {
     'html' : HtmlDialect,
 }
 
-def is_numeric_string(s):
+def guess_is_numeric(s):
+    # remove wiki templates
+    match = re.match(r'\{\{.*?\|(.*?)\}\}', s)
+    if match is not None:
+        s = match.group(1)
+        
+    # remove whitepsace, percent
+    s = s.lstrip()
+    s = s.rstrip()
+    s = s.rstrip('%')
+    
+    if len(s) == 0:
+        return True
+        
     try:
         float(s)
     except ValueError:
