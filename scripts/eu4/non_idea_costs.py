@@ -66,7 +66,7 @@ def ruler_cost(country, date = pyradox.Date('1444.11.11')):
         cost += 2 * (skill - 6) * 30 / (age + 15)
     return cost
 
-governments = pyradox.txt.parse_merge(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'governments'))
+governments = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'governments'))
 
 def government_cost(country, date = pyradox.Date('1444.11.11')):
     country = country.at_date(date)
@@ -78,7 +78,7 @@ def government_cost(country, date = pyradox.Date('1444.11.11')):
         return 0.0
 
 continents = {}
-for continent, provinces_id_s in pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'continent.txt')).items():
+for continent, provinces_id_s in pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'map', 'continent.txt')).items():
     for province_id in provinces_id_s:
         if province_id in continents:
             print('Duplicate continent for province %d' % province_id)
@@ -99,7 +99,7 @@ fallback_continents = {
     'ottoman' : 'europe',
     }
 
-tech_groups = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'technology.txt'))['groups']
+tech_groups = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'technology.txt'))['groups']
 
 def technology_cost(country, date = pyradox.Date('1444.11.11')):
     country = country.at_date(date)

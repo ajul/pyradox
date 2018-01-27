@@ -55,7 +55,7 @@ for continent in color_defs.keys():
     continent_cost[continent] = 0
     
 colormap = {}
-for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
     province_id = int(m.group(0))
     if 'base_tax' not in data: continue # skip wastelands

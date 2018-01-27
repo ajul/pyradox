@@ -11,9 +11,9 @@ from PIL import Image
         
 province_map = pyradox.worldmap.ProvinceMap()
 
-region_colors = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'region_colors', '00_region_colors.txt'))
-regions = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'region.txt'))
-trade_good_events = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'events', 'TradeGoods.txt'))
+region_colors = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'region_colors', '00_region_colors.txt'))
+regions = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'map', 'region.txt'))
+trade_good_events = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'events', 'TradeGoods.txt'))
 
 colormap = {}
 textmap = {}

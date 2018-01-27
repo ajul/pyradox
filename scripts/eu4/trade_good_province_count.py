@@ -13,7 +13,7 @@ start_date = pyradox.Date('1444.11.11')
 counts = pyradox.Tree() # province counts
 
 # parse all files in a directory, producing instances of pyradox.Tree
-for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces')):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'history', 'provinces')):
     # pyradox.Tree has many dict methods, such as .keys()
     if 'base_tax' not in data.keys(): continue
     

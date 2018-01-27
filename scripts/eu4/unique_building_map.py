@@ -23,7 +23,7 @@ building_colors = (
     )
 
 colormap = {}
-for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'history', 'provinces'), verbose=False):
     if end_game:
         data = data.at_date(True)
     else:

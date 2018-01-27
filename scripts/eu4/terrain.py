@@ -7,7 +7,7 @@ from PIL import Image
 
 province_map = pyradox.worldmap.ProvinceMap()
 terrain_map_image = Image.open('in/terrain.png')
-terrain_txt = pyradox.txt.parse_file(os.path.join(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'terrain.txt')))
+terrain_txt = pyradox.txt.parse_file(os.path.join(os.path.join(pyradox.get_game_directory('EU4'), 'map', 'terrain.txt')))
 
 terrain_by_color = {}
 

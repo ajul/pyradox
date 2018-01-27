@@ -35,7 +35,7 @@ def eval_bonus(bonus_key, bonus_value):
     else:
         return None
 
-for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
+for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'custom_ideas')):
     for idea_set in file_data.values():
         # start category
         
@@ -65,7 +65,7 @@ result += '! Idea group !! Linear cost !! Base cost !! Adjusted for<br/>early id
 
 result_tree = pyradox.Tree()
 
-for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
+for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'ideas')):
     for idea_set_name, idea_set in file_data.items():
         
         index = 0

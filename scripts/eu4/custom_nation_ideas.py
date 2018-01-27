@@ -37,7 +37,7 @@ for i in range(default_max_level):
 result = result[:-1]
 result += '\n'
 
-for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'custom_ideas')):
+for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'custom_ideas')):
     for idea_set in file_data.values():
         # start category
         

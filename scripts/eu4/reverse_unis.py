@@ -74,7 +74,7 @@ def make_wiki_table(bonus):
     result += '</table>\n'
     return result
 
-for _, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
+for _, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'ideas')):
     for key, tree in data.items():
         process_idea_group(key, tree)
 

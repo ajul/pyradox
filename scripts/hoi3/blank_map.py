@@ -7,7 +7,7 @@ import pyradox.image
 import pyradox
 import pyradox.worldmap
         
-province_map = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flip_y = True)
+province_map = pyradox.worldmap.ProvinceMap(pyradox.get_game_directory('HoI3'), flip_y = True)
 
 colormap = {}
 

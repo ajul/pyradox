@@ -32,13 +32,13 @@ for name, color in color_defs.items():
 print(legend)
 
 climate_map = {}
-for climate, provinces in pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'map', 'climate.txt'), verbose=False).items():
+for climate, provinces in pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'map', 'climate.txt'), verbose=False).items():
     for province_id in provinces:
         if climate in color_defs.keys():
             climate_map[province_id] = climate
 
 colormap = {}
-for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
     province_id = int(m.group(0))
     if 'base_tax' not in data: continue # skip wastelands

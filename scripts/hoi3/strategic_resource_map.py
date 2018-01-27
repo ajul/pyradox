@@ -12,7 +12,7 @@ import load.province
 
 resource_image_dir = 'in/strategic_resource/'
 
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.config.basedirs['HoI3'], flip_y = True)
+province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI3'), flip_y = True)
 
 resource_images = {}
 for filename in os.listdir(resource_image_dir):
@@ -21,8 +21,8 @@ for filename in os.listdir(resource_image_dir):
         if m is None: continue
         resource_images[m.group(1)] = Image.open(os.path.join(resource_image_dir, filename))
 
-vanilla_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
-tfh_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3'])
+vanilla_provinces = load.province.get_provinces(basedir = pyradox.get_game_directory('HoI3_vanilla'))
+tfh_provinces = load.province.get_provinces(basedir = pyradox.get_game_directory('HoI3'))
 
 iconmap = {}
 

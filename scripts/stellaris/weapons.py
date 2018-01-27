@@ -4,7 +4,7 @@ import pyradox.csv
 import os
 
 weapon_path = os.path.join(
-    pyradox.config.basedirs['Stellaris'],
+    pyradox.get_game_directory('Stellaris'),
     'common',
     'component_templates',
     'weapon_components.csv')

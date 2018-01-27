@@ -15,7 +15,7 @@ start_date = pyradox.Date('1444.11.11')
 resource_images = pyradox.image.split_strip(Image.open('in/resources.png'))
 
 trade_good_icons = {}
-tree = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'tradegoods', '00_tradegoods.txt'))
+tree = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'tradegoods', '00_tradegoods.txt'))
 for idx, trade_good in enumerate(tree.keys()):
     trade_good_icons[trade_good] = resource_images[idx]
     resource_images[idx].save('out/tradegoods/trade_good_%s.png' % trade_good)
@@ -23,7 +23,7 @@ for idx, trade_good in enumerate(tree.keys()):
 colormap = {}
 iconmap = {}
 
-for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'history', 'provinces'), verbose=False):
+for filename, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'history', 'provinces'), verbose=False):
     m = re.match('\d+', filename)
     province_id = int(m.group(0))
     start_data = data.at_date(start_date)

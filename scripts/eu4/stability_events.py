@@ -18,7 +18,7 @@ def get_stability_likely(conditions):
 
     return result
 
-events_tree = pyradox.txt.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'events', 'Republics.txt'))
+events_tree = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'events', 'Republics.txt'))
 
 allow_events = list(list([] for x in range(3)) for x in range(7))
 likely_events = list(list([] for x in range(3)) for x in range(7))

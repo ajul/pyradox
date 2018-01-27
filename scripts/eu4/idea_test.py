@@ -169,7 +169,7 @@ def compute_group_cost(group_name, tree):
     
 result = []
 
-for _, data in pyradox.txt.parse_dir(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'ideas')):
+for _, data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'ideas')):
     for group_name, tree in data.items():
         if "start" not in tree.keys(): continue
         result.append((compute_group_cost(group_name, tree), group_name))

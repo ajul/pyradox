@@ -9,9 +9,9 @@ import pyradox
 import pyradox.worldmap
 import load.province
 
-vanilla_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3_vanilla'])
-tfh_provinces = load.province.get_provinces(basedir = pyradox.config.basedirs['HoI3'])
-province_map = pyradox.worldmap.ProvinceMap(pyradox.config.basedirs['HoI3'], flip_y = True)
+vanilla_provinces = load.province.get_provinces(basedir = pyradox.get_game_directory('HoI3_vanilla'))
+tfh_provinces = load.province.get_provinces(basedir = pyradox.get_game_directory('HoI3'))
+province_map = pyradox.worldmap.ProvinceMap(pyradox.get_game_directory('HoI3'), flip_y = True)
 province_contents = {
     'infra' : (1, 10, 1),
     'industry' : (1, 10, 1),

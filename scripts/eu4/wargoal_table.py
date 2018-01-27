@@ -7,7 +7,7 @@ import pyradox.format
 import pyradox.image
 import pyradox
 
-tree = pyradox.parse_file(os.path.join(pyradox.config.basedirs['EU4'], 'common', 'wargoal_types', '00_wargoal_types.txt'))
+tree = pyradox.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'common', 'wargoal_types', '00_wargoal_types.txt'))
 
 def left_columns(wargoal, data, side = None):
     result = '|-\n'
