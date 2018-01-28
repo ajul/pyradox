@@ -1,3 +1,4 @@
+import pyradox.format
 import re
 
 class Dialect:
@@ -92,7 +93,7 @@ def guess_is_numeric(s):
 
 def default_column_specs(key, row):
     column_specs = [('id', None)]
-    for k, v in row:
+    for k, v in row.items():
         column_specs.append((k, '%%(%s)s' % k))
     return column_specs
 
@@ -149,7 +150,7 @@ def apply_format_spec(key, row, format_spec):
         except ZeroDivisionError:
             return ''
     elif format_spec is None:
-        return human_string(key, True)
+        return pyradox.format.human_string(key, True)
     else:
         try:
             return format_spec % row
