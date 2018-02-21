@@ -14,15 +14,25 @@ start_time = time.clock()
 
 file_count = 0
 
+do_txt = True
+do_yml = True
+
 dirname = os.path.join(pyradox.get_game_directory('HoI4'))
 for root, dirs, files in os.walk(dirname):
     if root == dirname: continue
     for filename in files:
         fullpath = os.path.join(root, filename)
+        if re.search(skip, fullpath): continue
         _, ext = os.path.splitext(fullpath)
-        if ext == ".txt" and not re.search(skip, fullpath):
+        if do_txt and ext == '.txt':
             try:
                 pyradox.parse_file(fullpath)
+                file_count += 1
+            except:
+                print(sys.exc_info())
+        elif do_yml and ext == '.yml':
+            try:
+                pyradox.filetype.yml.parse_file(fullpath)
                 file_count += 1
             except:
                 print(sys.exc_info())
