@@ -10,7 +10,7 @@ def get_province_name(province_id):
     Gets the name a country by its tag according to localization.
     """
     key = 'PROV%d' % province_id
-    return pyradox.yml.get_localization(key, ['prov_names'])
+    return pyradox.yml.get_localization(key)
 
 def province_cost(province):
     cost = 0

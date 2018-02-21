@@ -17,7 +17,7 @@ def list_commander_traits(k, v):
     result = ''
     for trait in v.find_all('traits'):
         if not isinstance(trait, str): continue
-        result += '{{iconify|' + pyradox.yml.get_localization(trait, ['traits'], game = 'HoI4') + '}}, '
+        result += '{{iconify|' + pyradox.yml.get_localization(trait, game = 'HoI4') + '}}, '
     return result[:-2]
 
 commander_type_keys = {
@@ -39,7 +39,7 @@ commanders = pyradox.Tree()
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'countries')):
     tag, _ = compute_country_tag_and_name(filename)
     ruling_party = country['set_politics']['ruling_party']
-    country_name = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), ['countries'], game = 'HoI4')
+    country_name = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), game = 'HoI4')
     for commander_type_key in commander_type_keys.keys():
         for leader in country.find_all(commander_type_key):
             leader['country'] = country_name
