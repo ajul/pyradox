@@ -318,7 +318,7 @@ class TreeParseState():
                 # Unexpected token.
                 break
         
-        warnings.warn_explicit('Found colorspace token %s without following color.' % (colorspace_token_string.lower()), ParseWarning, self.filename, colorspace_token_line_number)
+        warnings.warn_explicit('Found colorspace token %s without following color.' % (colorspace_token_string.lower()), ParseWarning, self.filename, colorspace_token_line_number + 1)
         return None
         
     def process_group(self):
