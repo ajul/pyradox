@@ -26,7 +26,7 @@ def readlines(filename, encodings):
             warnings.warn(ParseWarning("Failed to decode input file %s using codec %s." % (filename, encoding)))
     raise ParseError("All codecs failed for input file %s." % filename)
 
-def parse(s, filename=""):
+def parse(s, filename="<string>"):
     """Parse a string."""
     lines = s.splitlines()
     token_data = lex(lines, filename)
@@ -130,6 +130,7 @@ class TreeParseState():
         self.key = None                     # The key currently being processed.
         self.key_string = None               # The original token string for that key.
         self.operator = None                # The operator currently being processed. Usually '='.
+        self.in_group = False               # Whether the parser is currently inside a group.
         self.next = self.process_key         # The next case to execute.
     
     def get_previous_line_number(self):
@@ -161,13 +162,13 @@ class TreeParseState():
         self.pos += 1
         return token_type, token_string, token_line_number
         
-    def append_to_result(self, value, **kwargs):
+    def append_to_result(self, value):
         """ 
         Append the current value to result. 
-        key and operator are set by internal state. 
+        key, operator, and other arguments are set by internal state.
         Also consumes any pending comments.
         """
-        self.result.append(self.key, value, pre_comments = self.pending_comments, operator = self.operator, **kwargs)
+        self.result.append(self.key, value, pre_comments = self.pending_comments, operator = self.operator, in_group = self.in_group)
         self.pending_comments = []
         
     def append_line_comment(self, comment):
@@ -237,46 +238,65 @@ class TreeParseState():
                 # normal value
                 value = pyradox.token.make_primitive(token_string, token_type)
             self.append_to_result(value)
-            self.next = self.process_key
+            
+            if self.in_group:
+                self.next = self.process_value
+            else:
+                self.next = self.process_key
         elif token_type == 'begin':
             # Value is a tree or group. First, determine whether this is a tree or group.
             lookahead_pos = self.pos
             level = 0
-            # Empty brackets are trees.
+            
+            # Empty brackets are trees by default.
             is_tree = True
             while lookahead_pos < len(self.token_data) and level >= 0:
                 token_type, token_string, token_line_number = self.token_data[lookahead_pos]
                 lookahead_pos += 1
-                if token_type == 'end':
-                    level -= 1
-                elif token_type == 'comment':
-                    continue
-                else:
-                    # Non-empty brackets are groups unless an operator is found.
-                    is_tree = False
                 
-                    if token_type == 'begin':
-                        # Assume any nesting indicates a tree.
+                if level == 0:
+                    if token_type == 'operator':
+                        # If an operator is found at this level, it's definitely a tree.
                         is_tree = True
                         break
-                        # level += 1
-                    elif token_type == 'operator':
-                        # Tree if operator detected at current level.
-                        if level == 0: 
-                            is_tree = True
-                            break
+                    elif token_type not in ['comment', 'end']:
+                        # If something else (other than a comment or end) is found at this level, 
+                        # then it's a group unless an operator is found later.
+                        is_tree = False
+                
+                if token_type == 'begin':
+                    level += 1
+                elif token_type == 'end':
+                    level -= 1
+
             if is_tree:
                 # Recurse.
                 value, self.pos = parse_tree(self.token_data, self.filename, self.pos)
                 self.append_to_result(value)
-                self.next = self.process_key
-            else:
-                # Go to group state.
-                self.next = self.process_group
                 
+                if self.in_group:
+                    self.next = self.process_value
+                else:
+                    self.next = self.process_key
+            else:
+                # Process following values as a group.
+                if self.in_group:
+                    raise ParseError('%s, line %d: Error: Cannot nest groups inside groups.' % (self.filename, token_line_number + 1))
+                else:
+                    self.in_group = True
+                    self.next = self.process_value
         elif token_type == 'comment':
-            self.pending_comments.append(token_string[1:])
+            if self.in_group:
+                if token_line_number == self.get_previous_line_number():
+                    self.append_line_comment(token_string[1:])
+                else:
+                    self.pending_comments.append(token_string[1:])
+            else:
+                self.pending_comments.append(token_string[1:])
             self.next = self.process_value
+        elif token_type == 'end' and self.in_group:
+            self.in_group = False
+            self.next = self.process_key
         else:
             raise ParseError('%s, line %d: Error: Invalid token type %s after key "%s", expected a value type.' % (self.filename, token_line_number + 1, token_type, self.key_string))
         
@@ -323,24 +343,6 @@ class TreeParseState():
         
         warnings.warn_explicit('Found colorspace token %s without following color.' % (colorspace_token_string.lower()), ParseWarning, self.filename, colorspace_token_line_number + 1)
         return None
-        
-    def process_group(self):
-        token_type, token_string, token_line_number = self.consume()
-        
-        if pyradox.token.is_primitive_value_token_type(token_type):
-            value = pyradox.token.make_primitive(token_string, token_type)
-            self.append_to_result(value, in_group = True)
-        elif token_type == "comment":
-            if token_line_number == self.get_previous_line_number():
-                self.append_line_comment(token_string[1:])
-            else:
-                self.pending_comments.append(token_string[1:])
-        elif token_type == "end":
-            self.next = self.process_key
-        elif token_type == "begin":
-            raise ParseError('%s, line %d: Error: Cannot nest inside a group.' % (filename, token_line_number + 1))
-        else:
-            raise ParseError('%s, line %d: Error: Invalid value type %s.' % (filename, token_line_number + 1, token_type))
 
 def parse_tree(token_data, filename, start_pos = 0):
     """Given a list of (token_type, token_string, line_number) from the lexer, produces a Tree."""
