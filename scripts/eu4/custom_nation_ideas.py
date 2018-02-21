@@ -60,9 +60,9 @@ for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_
                     costs[level] = value
                 else:
                     localized_key = (
-                        pyradox.yml.get_localization('modifier_%s' % key, localization_sources)
-                        or pyradox.yml.get_localization('yearly_%s' % key, localization_sources)
-                        or pyradox.yml.get_localization(key, localization_sources)
+                        pyradox.yml.get_localization('modifier_%s' % key)
+                        or pyradox.yml.get_localization('yearly_%s' % key)
+                        or pyradox.yml.get_localization(key)
                         )
                     if not localized_key:
                         localized_key = pyradox.format.human_title(key)

@@ -41,7 +41,7 @@ for state in states.values():
     # if state['id'] == 50: print('state50', history)
     state['owner'] = history['owner']
     state['owner_name'] = countries[history['owner']]['name']
-    state['human_name'] = pyradox.yml.get_localization(state['name'], localization_sources, game = game)
+    state['human_name'] = pyradox.yml.get_localization(state['name'], game = game)
     country = countries[tag]
 
     country['states'] = (country['states'] or 0) + 1

@@ -14,7 +14,7 @@ import province_costs
 sources = ['EU4', 'text', 'nw2', 'res_publica', "aow"]
 
 def localized(s):
-    return pyradox.yml.get_localization(s, sources) or pyradox.format.human_title(s)
+    return pyradox.yml.get_localization(s) or pyradox.format.human_title(s)
 
 
 culture_groups = {}
