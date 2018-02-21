@@ -44,9 +44,9 @@ w += '! Country !! Tech group !! Religion !! Primary culture !! Provinces !! Bas
 for tag, country in countries.items():
     country = country.at_date('1444.11.11')
     country['name'] = load.country.get_country_name(tag)
-    country['technology_group'] = pyradox.yml.get_localization(country['technology_group'] or '')
-    country['religion'] = pyradox.yml.get_localization(country['religion'] or '')
-    country['primary_culture'] = pyradox.yml.get_localization(country['primary_culture'] or '')
+    country['technology_group'] = pyradox.yml.get_localisation(country['technology_group'] or '')
+    country['religion'] = pyradox.yml.get_localisation(country['religion'] or '')
+    country['primary_culture'] = pyradox.yml.get_localisation(country['primary_culture'] or '')
     w += '|-\n'
     w += '| %(name)s || %(technology_group)s || %(religion)s || %(primary_culture)s ' % country
     w += '|| %(provinces)d || %(base_tax)d || %(manpower)d \n' % country

@@ -17,8 +17,8 @@ encodings = [
 # set of sources already read
 already_read_sources = set()
 
-# game -> key -> localization
-localization_cache = {}
+# game -> key -> localisation
+localisation_cache = {}
 
 def readlines(filename):
     for encoding in encodings:
@@ -66,16 +66,16 @@ def parse_dir(path):
         result.update(parse_file(fullpath))
     return result
     
-def get_localization(key, game):
-    if game not in localization_cache:
-        localization_path = os.path.join(pyradox.get_game_directory(game), 'localisation')
-        localization_cache[game] = parse_dir(localization_path)
+def get_localisation(key, game):
+    if game not in localisation_cache:
+        localisation_path = os.path.join(pyradox.get_game_directory(game), 'localisation')
+        localisation_cache[game] = parse_dir(localisation_path)
     
-    if key.lower() in localization_cache[game]:
-        return pyradox.token.make_string(localization_cache[game][key.lower()])
+    if key.lower() in localisation_cache[game]:
+        return pyradox.token.make_string(localisation_cache[game][key.lower()])
     else: 
         return None
 
-def get_localization_desc(key, **kwargs):
-    return get_localization('%s_desc' % key, **kwargs)
+def get_localisation_desc(key, **kwargs):
+    return get_localisation('%s_desc' % key, **kwargs)
     

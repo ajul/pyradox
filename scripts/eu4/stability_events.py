@@ -24,7 +24,7 @@ allow_events = list(list([] for x in range(3)) for x in range(7))
 likely_events = list(list([] for x in range(3)) for x in range(7))
 
 for event in events_tree.find_all("country_event"):
-    event_name = pyradox.yml.get_localization(event["title"])
+    event_name = pyradox.yml.get_localisation(event["title"])
     if "trigger" in event:
         allow = get_stability_likely(event["trigger"])
         for i, x in enumerate(allow):

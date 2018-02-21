@@ -23,7 +23,7 @@ def value_string(bonus, value):
     else:
         return '{{%s|%s}}' % (color, pyradox.make_token_string(value))
 
-localization_sources = ['EU4', 'text', 'modifers']
+localisation_sources = ['EU4', 'text', 'modifers']
 
 default_max_level = 4
 
@@ -60,9 +60,9 @@ for file_name, file_data in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_
                     costs[level] = value
                 else:
                     localized_key = (
-                        pyradox.yml.get_localization('modifier_%s' % key)
-                        or pyradox.yml.get_localization('yearly_%s' % key)
-                        or pyradox.yml.get_localization(key)
+                        pyradox.yml.get_localisation('modifier_%s' % key)
+                        or pyradox.yml.get_localisation('yearly_%s' % key)
+                        or pyradox.yml.get_localisation(key)
                         )
                     if not localized_key:
                         localized_key = pyradox.format.human_title(key)

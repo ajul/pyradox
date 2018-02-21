@@ -19,7 +19,7 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_dir
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party'] or 'neutrality'
-    country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), game = 'HoI4')
+    country['name'] = pyradox.yml.get_localisation('%s_%s' % (tag, ruling_party), game = 'HoI4')
     countries[tag] = country
 
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'))

@@ -14,7 +14,7 @@ if beta:
 else:
     game = 'HoI4'
 
-localization_sources = ['state_names']
+localisation_sources = ['state_names']
 
 def compute_country_tag_and_name(filename):
     m = re.match('.*([A-Z]{3})\s*-\s*(.*)\.txt$', filename)
@@ -27,7 +27,7 @@ for filename, country in pyradox.txt.parse_dir(('history', 'countries'), game = 
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party'] or 'neutrality'
-    country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), game = game)
+    country['name'] = pyradox.yml.get_localisation('%s_%s' % (tag, ruling_party), game = game)
     countries[tag] = country
 
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory(game), 'history', 'states'))
@@ -41,7 +41,7 @@ for state in states.values():
     # if state['id'] == 50: print('state50', history)
     state['owner'] = history['owner']
     state['owner_name'] = countries[history['owner']]['name']
-    state['human_name'] = pyradox.yml.get_localization(state['name'], game = game)
+    state['human_name'] = pyradox.yml.get_localisation(state['name'], game = game)
     country = countries[tag]
 
     country['states'] = (country['states'] or 0) + 1

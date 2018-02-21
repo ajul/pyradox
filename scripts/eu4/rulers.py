@@ -22,7 +22,7 @@ s += "! Leader !! Country !! Date !! {{icon|adm}} !! {{icon|dip}} !! {{icon|mil}
 
 for tag, country in countries.items():
     country_name = load.country.get_country_name(tag)
-    if country_name is None: print('Missing localization: ' + tag)
+    if country_name is None: print('Missing localisation: ' + tag)
 
     for date, data in country.items():
         if not isinstance(date, pyradox.Date): continue

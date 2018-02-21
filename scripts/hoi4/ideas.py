@@ -18,7 +18,7 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_dir
     tag, name = compute_country_tag_and_name(filename)
     country['tag'] = tag
     ruling_party = country['set_politics']['ruling_party'] or 'neutrality'
-    country['name'] = pyradox.yml.get_localization('%s_%s' % (tag, ruling_party), game = 'HoI4')
+    country['name'] = pyradox.yml.get_localisation('%s_%s' % (tag, ruling_party), game = 'HoI4')
     if country['name'] is None: print(tag)
     countries[tag] = country
 
@@ -56,7 +56,7 @@ result = pyradox.Tree()
 idea_data = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'common', 'ideas'), merge_levels = 2)['ideas']
 for idea_type in types_to_tabulate:
     ideas = idea_data[idea_type]
-    type_name = pyradox.yml.get_localization(idea_type, game = 'HoI4')
+    type_name = pyradox.yml.get_localisation(idea_type, game = 'HoI4')
     for idea_key, idea in ideas.items():
         if idea_key == 'designer': continue
         row = pyradox.Tree()
@@ -78,8 +78,8 @@ for idea_type in types_to_tabulate:
             print(idea)
             row['country'] = 'Generic'
 
-        row['name'] = pyradox.yml.get_localization(idea_key, game = 'HoI4') or (
-            row['tag'] and pyradox.yml.get_localization('%s_%s' % (row['tag'], idea_key), game = 'HoI4')
+        row['name'] = pyradox.yml.get_localisation(idea_key, game = 'HoI4') or (
+            row['tag'] and pyradox.yml.get_localisation('%s_%s' % (row['tag'], idea_key), game = 'HoI4')
             )
 
         if 'research_bonus' in idea:
@@ -89,7 +89,7 @@ for idea_type in types_to_tabulate:
         for trait in idea.find_all('traits'):
             row.append('traits', trait)
         row['trait_display'] = '<br/>'.join(
-            pyradox.yml.get_localization(trait_key, game = 'HoI4') for trait_key in idea.find_all('traits')).replace('\\n', ' ')
+            pyradox.yml.get_localisation(trait_key, game = 'HoI4') for trait_key in idea.find_all('traits')).replace('\\n', ' ')
         result.append(idea_key, row)
 
 traits = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('HoI4'), 'common', 'country_leader', '00_traits.txt'))['leader_traits']
@@ -151,17 +151,17 @@ def compute_effects(k, v):
         result = ''
         for equipment_type, effects in equipment_bonuses.items():
             equipment_type_name = (
-                pyradox.yml.get_localization(equipment_type, game = 'HoI4') or pyradox.format.human_title(equipment_type)
+                pyradox.yml.get_localisation(equipment_type, game = 'HoI4') or pyradox.format.human_title(equipment_type)
                 or pyradox.format.human_title(equipment_type))
             for effect_key, magnitude in effects.items():
-                effect_name = pyradox.yml.get_localization('modifier_' + effect_key, game = 'HoI4') or pyradox.format.human_title(effect_key)
+                effect_name = pyradox.yml.get_localisation('modifier_' + effect_key, game = 'HoI4') or pyradox.format.human_title(effect_key)
                 magnitude_string = compute_magnitude_string(effect_key, magnitude)
                 result += '<li>%s %s: %s</li>' % (equipment_type_name, effect_name, magnitude_string)
         return result
 
     if 'research_bonus' in v:
         for category, magnitude in v['research_bonus'].items():
-            category_string = pyradox.yml.get_localization(category + '_research', game = 'HoI4') or (
+            category_string = pyradox.yml.get_localisation(category + '_research', game = 'HoI4') or (
                 pyradox.format.human_title(category) + ' Research Time')
             magnitude_string = compute_magnitude_string(category, -magnitude, False)
             result += '<li>%s: %s</li>' % (category_string, magnitude_string)
@@ -177,12 +177,12 @@ def compute_effects(k, v):
             elif effect_key == 'equipment_bonus':
                 subresult += equipment_bonus(magnitude)
             else:
-                effect_name = pyradox.yml.get_localization('modifier_' + effect_key, game = 'HoI4') or pyradox.format.human_title(effect_key)
+                effect_name = pyradox.yml.get_localisation('modifier_' + effect_key, game = 'HoI4') or pyradox.format.human_title(effect_key)
                 magnitude_string = compute_magnitude_string(effect_key, magnitude)
                 subresult += '<li>%s: %s</li>' % (effect_name, magnitude_string)
         if trait_key not in trait_result.keys():
             row = pyradox.Tree()
-            row['name'] = pyradox.yml.get_localization(trait_key, game = 'HoI4').replace('\\n', ' ')
+            row['name'] = pyradox.yml.get_localisation(trait_key, game = 'HoI4').replace('\\n', ' ')
             row['type'] = v['type']
             row['text'] = '<ul>' + subresult + '</ul>'
             

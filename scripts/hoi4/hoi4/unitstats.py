@@ -80,7 +80,7 @@ def units_at_year(year):
     return units
 
 def compute_unit_name(unit_key, unit = None):
-    return pyradox.yml.get_localization(unit_key, game = 'HoI4') or pyradox.format.human_string(unit_key)
+    return pyradox.yml.get_localisation(unit_key, game = 'HoI4') or pyradox.format.human_string(unit_key)
     
 def compute_unit_type(unit):
     if unit["map_icon_category"] == "ship":
