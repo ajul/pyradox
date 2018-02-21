@@ -32,14 +32,17 @@ def parse(s, filename=""):
     token_data = lex(lines, filename)
     return parse_tree(token_data, filename)
 
-def parse_file(path, game=None, verbose=False):
+def parse_file(path, game=None, path_relative_to_game=True, verbose=False):
     """
     Parse a single file and return a Tree.
     path, game: 
         If game is None, path is a full path and the game is determined from that.
         Or game can be supplied, in which case path is a path relative to the game directory.
     """
-    path, game = pyradox.config.combine_path_and_game(path, game)
+    if not path_relative_to_game:
+        pass
+    else:
+        path, game = pyradox.config.combine_path_and_game(path, game)
     encodings = game_encodings[game]
     
     lines = readlines(path, encodings)
@@ -343,7 +346,7 @@ def parse_tree(token_data, filename, start_pos = 0):
     """Given a list of (token_type, token_string, line_number) from the lexer, produces a Tree."""
     is_top_level = (start_pos == 0)
      # if starting position is 0, check for extra token at beginning
-    if start_pos == 0 and len(token_data) >= 1 and token_data[0][1] == 'EU4txt':
+    if start_pos == 0 and len(token_data) >= 1 and re.search('txt$', token_data[0][1]):
         token_type, token_string, line_number = token_data[0]
         print('%s, line %d: Skipping header token "%s".' % (filename, line_number + 1, token_string))
         start_pos = 1 # skip first token
