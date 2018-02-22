@@ -63,7 +63,7 @@ class Tree():
         def prettyprint_group(self, level, indent_string, include_comments):
             """
             Some trickiness here. Assumes that any indentation for the first line has already been performed.
-            If there are no comments, return (value string, False), so following values may be placed on the same line.
+            If there are no comments and the value is not a Tree, return (value string, False), so following values may be placed on the same line.
             Otherwise, return (string ending in newline, True).
             """
             result = ''
@@ -74,11 +74,17 @@ class Tree():
                     has_pre_comment = True
                     result += '\n%s#%s' % (indent_string * level, pre_comment)
             
-            if has_pre_comment:
+            if has_pre_comment or isinstance(self.value, Tree):
                 result += '\n%s' % (indent_string * level)
             
-            # Output value. At current trees are not valid inside groups.
-            result += pyradox.token.make_token_string(self.value) + ' '
+            # Output value.
+            if isinstance(self.value, Tree):
+                need_indent = True
+                result += '{\n'
+                result += self.value.prettyprint(level + 1)
+                result += indent_string * level + '}'
+            else:
+                result += pyradox.token.make_token_string(self.value) + ' '
             
             if include_comments and self.line_comment is not None:
                 need_indent = True
@@ -318,7 +324,7 @@ class Tree():
         
         for item in self._data:
             if group_key is not None: # Last item was in a group.
-                if item.in_group and pyradox.datatype.util.match(item.key, group_key) and not isinstance(item.value, Tree):
+                if item.in_group and pyradox.datatype.util.match(item.key, group_key):
                     # Continue the previous group.
                     if needs_indent:
                         result += indent_string * (level + 1)
@@ -329,7 +335,7 @@ class Tree():
                     # End the group.
                     group_key = None
                     result += indent_string * level + '}\n'
-            if item.in_group and not isinstance(item.value, Tree):
+            if item.in_group:
                 # Start a group.
                 group_key = item.key
                 result += '%s%s %s { ' % (indent_string * level, item.key, item.operator)
