@@ -1,6 +1,5 @@
 import _initpath
-
-
+import pyradox
 import os
 
 weapon_path = os.path.join(
@@ -11,7 +10,6 @@ weapon_path = os.path.join(
 
 data = pyradox.csv.parse_file(weapon_path)
 
-print(data.to_wiki())
-f = open('out/weapons.csv', 'w')
-f.write(data.to_csv())
+f = open('out/weapons.wiki', 'w')
+f.write(pyradox.filetype.table.make_table(data, 'wiki'))
 f.close()
