@@ -6,6 +6,7 @@ from pyradox.error import *
 
 import csv
 import os
+import re
 import warnings
 
 encoding = 'cp1252'
@@ -18,27 +19,26 @@ class ParadoxDialect(csv.Dialect):
 
 csv.register_dialect('paradox', ParadoxDialect)
     
-def parse_file(filename, verbose=False):
+def parse_file(filename, headings = None):
     with open(filename, encoding=encoding) as f:
-        lines = f.readlines()
-    if verbose: print('Parsing file %s.' % filename)
-    return parse(lines, filename)
+        lines = [line for line in f.readlines() if not re.match('#.*', line)]
+    return parse(lines, filename, headings = headings)
     
-def parse_dir(dirname, verbose=False):
-    """Given a directory, iterate over the content of the .csv files in that directory"""
+def parse_dir(dirname):
+    """Given a directory, iterate over the contents of the .csv files in that directory"""
     for filename in os.listdir(dirname):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
             _, ext = os.path.splitext(fullpath)
             if ext == ".csv":
-                yield filename, parse_file(fullpath, verbose)
+                yield filename, parse_file(fullpath)
 
-def parse(lines, filename):
+def parse(lines, filename, headings = None):
+    """ headings: Specify the headings explicitly. Otherwise they are read from the first line in the file. """
     reader = csv.reader(lines, dialect = ParadoxDialect)
-    headings = next(reader, None)
     
     if headings is None:
-        raise ParseError('%s, row 1 (headings): csv file must have at least one row.' % filename)
+        headings = next(reader)
     
     result = pyradox.Tree()
     
