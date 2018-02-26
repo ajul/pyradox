@@ -92,7 +92,7 @@ def parse_walk(dirname, *args, **kwargs):
 token_types = [
     # keysymbols
     ('whitespace', r'\s+'),
-    ('operator', r'[=><]'),
+    ('operator', r'<=?|>=?|='),
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
