@@ -19,10 +19,15 @@ class ParadoxDialect(csv.Dialect):
 
 csv.register_dialect('paradox', ParadoxDialect)
     
-def parse_file(filename, headings = None):
-    with open(filename, encoding=encoding) as f:
+def parse_file(path, game = None, path_relative_to_game = True, headings = None):
+    if not path_relative_to_game:
+        pass
+    else:
+        path, game = pyradox.config.combine_path_and_game(path, game)
+   
+    with open(path, encoding=encoding) as f:
         lines = [line for line in f.readlines() if not re.match('#.*', line)]
-    return parse(lines, filename, headings = headings)
+    return parse(lines, path, headings = headings)
     
 def parse_dir(dirname):
     """Given a directory, iterate over the contents of the .csv files in that directory"""
@@ -57,8 +62,8 @@ def parse(lines, filename, headings = None):
             heading = headings[col_index]
             row_token = row_tokens[col_index]
             value = pyradox.token.make_primitive(row_token, default_token_type = 'str')
-            tree_row.append(heading, row_token)
-            
+            tree_row.append(heading, value)
+    
     return result 
 
 def write_tree(tree, filename, column_specs, dialect, filter_function = None, sort_function = None):
