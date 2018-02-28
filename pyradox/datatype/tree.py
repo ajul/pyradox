@@ -370,7 +370,31 @@ class Tree():
         result = copy.deepcopy(self)
         result.replaced_key_with_subkey(key, subkey)
         return result
+    
+    def apply_defines(self):
+        """
+        For every top-level key-value whose key starts with '@', recursively replace all values with that key with a deep copy of that value.
         
+        Non-destructive (returns a copy).
+        """
+
+        # Compute dictionary of substitutions.
+        sub = {}
+        for key, value in self.items():
+            if isinstance(key, str) and key[0] == '@':
+                sub[key] = value
+        
+        result = copy.deepcopy(self)
+        result._apply_defines_internal(sub)
+        return result
+    
+    def _apply_defines_internal(self, sub):
+        for item in self._data:
+            if item.value in sub:
+                item.value = copy.deepcopy(sub[item.value])
+            elif isinstance(item.value, Tree):
+                item.value._apply_defines_internal(sub)
+    
     # conversion methods
     
     def to_python(self, duplicate_action = 'list'):

@@ -61,7 +61,7 @@ def parse_dir(path, game=None, *args, **kwargs):
             if ext == ".txt":
                 yield filename, parse_file(fullpath, game = game, *args, **kwargs)
 
-def parse_merge(path, game=None, merge_levels = 0, *args, **kwargs):
+def parse_merge(path, game=None, merge_levels = 0, apply_defines = False, *args, **kwargs):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
     path, game = pyradox.config.combine_path_and_game(path, game)
     
@@ -72,6 +72,8 @@ def parse_merge(path, game=None, merge_levels = 0, *args, **kwargs):
             _, ext = os.path.splitext(fullpath)
             if ext == ".txt":
                 tree = parse_file(fullpath, game = game, *args, **kwargs)
+                if apply_defines:
+                    tree = tree.apply_defines()
                 result.merge(tree, merge_levels)
     return result
 
