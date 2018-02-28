@@ -55,24 +55,34 @@ def parse_file(path):
     lines = readlines(path)
     return {key : value for key, value in parse_lines(lines, path)}
     
-def parse_dir(path):
+def parse_walk(path):
     result = {}
-    for filename in os.listdir(path):
-        fullpath = os.path.join(path, filename)
-        if not os.path.isfile(fullpath): continue
-        base, ext = os.path.splitext(fullpath)
-        if ext != '.yml': continue
-        if not re.search('l_%s$' % pyradox.get_language(), base): continue
-        result.update(parse_file(fullpath))
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            fullpath = os.path.join(root, file)
+            base, ext = os.path.splitext(file)
+            if ext != '.yml': continue
+            if not re.search('l_%s$' % pyradox.get_language(), base): continue
+            result.update(parse_file(fullpath))
     return result
     
-def get_localisation(key, game):
+def get_localisation(key, game, process_substitutions = True):
+    """
+    process_substitutions: If true, items between $ signs will be replaced with the localisation with that key.
+    """
+    def replace_substitution(m):
+        return get_localisation(m.group(1), game, process_substitutions = True) or ''
+    
     if game not in localisation_cache:
         localisation_path = os.path.join(pyradox.get_game_directory(game), 'localisation')
-        localisation_cache[game] = parse_dir(localisation_path)
+        localisation_cache[game] = parse_walk(localisation_path)
     
     if key.lower() in localisation_cache[game]:
-        return pyradox.token.make_string(localisation_cache[game][key.lower()])
+        result = pyradox.token.make_string(localisation_cache[game][key.lower()])
+        if process_substitutions:
+            # TODO: are $ signs escapable?
+            result = re.sub(r'\$(.*?)\$', replace_substitution, result)
+        return result
     else: 
         return None
 
