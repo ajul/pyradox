@@ -1,3 +1,5 @@
+import pyradox
+
 slot_sizes = {
     'small' : 1,
     'point_defence' : 1,
@@ -142,7 +144,21 @@ def special_string(key, weapon):
     return '<br/>'.join(items)
     
 def is_missile(key, weapon):
-    return weapon['missile_speed'] > 0.0
+    return weapon['missile_health'] > 0.0
 
 def slot_string(key, weapon):
     return '{{icon|slot %s}}' % slot_icons[weapon['size'].lower()]
+
+def icon_and_name(k, v):
+    tech = v['prerequisites'].replace('_', ' ')
+    name = pyradox.get_localisation(k, game = 'Stellaris')
+
+    return '[[File:%s.png|26px]] %s' % (tech, name)
+    
+def weapon_category(key, weapon):
+    if weapon['type'] == 'instant': return weapon['tags'] or 'none'
+    else: return weapon['type'] or 'none'
+    
+def sort_function(key, weapon):
+    component_set = weapon['prerequisites'] or key
+    return component_set, slot_sizes[weapon['size'].lower()]

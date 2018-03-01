@@ -15,6 +15,7 @@ default_values['shield_damage'] = 1.0
 default_values['armor_penetration'] = 0.0
 default_values['shield_penetration'] = 0.0
 default_values['tracking'] = 0.0
+default_values['prerequisites'] = 'Ship part strike craft scout 1'
 
 result_data = pyradox.Tree()
 
@@ -26,8 +27,8 @@ for strike_craft in txt_data.find_all('strike_craft_component_template'):
     result_data[key] = strike_craft
 
 column_specs = [
-    ('Weapon', lambda k, v: pyradox.get_localisation(k, game = 'Stellaris')),
-    #('Size', stellaris.weapon.slot_string),
+    ('Weapon', stellaris.weapon.icon_and_name),
+    ('Size', stellaris.weapon.slot_string),
     ('{{icon|minerals}}<br/>Cost', '%(cost)d'),
     ('{{icon|power}}<br/>Power', lambda k, v: str(abs(v['power']))),
     ('{{icon|damage}}<br/>Average<br/>damage', lambda k, v: '%0.1f' % stellaris.weapon.average_damage(v)),
@@ -44,5 +45,8 @@ column_specs = [
     ]
 
 with open('out/strike_craft.wiki', 'w') as outfile:
-    outfile.write(pyradox.filetype.table.make_table(result_data, 'wiki', column_specs))   
+    outfile.write(pyradox.filetype.table.make_table(
+        result_data, 'wiki',
+        column_specs,
+        table_classes = ["wikitable sortable mw-collapsible mw-collapsed"]))   
 
