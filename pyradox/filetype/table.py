@@ -135,6 +135,27 @@ def make_table(tree, dialect, column_specs = None, filter_function = None, sort_
     
     return table
 
+def make_tables(tree, dialect, split_function, filter_function = None, *args, **kwargs):
+    # TODO: better version
+    
+    split_set = set()
+    
+    if filter_function is None: filter_function = lambda key, row: True
+    
+    for key, row in tree.items():
+        if filter_function(key, row):
+            split_id = split_function(key, row)
+            split_set.add(split_id)
+        
+    result = ''
+    
+    for split_id in sorted(split_set):
+        filter_function = lambda k, v: split_function(k, v) == split_id
+        result += make_table(tree, dialect, filter_function = filter_function, *args, **kwargs)
+        result += '\n'
+    
+    return result
+    
 def apply_format_spec(key, row, format_spec):
     """
     Produces a string from a key-row pair based on the format_spec.
