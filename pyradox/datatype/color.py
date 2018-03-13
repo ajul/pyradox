@@ -1,3 +1,4 @@
+import pyradox.image
 from pyradox.error import *
 
 import warnings
@@ -62,3 +63,13 @@ class Color():
             return '%s { %d %d %d }' % ((self.colorspace,) + tuple(self.channels))
         else:
             return '%s { %0.2f %0.2f %0.2f }' % ((self.colorspace,) + tuple(self.channels))
+
+    def __iter__(self):
+        for x in self.channels: yield x
+            
+    def to_rgb(self):
+        if self.colorspace == 'rgb': 
+            return Color(self.channels, 'rgb')
+        elif self.colorspace == 'hsv':
+            channels = pyradox.image.HSVtoRGB(self.channels)
+            return Color(channels, 'rgb')
