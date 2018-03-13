@@ -48,7 +48,7 @@ def generate_edge_image(image, edge_width=1):
     
 
 class ProvinceMap():
-    def __init__(self, game, flip_y = False, position_type = None):
+    def __init__(self, game, flip_y = False):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
         self.game = game
         
@@ -120,21 +120,25 @@ class ProvinceMap():
         max_y = self.province_image.size[1] # use image coords
         
         if 'HoI4' in game:
-            # TODO: buildings.txt is states not provinces...
-            """
-            buildings = pyradox.csv.parse_file(['map', 'buildings.txt'], game = game, headings = headings)
-            for province_id, row in buildings.items():
+        
+            building_headings = ['state_id', 'type', 'x', 'x_offset', 'y', 'y_offset', 'sea_province_id']
+            buildings = pyradox.csv.parse_file(['map', 'buildings.txt'], game = game, headings = building_headings)
+            for _, row in buildings.items():
                 building_type = row['type']
+                x, y = int(row['x']), max_y - int(row['y'])
+                province_id = self.province_at_coordinates(x, y)
                 if building_type not in self.positions: self.positions[building_type] = {}
                 self.positions[building_type][province_id] = (row['x'], max_y - row['y'])
-            """
             
-            headings = ['province_id', 'type', 'x', 'x_offset', 'y', 'y_offset', 'z']
+            """
+            unitstack_headings = ['province_id', 'type', 'x', 'x_offset', 'y', 'y_offset', 'z']
             
             self.positions['unitstacks'] = {}
-            unitstacks = pyradox.csv.parse_file(['map', 'unitstacks.txt'], game = game, headings = headings)
+            unitstacks = pyradox.csv.parse_file(['map', 'unitstacks.txt'], game = game, headings = unitstack_headings)
             for province_id, row in unitstacks.items():
                 self.positions['unitstacks'][province_id] = (row['x'], max_y - row['y'])
+            """
+            
             print('Read province positions.')
         """
         else:
@@ -156,17 +160,23 @@ class ProvinceMap():
                         self.positions[province_id] = (position_data['x'], max_y - position_data['y'])
         """
         
-    def province_position(self, province_id, position_type = None):
-        if position_type is None or province_id not in self.positions[position_type]: 
-            position_type = 'centroid'
-        return self.positions[position_type][province_id]
+    def province_at_coordinates(self, x, y):
+        """ Return the province ID at a given coordinates in image space (y down). """
+        return self.province_id_by_color[self.province_image.getpixel((x, y))]
+        
+    def province_position(self, province_id, position_type = 'centroid'):
+        """ Returns the position of a province by ID. Various position types can be specified; default is just the centroid of the province's pixels."""
+        if province_id in self.positions[position_type]:
+            return self.positions[position_type][province_id]
+        else:
+            return self.positions['centroid'][province_id]
                 
     def is_water_province(self, province_id):
         """ Return true iff province is a water province """
         return province_id in self.water_provinces
 
     def get_adjacent(self, province_id):
-        """ Returns a list of adjacent province_id_s. """
+        """ Returns a list of adjacent province_ids. """
         # get province bounding box
         province_color_image = ImageChops.constant(self.province_image, self.province_color_by_id[province_id])
         mask = ImageChops.invert(ne_image(self.province_image, province_color_image))
@@ -256,7 +266,7 @@ class ProvinceMap():
         edge_image = generate_edge_image(province_image, edge_width)
         image.paste(edge_color, None, edge_image)
 
-    def overlay_icons(self, image, iconmap, offsetmap = {}, default_offset = (0, 0), position_type = None):
+    def overlay_icons(self, image, iconmap, offsetmap = {}, default_offset = (0, 0), position_type = 'centroid'):
         """
         Given a dict mapping province_id -> icon, overlays an icon on each province
         """
@@ -286,7 +296,7 @@ class ProvinceMap():
                      colormap = {}, offsetmap = {}, 
                      fontsize = 9, fontfile='tahoma.ttf', default_font_color=(0, 0, 0), antialias = False,
                      default_offset = (0, 0), horizontal_alignment = 'center', vertical_alignment = 'center',
-                     position_type = None):
+                     position_type = 'centroid'):
         """
         Given a textmap mapping province_id -> text or (province_id, ...) -> text, overlays text on each province
         Optional colormap definiting text color.
@@ -342,8 +352,8 @@ class ProvinceMap():
 
             text_size_x, text_size_y = draw.textsize(text, font=font)
 
-            text_start_x = int(scaled_pos_x - text_size_x / 2)
-            text_start_y = int(scaled_pos_y - text_size_y / 2)
+            text_start_x = scaled_pos_x
+            text_start_y = scaled_pos_y
             
             if province_id in offsetmap.keys():
                 text_start_x += offsetmap[province_id][0]
@@ -358,9 +368,9 @@ class ProvinceMap():
                 text_start_x -= text_size_x
                 
             if vertical_alignment == 'center':
-                text_start_y += 0.5 * text_size_y
-            elif vertical_alignment == 'top':
-                text_start_y += text_size_y
+                text_start_y -= 0.5 * text_size_y
+            elif vertical_alignment == 'bottom':
+                text_start_y -= text_size_y
 
             if province_id in colormap.keys():
                 color = colormap[province_id]
