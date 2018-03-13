@@ -10,8 +10,8 @@ import pyradox
 
 from PIL import Image
 
-#date = pyradox.Date('1936.1.1')
-date = pyradox.Date('1939.8.14')
+date = pyradox.Time('1936.1.1')
+#date = pyradox.Time('1939.8.14')
 
 vp_images = pyradox.image.split_strip(Image.open('in/onmap_victorypoints_strip.png'), subwidth = 29)
 capital_icon = vp_images[4]
@@ -45,7 +45,7 @@ country_color_file = pyradox.txt.parse_file(os.path.join(pyradox.get_game_direct
 for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'countries')):
     tag = compute_country_tag(filename)
     if tag in country_color_file:
-        country_colors[tag] = compute_color([x for x in country_color_file[tag].find_all('color')])
+        country_colors[tag] = country_color_file[tag]['color'].to_rgb()
     else:
         print('HACK FOR %s' % tag)
         country_colors[tag] = (165, 102, 152)
@@ -55,7 +55,7 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_dir
 
 # Load states.
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'))
-province_map = pyradox.worldmap.ProvinceMap()
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 colormap = {}
 iconmap = {}
