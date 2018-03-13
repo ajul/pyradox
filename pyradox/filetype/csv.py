@@ -54,7 +54,7 @@ def parse(lines, filename, headings = None):
             warnings.warn_explicit('Row length (%d) should be same as headings length (%d).' % (len(row_tokens), len(headings)), ParseWarning, filename, row_index + 2)
         
         # first column is the key
-        key = row_tokens[0]
+        key = pyradox.token.make_primitive(row_tokens[0], default_token_type = 'str')
         tree_row = pyradox.Tree()
         result.append(key, tree_row)
         
