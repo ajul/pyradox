@@ -52,7 +52,7 @@ for supply_area in supply_areas.values():
     supply_area_local_supply[supply_area['id']] = local_supply
     supply_area_transport[supply_area['id']] = transport
 
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 # provinces -> state id
 groups_local = {}

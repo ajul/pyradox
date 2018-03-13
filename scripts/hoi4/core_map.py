@@ -46,7 +46,7 @@ for filename, country in pyradox.txt.parse_dir(os.path.join(pyradox.get_game_dir
 
 # Load states.
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'))
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 # provinces -> state id
 colormap = {}

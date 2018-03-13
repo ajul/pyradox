@@ -19,7 +19,7 @@ for state in states.values():
     groups[k] = str(state['id'])
 
 # Load the province map using the default location set in pyradox.
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 out = province_map.generate_image({}, default_land_color=(255, 255, 255), edge_groups = groups.keys())
 

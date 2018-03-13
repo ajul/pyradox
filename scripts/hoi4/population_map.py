@@ -13,7 +13,7 @@ scale = 2.0
 
 # Load states.
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'), verbose=False)
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 # provinces -> state id
 groups = {}
