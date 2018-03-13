@@ -34,7 +34,7 @@ with open("out/%s_units_by_unit.txt" % unit_type, "w") as out_file:
     for unit_key, unit_years in sorted(tables.items(), key=lambda item: hoi4.unitstats.compute_unit_name(item[0])):
         unit_name = hoi4.unitstats.compute_unit_name(unit_key)
         out_file.write("== %s ==\n" % unit_name)
-        out_file.write(pyradox.table.make_table(unit_years, 'wiki', columns, sortable=False))
+        out_file.write(pyradox.table.make_table(unit_years, 'wiki', columns, table_classes = ["wikitable"]))
 
 
 

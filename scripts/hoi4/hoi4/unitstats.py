@@ -40,8 +40,15 @@ def units_at_year(year):
     for tech_key, tech in techs.items():
         if not isinstance(tech, pyradox.Tree): continue
         if (tech["start_year"] or year) > year: continue
-        if tech["allow"] and tech["allow"]["always"] == False: continue # ignore unallowed techs
+        
         if 'folder' in tech and 'doctrine' in tech['folder']['name']: continue # ignore doctrines
+        if "enable_subunits" in tech:
+            for unit_key in tech.find_all("enable_subunits"):
+                units[unit_key]["active"] = True
+                units[unit_key]["last_upgrade"] = max(units[unit_key]["last_upgrade"], tech["start_year"])
+        
+        if tech["allow"] and tech["allow"]["always"] == False: continue # ignore unallowed techs, but allow subunits through
+        
         if "enable_equipments" in tech:
             for equipment_key in tech.find_all("enable_equipments"):
                 equipment = equipments[equipment_key]
@@ -50,11 +57,8 @@ def units_at_year(year):
                     equipment_models[archetype_key] = equipments[equipment_key]
                 equipment_models[equipment_key] = equipments[equipment_key]
                 # TODO: drop ordering assumption?
-        if "enable_subunits" in tech:
-            for unit_key in tech.find_all("enable_subunits"):
-                units[unit_key]["active"] = True
-                units[unit_key]["last_upgrade"] = max(units[unit_key]["last_upgrade"], tech["start_year"])
-
+        
+        
         # non-equipment modifiers
         for unit_key, unit_data in units.items():
             for tech_unit_key, stats in tech.items():
@@ -200,7 +204,7 @@ base_columns = {
         ("Org.", "%(max_organisation)d"),
         ("Recovery", "%(default_morale)0.1f"),
         ("HP", "%(max_strength)0.1f"),
-        ("Hardness", compute_unit_stat_function("hardness", format_string = "%d", combiner = max, base_value = 0, display_zero = True, use_percent = True), None),
+        ("Hardness", compute_unit_stat_function("hardness", format_string = "%d", combiner = max, base_value = 0, display_zero = True, use_percent = True)),
         ("Soft attack", compute_unit_stat_function("soft_attack")),
         ("Hard attack", compute_unit_stat_function("hard_attack")),
         ("Air attack", compute_unit_stat_function("air_attack")),
