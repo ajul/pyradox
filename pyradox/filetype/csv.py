@@ -56,7 +56,7 @@ def parse(lines, filename, headings = None):
         # first column is the key
         key = row_tokens[0]
         tree_row = pyradox.Tree()
-        result[key] = tree_row
+        result.append(key, tree_row)
         
         for col_index in range(min(len(headings), len(row_tokens))):
             heading = headings[col_index]
