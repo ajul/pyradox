@@ -22,7 +22,7 @@ for weapon in txt_data.find_all('weapon_component_template'):
     total_data[key] = weapon + csv_data[key]
 
 column_specs = [
-    ('Weapon', stellaris.weapon.icon_and_name),
+    ('Weapon/Role', stellaris.weapon.icon_and_name_and_role),
     ('Size', stellaris.weapon.slot_string),
     ('{{icon|minerals}}<br/>Cost', '%(cost)d'),
     ('{{icon|power}}<br/>Power', lambda k, v: str(abs(v['power']))),
@@ -36,7 +36,7 @@ column_specs = [
     ]
 
 missile_specs = [
-    ('Weapon', stellaris.weapon.icon_and_name),
+    ('Weapon/Role', stellaris.weapon.icon_and_name_and_role),
     ('Size', stellaris.weapon.slot_string),
     ('{{icon|minerals}}<br/>Cost', '%(cost)d'),
     ('{{icon|power}}<br/>Power', lambda k, v: str(abs(v['power']))),
@@ -61,9 +61,10 @@ with open('out/weapons_split.wiki', 'w') as outfile:
     outfile.write(pyradox.filetype.table.make_tables(
         total_data, 'wiki',
         column_specs = column_specs,
+        filter_function = lambda k, v: not stellaris.weapon.is_missile(k, v),
         split_function = stellaris.weapon.weapon_category,
         sort_function = stellaris.weapon.sort_function,
-        table_classes = ["wikitable sortable mw-collapsible mw-collapsed"])) 
+        table_classes = ["wikitable sortable"])) 
 
 with open('out/missiles.wiki', 'w') as outfile:
     outfile.write(pyradox.filetype.table.make_table(
@@ -71,4 +72,4 @@ with open('out/missiles.wiki', 'w') as outfile:
         missile_specs,
         filter_function = stellaris.weapon.is_missile,
         sort_function = stellaris.weapon.sort_function,
-        table_classes = ["wikitable sortable mw-collapsible mw-collapsed"]))   
+        table_classes = ["wikitable sortable"]))   

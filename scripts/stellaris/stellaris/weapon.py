@@ -50,7 +50,7 @@ def normalized_dps(weapon):
     effectiveness_denominator = 0.5 + 0.25 * (1.0 - weapon['armor_penetration']) + 0.25 * (1.0 - weapon['shield_penetration'])
     
     accuracy_mult = weapon['accuracy']
-    result = dps_per_size * effectiveness_numerator / effectiveness_denominator / effectiveness_denominator
+    result = dps_per_size * accuracy_mult * effectiveness_numerator / effectiveness_denominator / effectiveness_denominator
     return result
 
 def float_to_255(x):
@@ -114,17 +114,17 @@ def special_description(key, weapon):
     elif shield > hull and shield > armor:
         text = 'anti-shield'
     else:
-        text = 'general-purpose'
+        return ''
 
     color = special_color(key, weapon)
 
     result = ''
-    result += '<span style="display:none;">%s</span>' % text
-    result += '<span style="color:%s; font-weight:bold;">%s</span>' % (color, text)
+    result += '<p style="color:%s; font-weight:bold; text-align:right; margin:0;">%s</p>' % (color, text)
     return result
     
 def special_string(key, weapon):
-    items = [special_description(key, weapon)]
+    #items = [special_description(key, weapon)]
+    items = []
 
     if weapon['hull_damage'] != 1.0:
         items.append('%d%% hull damage' % (weapon['hull_damage'] * 100.0))
@@ -141,7 +141,13 @@ def special_string(key, weapon):
     if weapon['shield_penetration'] != 0.0:
         items.append('%d%% shield penetration' % (weapon['shield_penetration'] * 100.0))
     
-    return '<br/>'.join(items)
+    result = '<br/>'.join(items)
+    
+    if len(items) > 2:
+        percent = 200.0 / len(items)
+        result = '<span style="font-size:%d%%;">%s</span>' % (percent, result)
+    
+    return result
     
 def is_missile(key, weapon):
     return weapon['missile_health'] > 0.0
@@ -154,6 +160,14 @@ def icon_and_name(k, v):
     name = pyradox.get_localisation(k, game = 'Stellaris')
 
     return '[[File:%s.png|26px]] %s' % (tech, name)
+    
+def icon_and_name_and_role(k, v):
+    line_0 = icon_and_name(k, v)
+    line_1 = special_description(k, v)
+    
+    if line_1 == '': return line_0
+    else:
+        return '%s<br/>%s' % (line_0, line_1)
     
 def weapon_category(key, weapon):
     if weapon['type'] == 'instant': return weapon['tags'] or 'none'
