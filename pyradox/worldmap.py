@@ -48,7 +48,7 @@ def generate_edge_image(image, edge_width=1):
     
 
 class ProvinceMap():
-    def __init__(self, game = None, flip_y = False):
+    def __init__(self, game, flip_y = False):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
         basedir = pyradox.get_game_directory(game)
         
@@ -177,7 +177,7 @@ class ProvinceMap():
                     merged_map[province_color] = default_land_color
         
         result = Image.new(self.province_image.mode, self.province_image.size)
-        result.putdata([merged_map[pixel] for pixel in self.province_image.getdata()])
+        result.putdata([tuple(merged_map[pixel]) for pixel in self.province_image.getdata()])
 
         if edge_width > 0:
             self.overlay_edges(result, edge_color, edge_width, groups = edge_groups)
