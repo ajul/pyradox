@@ -15,12 +15,14 @@ scale = 2.0
 
 # Load states.
 states = pyradox.txt.parse_merge(os.path.join(pyradox.get_game_directory('HoI4'), 'history', 'states'), verbose=False)
-province_map = pyradox.worldmap.ProvinceMap(basedir = pyradox.get_game_directory('HoI4'))
+province_map = pyradox.worldmap.ProvinceMap(game = 'HoI4')
 
 colormap = {}
 textmap = {}
 
 for state in states.values():
+    if 'buildings' not in state['history']:
+        continue
     for province_id, buildings in state['history']['buildings'].items():
         if isinstance(province_id, int) and building_type in buildings:
             count = buildings[building_type]

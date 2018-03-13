@@ -26,5 +26,5 @@ out = province_map.generate_image({}, default_land_color=(255, 255, 255), edge_c
 
 # unfortunately lakes don't have unitstacks.txt
 province_map.overlay_text(out, groups, fontfile = "tahoma.ttf", fontsize = 9, antialias = False)
-out.save('out/state__id_map.png')
+out.save('out/state_id_map.png')
 #pyradox.image.save_using_palette(out, 'out/province__id_map.png')
