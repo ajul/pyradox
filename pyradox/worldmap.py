@@ -64,7 +64,7 @@ class ProvinceMap():
         with open(definition_csv) as definition_file:
             csv_reader = csv.reader(definition_file, delimiter = ';')
             self.province_color_by_id = {}
-            self.province__idb_y_color = {}
+            self.province_id_by_color = {}
             self.water_provinces = set()
             self._adjacency = {} # lazy evaluation
 
@@ -83,7 +83,7 @@ class ProvinceMap():
                     province_color = (int(row[1]), int(row[2]), int(row[3]))
                     if row[4] in ("sea", "lake"): self.water_provinces.add(province_id) # HoI4
                     self.province_color_by_id[province_id] = province_color
-                    self.province__idb_y_color[province_color] = province_id
+                    self.province_id_by_color[province_color] = province_id
                     province_count += 1
                 except ValueError:
                     warnings.warn('Could not parse province definition from row "%s" of %s.' % (str(row), definition_csv))
