@@ -48,8 +48,10 @@ def generate_edge_image(image, edge_width=1):
     
 
 class ProvinceMap():
-    def __init__(self, game, flip_y = False):
+    def __init__(self, game, flip_y = False, position_type = None):
         """Creates a province map using the base game directory specified, defaulting to the one in pyradox.config."""
+        self.game = game
+        
         basedir = pyradox.get_game_directory(game)
         
         provinces_bmp = os.path.join(basedir, 'map', 'provinces.bmp')
@@ -91,37 +93,73 @@ class ProvinceMap():
             
             print("Read %d provinces from %s." % (province_count, definition_csv))
 
-        # read province positions
         self.positions = {}
-        max_y = self.province_image.size[1] # use image coords
-        positions_txt = os.path.join(basedir, 'map', 'positions.txt')
-        positions_tree = pyradox.parse_file(positions_txt, verbose=False)
-        if len(positions_tree) > 0:
+        self.positions['centroid'] = { province_id : (0.0, 0.0) for province_id in self.province_color_by_id.keys() }
+        self.province_sizes = { province_id : 0 for province_id in self.province_color_by_id.keys() }
+        
+        # compute province sizes and centroids (assume no provinces wrap around)
+        for index, pixel in enumerate(self.province_image.getdata()):
+            x = index % self.province_image.size[0]
+            y = index // self.province_image.size[0]
+            province_id = self.province_id_by_color[pixel]
+            self.province_sizes[province_id] += 1
             
-            for province_id, data in positions_tree.items():
-                if "position" in data:
-                    position_data = [x for x in data.find_all('position')]
-                    # second pair is unit position
-                    self.positions[province_id] = (position_data[2], max_y - position_data[3]) 
-                    
-                elif "text_position" in data:
-                    position_data = data['text_position']
-                    self.positions[province_id] = (position_data['x'], max_y - position_data['y'])
-                elif "building_position" in data:
-                    _, position_data = data['building_position'].at(0)
-                    self.positions[province_id] = (position_data['x'], max_y - position_data['y'])
+            prev_x, prev_y = self.positions['centroid'][province_id]
+            self.positions['centroid'][province_id] = (prev_x + x, prev_y + y)
+            
+        for province_id in self.positions['centroid'].keys():
+            size = self.province_sizes[province_id]
+            if size > 0:
+                prev_x, prev_y = self.positions['centroid'][province_id]
+                self.positions['centroid'][province_id] = (prev_x / size, prev_y / size)
+            else:
+                warnings.warn('Province %d has size 0.' % province_id)
+        
+        print('Computed province centroids.')
+        
+        max_y = self.province_image.size[1] # use image coords
+        
+        if 'HoI4' in game:
+            # TODO: buildings.txt is states not provinces...
+            """
+            buildings = pyradox.csv.parse_file(['map', 'buildings.txt'], game = game, headings = headings)
+            for province_id, row in buildings.items():
+                building_type = row['type']
+                if building_type not in self.positions: self.positions[building_type] = {}
+                self.positions[building_type][province_id] = (row['x'], max_y - row['y'])
+            """
+            
+            headings = ['province_id', 'type', 'x', 'x_offset', 'y', 'y_offset', 'z']
+            
+            self.positions['unitstacks'] = {}
+            unitstacks = pyradox.csv.parse_file(['map', 'unitstacks.txt'], game = game, headings = headings)
+            for province_id, row in unitstacks.items():
+                self.positions['unitstacks'][province_id] = (row['x'], max_y - row['y'])
+            print('Read province positions.')
+        """
         else:
-            # HoI4 fallback to unitstacks
-            with open(os.path.join(basedir, 'map', 'unitstacks.txt')) as position_file:
-                csv_reader = csv.reader(position_file, delimiter = ';')
-                for row in csv_reader:
-                    try:
-                        province_id = int(row[0])
-                        province_x = round(float(row[2]))
-                        province_y = round(float(row[4]))
-                        self.positions[province_id] = (province_x, max_y - province_y)
-                    except ValueError:
-                        pass
+            positions_txt = os.path.join(basedir, 'map', 'positions.txt')
+            positions_tree = pyradox.parse_file(positions_txt, verbose=False)
+            if len(positions_tree) > 0:
+                
+                for province_id, data in positions_tree.items():
+                    if "position" in data:
+                        position_data = [x for x in data.find_all('position')]
+                        # second pair is unit position
+                        self.positions[province_id] = (position_data[2], max_y - position_data[3]) 
+                        
+                    elif "text_position" in data:
+                        position_data = data['text_position']
+                        self.positions[province_id] = (position_data['x'], max_y - position_data['y'])
+                    elif "building_position" in data:
+                        _, position_data = data['building_position'].at(0)
+                        self.positions[province_id] = (position_data['x'], max_y - position_data['y'])
+        """
+        
+    def province_position(self, province_id, position_type = None):
+        if position_type is None or province_id not in self.positions[position_type]: 
+            position_type = 'centroid'
+        return self.positions[position_type][province_id]
                 
     def is_water_province(self, province_id):
         """ Return true iff province is a water province """
@@ -218,7 +256,7 @@ class ProvinceMap():
         edge_image = generate_edge_image(province_image, edge_width)
         image.paste(edge_color, None, edge_image)
 
-    def overlay_icons(self, image, iconmap, offsetmap = {}, default_offset = (0, 0)):
+    def overlay_icons(self, image, iconmap, offsetmap = {}, default_offset = (0, 0), position_type = None):
         """
         Given a dict mapping province_id -> icon, overlays an icon on each province
         """
@@ -226,7 +264,7 @@ class ProvinceMap():
         rel_scale_y = image.size[1] / self.province_image.size[1]
 
         for province_id, icon in iconmap.items():
-            pos_x, pos_y = self.positions[province_id]
+            pos_x, pos_y = self.province_position(province_id, position_type)
             scaled_pos_x, scaled_pos_y = pos_x * rel_scale_x, pos_y * rel_scale_y
 
             icon_size_x, icon_size_y = icon.size
@@ -244,7 +282,11 @@ class ProvinceMap():
             box = (icon_start_x, icon_start_y, icon_start_x + icon_size_x, icon_start_y + icon_size_y)
             image.paste(icon, box, icon)
 
-    def overlay_text(self, image, textmap, colormap = {}, offsetmap = {}, fontsize = 9, fontfile='tahoma.ttf', default_font_color=(0, 0, 0), antialias = False, default_offset = (0, 0)):
+    def overlay_text(self, image, textmap, 
+                     colormap = {}, offsetmap = {}, 
+                     fontsize = 9, fontfile='tahoma.ttf', default_font_color=(0, 0, 0), antialias = False,
+                     default_offset = (0, 0), horizontal_alignment = 'center', vertical_alignment = 'center',
+                     position_type = None):
         """
         Given a textmap mapping province_id -> text or (province_id, ...) -> text, overlays text on each province
         Optional colormap definiting text color.
@@ -261,10 +303,7 @@ class ProvinceMap():
         for province_id, text in textmap.items():
             if isinstance(province_id, int):
                 # single province: center on that province
-                if province_id not in self.positions:
-                    warnings.warn(MapWarning('Textmap references province ID %d with no position for text string "%s".' % (province_id, text)))
-                    continue
-                pos_x, pos_y = self.positions[province_id]
+                pos_x, pos_y = self.province_position(province_id, position_type)
             else:
                 # set of provinces: find centroid
                 center_x, center_y = 0.0, 0.0
@@ -274,7 +313,7 @@ class ProvinceMap():
                         warnings.warn(MapWarning('Textmap references province ID %d with no position for text string "%s".' % (sub_province_id, text)))
                         continue
                     center_province_id = sub_province_id
-                    sub_pos_x, sub_pos_y = self.positions[sub_province_id]
+                    sub_pos_x, sub_pos_y = self.province_position(sub_province_id, position_type)
                     center_x += sub_pos_x
                     center_y += sub_pos_y
                     province_count += 1
@@ -312,6 +351,16 @@ class ProvinceMap():
             else:
                 text_start_x += default_offset[0]
                 text_start_y += default_offset[1]
+                
+            if horizontal_alignment == 'center':
+                text_start_x -= 0.5 * text_size_x
+            elif horizontal_alignment == 'right':
+                text_start_x -= text_size_x
+                
+            if vertical_alignment == 'center':
+                text_start_y += 0.5 * text_size_y
+            elif vertical_alignment == 'top':
+                text_start_y += text_size_y
 
             if province_id in colormap.keys():
                 color = colormap[province_id]
