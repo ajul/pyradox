@@ -377,4 +377,4 @@ class ProvinceMap():
             else:
                 color = default_font_color
             
-            draw.text((text_start_x, text_start_y), text, font=font, fill=color)
+            draw.text((round(text_start_x), round(text_start_y)), text, font=font, fill=color)
