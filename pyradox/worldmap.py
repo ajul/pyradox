@@ -319,7 +319,7 @@ class ProvinceMap():
                 center_x, center_y = 0.0, 0.0
                 province_count = 0
                 for sub_province_id in province_id:
-                    if sub_province_id not in self.positions:
+                    if sub_province_id not in self.positions[position_type]:
                         warnings.warn(MapWarning('Textmap references province ID %d with no position for text string "%s".' % (sub_province_id, text)))
                         continue
                     center_province_id = sub_province_id
@@ -329,19 +329,19 @@ class ProvinceMap():
                     province_count += 1
                     
                 if province_count == 0:
-                    warnings.warn(MapWarning('No valid provinces were found for text string "%s".' % (sub_province_id, text)))
+                    warnings.warn(MapWarning('No valid provinces were found for text string "%s".' % text))
                     continue
                 
                 center_x /= province_count
                 center_y /= province_count
                 
                 # then choose province nearest to centroid
-                pos_x, pos_y = self.positions[center_province_id]
+                pos_x, pos_y = self.province_position(center_province_id, position_type)
                 dist_sq = (pos_x - center_x) ** 2 + (pos_y - center_y) ** 2
                 for sub_province_id in province_id:
-                    if sub_province_id not in self.positions:
+                    if sub_province_id not in self.positions[position_type]:
                         continue # already warned
-                    sub_pos_x, sub_pos_y = self.positions[sub_province_id]
+                    sub_pos_x, sub_pos_y = self.province_position(sub_province_id, position_type)
                     sub_dist_sq = (sub_pos_x - center_x) ** 2 + (sub_pos_y - center_y) ** 2
                     if sub_dist_sq < dist_sq:
                         center_province_id = sub_province_id
