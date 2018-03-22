@@ -2,7 +2,7 @@ import hoi4
 import re
 import pyradox
 
-factories_per_resource = 1.5 / 8.0
+production_per_resource = 1.5 / 8.0
 
 default_year = 1918
 
@@ -129,7 +129,7 @@ def compute_unit_total_cost(unit_key, unit_data):
         equipment = unit_data["equipments"][archetype_key]
         if "resources" not in equipment: continue
         result += quantity * (equipment["build_cost_ic"]
-                              + factories_per_resource * sum(equipment["resources"].values()) * equipment["build_cost_ic"])
+                              + production_per_resource * sum(equipment["resources"].values()) * equipment["build_cost_ic"])
     return "%d" % result
     
 def compute_equipment_cost(equipment_key, equipment):
@@ -141,7 +141,7 @@ def compute_equipment_resource_cost(equipment_key, equipment):
     
 def compute_equipment_total_cost(equipment_key, equipment):
     result = equipment['build_cost_ic']
-    if "resources" in equipment: result *= (1.0 + factories_per_resource * sum(equipment["resources"].values()))
+    if "resources" in equipment: result *= (1.0 + production_per_resource * sum(equipment["resources"].values()))
     return '%d' % result
 
 def compute_unit_stat_function(stat_key, format_string = "%0.1f", combiner = sum, base_value = None, display_zero = False, use_percent = False):
@@ -192,11 +192,11 @@ unit_type_years = {
     
 base_columns = {
     "land" : [
-        ("Prod. cost", compute_unit_cost),
-        ("Res. cost", compute_unit_resource_cost),
+        ("{{icon|Production cost}}", compute_unit_cost),
+        ("[[File:Resources unchecked.png|24px|Resource cost]]", compute_unit_resource_cost),
         ("Total cost", compute_unit_total_cost),
-        ("Manpower", "%(manpower)d"),
-        ("Train time", "%(training_time)d"),
+        ("{{icon|Manpower}}", "%(manpower)d"),
+        ("{{icon|Time|Training time}}", "%(training_time)d"),
         ("Supply", "%(supply_consumption)0.2f"),
         ("Weight", "%(weight)0.1f"),
         ("Width", "%(combat_width)d"),
@@ -214,8 +214,8 @@ base_columns = {
         ("Piercing", compute_unit_stat_function("ap_attack")),
         ],
     "naval" : [
-        ("IC cost", compute_unit_cost),
-        ("Resource cost", compute_unit_resource_cost),
+        ("{{icon|Production cost}}", compute_unit_cost),
+        ("[[File:Resources unchecked.png|24px]]", compute_unit_resource_cost),
         ("Total cost", compute_unit_total_cost),
         ("Port usage", compute_unit_stat_function("port_capacity_usage")),
         ("Speed", compute_unit_stat_function("naval_speed")),
@@ -229,8 +229,8 @@ base_columns = {
         ("Piercing", compute_unit_stat_function("ap_attack")),
         ],
     "air" : [
-        ("IC cost", compute_unit_cost),
-        ("Resource cost", compute_unit_resource_cost),
+        ("{{icon|Production cost}}", compute_unit_cost),
+        ("[[File:Resources unchecked.png|24px]]", compute_unit_resource_cost),
         ("Total cost", compute_unit_total_cost),
         ("Range", compute_unit_stat_function("air_range")),
         ("Speed", compute_unit_stat_function("maximum_speed")),

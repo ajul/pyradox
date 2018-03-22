@@ -36,8 +36,6 @@ for state in states.values():
         k = tuple(x for x in k)
         groups[k] = '%d' % resources
 
-
-
 # Create a blank map and scale it up 2x.
 out = province_map.generate_image(colormap, default_land_color=(255, 255, 255), edge_color=(191, 191, 191), edge_groups = groups.keys())
 # out = out.resize((out.size[0] * scale, out.size[1] * scale), Image.NEAREST)

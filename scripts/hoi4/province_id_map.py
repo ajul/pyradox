@@ -31,7 +31,7 @@ for sr in srs.values():
 
 textmap = {}
 colormap = {}
-for province_id in province_map.positions.keys():
+for province_id in province_map.positions['centroid'].keys():
     textmap[province_id] = '%d' % province_id
     if province_map.is_water_province(province_id):
         colormap[province_id] = (0, 0, 127)
