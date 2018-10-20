@@ -32,6 +32,13 @@ def parse(s, filename="<string>"):
     token_data = lex(lines, filename)
     return parse_tree(token_data, filename)
 
+def should_parse(fullpath, filename, filter_pattern = None):
+    if not os.path.isfile(fullpath): return False
+    _, ext = os.path.splitext(fullpath)
+    if not ext == '.txt': return False
+    if filter_pattern is not None and not re.search(filter_pattern, filename): return False
+    return True
+
 def parse_file(path, game=None, path_relative_to_game=True, verbose=False):
     """
     Parse a single file and return a Tree.
@@ -50,18 +57,16 @@ def parse_file(path, game=None, path_relative_to_game=True, verbose=False):
     token_data = lex(lines, path)
     return parse_tree(token_data, path)
     
-def parse_dir(path, game=None, *args, **kwargs):
+def parse_dir(path, game=None, filter_pattern = None, *args, **kwargs):
     """Given a directory, iterate over the content of the .txt files in that directory as Trees"""
     path, game = pyradox.config.combine_path_and_game(path, game)
     
     for filename in os.listdir(path):
         fullpath = os.path.join(path, filename)
-        if os.path.isfile(fullpath):
-            _, ext = os.path.splitext(fullpath)
-            if ext == ".txt":
-                yield filename, parse_file(fullpath, game = game, *args, **kwargs)
+        if should_parse(fullpath, filename, filter_pattern):
+            yield filename, parse_file(fullpath, game = game, *args, **kwargs)
 
-def parse_merge(path, game=None, merge_levels = 0, apply_defines = False, *args, **kwargs):
+def parse_merge(path, game=None, filter_pattern = None, merge_levels = 0, apply_defines = False, *args, **kwargs):
     """Given a directory, return a Tree as if all .txt files in the directory were a single file"""
     path, game = pyradox.config.combine_path_and_game(path, game)
     
@@ -69,21 +74,19 @@ def parse_merge(path, game=None, merge_levels = 0, apply_defines = False, *args,
     for filename in os.listdir(path):
         fullpath = os.path.join(path, filename)
         if os.path.isfile(fullpath):
-            _, ext = os.path.splitext(fullpath)
-            if ext == ".txt":
+            if should_parse(fullpath, filename, filter_pattern):
                 tree = parse_file(fullpath, game = game, *args, **kwargs)
                 if apply_defines:
                     tree = tree.apply_defines()
                 result.merge(tree, merge_levels)
     return result
 
-def parse_walk(dirname, *args, **kwargs):
+def parse_walk(dirname, filter_pattern = None, *args, **kwargs):
     """Given a directory, recursively iterate over the content of the .txt files in that directory as Trees"""
     for root, dirs, files in os.walk(dirname):
         for filename in files:
             fullpath = os.path.join(root, filename)
-            _, ext = os.path.splitext(fullpath)
-            if ext == ".txt":
+            if should_parse(fullpath, filename, filter_pattern):
                 yield filename, parse_file(fullpath, *args, **kwargs)
 
 # open questions:
