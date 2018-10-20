@@ -244,7 +244,7 @@ class Tree():
         result += other
         return result
 
-    # TODO: update
+    # TODO: update?
     
     def weak_update(self, other):
         """
@@ -253,7 +253,27 @@ class Tree():
         for key, value in other.items():
             if key not in self:
                 self.append(key, copy.deepcopy(value))
-                
+    
+    def inherit(self, other):
+        """
+        Recursively replaces all values of "inherit" with a copy of the corresponding value from other.
+        Topology must match. Assumes keys with inherit are unique.
+        """
+        for key, value in self.items():
+            if value == "inherit":
+                if key not in other:
+                    raise ValueError("Parent lacks key " + key)
+                self[key] = copy.deepcopy(other[key])
+            elif isinstance(value, Tree):
+                if key in other:
+                    other_value = other[key]
+                    if not isinstance(other_value, Tree):
+                        raise ValueError("Mismatched topology on key " + key)
+                else:
+                    # Check if there are dangling inherits.
+                    other_value = Tree()
+                value.inherit(other_value)
+        
     def merge_item(self, key, value, merge_levels = 0):
         if key in self and isinstance(self[key], Tree):
             self[key].merge(value, merge_levels)
@@ -394,6 +414,21 @@ class Tree():
                 item.value = copy.deepcopy(sub[item.value])
             elif isinstance(item.value, Tree):
                 item.value._apply_defines_internal(sub)
+    
+    def resolve_references(self):
+        """
+        For every top level value that is a string, replaces it with self[value] if that exists and is not a string.
+        Repeat until convergence.
+        """
+        converged = False
+        while converged is False:
+            converged = True
+            for key, value in self.items():
+                if isinstance(value, str) and value in self:
+                    replacement = self[value]
+                    if not isinstance(replacement, str):
+                        converged = False
+                        self[key] = copy.deepcopy(replacement)
     
     # conversion methods
     
