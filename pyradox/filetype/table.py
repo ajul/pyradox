@@ -99,7 +99,7 @@ def default_column_specs(key, row):
 
 def filter_and_sort_tree(tree, filter_function = None, sort_function = None):
     if filter_function is None: filter_function = lambda key, row: True
-    if sort_function is None: sort_function = lambda key, row: key
+    if sort_function is None: sort_function = lambda key, row: 0
     
     for key, row in sorted(tree.items(), key = lambda item: sort_function(*item)):
         if filter_function(key, row): yield key, row
