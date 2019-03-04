@@ -8,6 +8,8 @@ import pyradox
 
 
 from PIL import Image
+
+region_colors = pyradox.txt.parse_file(os.path.join(pyradox.get_game_directory('EU4'), 'map', 'area.txt'))
         
 province_map = pyradox.worldmap.ProvinceMap()
 
