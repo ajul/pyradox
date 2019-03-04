@@ -28,6 +28,9 @@ def make_token_string(value):
     if isinstance(value, bool):
         if value: return 'yes'
         else: return 'no'
+    elif isinstance(value, float):
+        # Only go to 3 decimal places.
+        return ('%0.3f' % value).rstrip('0')
     elif isinstance(value, str):
         #quote string if contains non-alphanumerics or is empty
         if len(value) == 0 or re.search("\W", value):

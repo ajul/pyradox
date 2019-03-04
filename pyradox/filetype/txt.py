@@ -159,7 +159,8 @@ class TreeParseState():
             self.result.end_comments = self.pending_comments
             return self.result
         else:
-            raise ParseError('%s, line %d: Error: Cannot end inner level with end of file.' % (self.filename, self.get_previous_line_number() + 1))
+            warnings.warn_explicit('Cannot end inner level with end of file.', ParseWarning, self.filename, self.get_previous_line_number() + 1)
+            return self.result, self.pos
     
     def consume(self):
         """ Read the next tuple from the list and advance the position counter. """

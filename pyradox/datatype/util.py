@@ -13,6 +13,12 @@ def to_python(value, duplicate_action = 'list'):
     else:
         return value
 
+def to_pyradox(value):
+    if isinstance(value, dict):
+        return pyradox.datatype.tree.Tree(value)
+    else:
+        return value
+
 def match(x, spec):
     if isinstance(spec, str) and isinstance(x, str): return x.lower() == spec.lower()
     else: return x == spec

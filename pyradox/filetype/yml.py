@@ -88,4 +88,10 @@ def get_localisation(key, game, process_substitutions = True):
 
 def get_localisation_desc(key, **kwargs):
     return get_localisation('%s_desc' % key, **kwargs)
-    
+
+def to_yml(dictionary):
+    result = 'l_english:\n'
+    for key, value in dictionary.items():
+        value = re.sub('"', '\\"', value)
+        result += ' %s:0 "%s"\n' % (key, value)
+    return result

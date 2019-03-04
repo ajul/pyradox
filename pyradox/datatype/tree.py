@@ -1,4 +1,5 @@
 from pyradox.error import *
+import pyradox.datatype.color
 import pyradox.datatype.time
 import pyradox.datatype.util
 import pyradox.token
@@ -23,8 +24,11 @@ class Tree():
         line_comments appear on the same line as the item.
         """
         def __init__(self, key, value, operator = None, in_group = False, pre_comments = None, line_comment = None):
+            #if not isinstance(key, allowable_key_types):
+            #    raise ValueError('Key %s is not of allowable type.' % key)
+                
             self.key = key
-            self.value = value
+            self.set_value(value)
             
             if pre_comments is None: self.pre_comments = []
             else: self.pre_comments = pre_comments
@@ -35,6 +39,12 @@ class Tree():
             else: self.operator = operator
             
             self.in_group = in_group
+        
+        def set_value(self, value):
+            value = pyradox.datatype.util.to_pyradox(value)
+            #if not isinstance(value, allowable_value_types):
+            #    raise ValueError('Value %s is not of allowable type.' % value)
+            self.value = value
 
         def prettyprint(self, level, indent_string, include_comments):
             result = ''
@@ -96,18 +106,37 @@ class Tree():
             return result, need_indent
             
     
-    def __init__(self, iterator = None, end_comments = None):
-        """Creates an tree from a key, value iterator if given, or an empty tree otherwise."""
-        if iterator is None:
+    def __init__(self, source = None, end_comments = None):
+        """Creates an tree from another Tree, a dict, or a key, value iterator if given, or an empty tree otherwise."""
+        if source is None:
             self._data = []
+        elif isinstance(source, Tree):
+            self._data = copy.deepcopy(source._data)
+        elif isinstance(source, dict):
+            self._from_python(source)
         else:
-            self._data = [Tree._Item(key, value) for (key, value) in iterator]
+            self._data = [Tree._Item(key, value) for (key, value) in source]
         
         if end_comments is None:
             self.end_comments = []
         else:
             self.end_comments = end_comments
+    
+    def _from_python(self, python_dict):
+        """
+        Recommended to use Python 3.6 or later, whose dicts preserve order.
+        """
+        self._data = []
         
+        for key, value in python_dict.items():
+            if isinstance(value, dict):
+                self.append(key, Tree(value))
+            elif isinstance(value, list):
+                for subvalue in value:
+                    self.append(key, subvalue, in_group = True)
+            else:
+                self.append(key, value)
+    
     # iterator methods
     def keys(self):
         """Iterator over the keys of this tree."""
@@ -235,6 +264,7 @@ class Tree():
         if idx is not None: del self._data[idx]
     
     def __iadd__(self, other):
+        other = Tree(other)
         for item in other._data:
             self._data.append(copy.deepcopy(item))
         return self
@@ -244,7 +274,12 @@ class Tree():
         result += other
         return result
 
-    # TODO: update?
+    def update(self, other):
+        """
+        Shallow update.
+        """
+        for key, value in other.items():
+            self[key] = value
     
     def weak_update(self, other):
         """
@@ -354,7 +389,7 @@ class Tree():
                 else:
                     # End the group.
                     group_key = None
-                    result += indent_string * level + '}\n'
+                    result += ' }\n'
             if item.in_group:
                 # Start a group.
                 group_key = item.key
@@ -366,7 +401,7 @@ class Tree():
         
         # If last item was in a group, close it.
         if group_key is not None:
-            result += indent_string * level + '}\n'
+            result += '}\n'
             
         for end_comment in self.end_comments:
             result += '%s#%s\n' % (indent_string * level, end_comment)
@@ -411,7 +446,7 @@ class Tree():
     def _apply_defines_internal(self, sub):
         for item in self._data:
             if item.value in sub:
-                item.value = copy.deepcopy(sub[item.value])
+                item.set_value(copy.deepcopy(sub[item.value]))
             elif isinstance(item.value, Tree):
                 item.value._apply_defines_internal(sub)
     
@@ -487,6 +522,7 @@ class Tree():
                     result[python_key] = python_value
             
         return result
+    
 
     # other methods
     def at_time(self, time = False, merge_levels = -1):
