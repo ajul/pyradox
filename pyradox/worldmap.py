@@ -63,7 +63,12 @@ class ProvinceMap():
         if flip_y:
             self.province_image = self.province_image.transpose(Image.FLIP_TOP_BOTTOM)
 
-        with open(definition_csv) as definition_file:
+        if game == 'EU4':
+            encoding = 'cp1252'
+        else:
+            encoding = None
+
+        with open(definition_csv, encoding=encoding) as definition_file:
             csv_reader = csv.reader(definition_file, delimiter = ';')
             self.province_color_by_id = {}
             self.province_id_by_color = {}
