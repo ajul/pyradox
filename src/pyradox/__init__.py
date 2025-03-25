@@ -1,4 +1,4 @@
-__version__ = '5.0.0a2'
+__version__ = '5.0.0'
 
 from pyradox.datatype import Color, Time, Tree
 from pyradox.filetype import csv, json, table, txt, yml

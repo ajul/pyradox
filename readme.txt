@@ -1,3 +1,9 @@
+Install:
+
+```
+pip install pyradox-txt-parser
+```
+
 Requires: 
 * Unicode-default Python. This includes the default CPython 3, IronPython, and probably Jython, but NOT the default CPython 2.
 * pyradox.worldmap requires PIL (or Pillow).
