@@ -100,7 +100,7 @@ class Tree():
             if isinstance(self.value, Tree):
                 need_indent = True
                 result += '{\n'
-                result += self.value.prettyprint(level + 1)
+                result += self.value.prettyprint(level + 1, indent_string=indent_string, include_comments=include_comments)
                 result += indent_string * level + '}'
             else:
                 result += pyradox.token.make_token_string(self.value) + ' '
