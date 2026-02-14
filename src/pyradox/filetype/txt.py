@@ -97,7 +97,8 @@ def parse_walk(dirname, filter_pattern = None, *args, **kwargs):
 token_types = [
     # keysymbols
     ('whitespace', r'\s+'),
-    ('operator', r'<=?|>=?|='),
+    # add more comparator operators used in Paradox scripts (e.g. '!=', '?=')
+    ('operator', r'!=|<=|>=|\?=|<=?|>=?|='),
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
@@ -193,6 +194,23 @@ class TreeParseState():
         token_type, token_string, token_line_number = self.consume()
         
         if pyradox.token.is_primitive_key_token_type(token_type):
+            # Handle trailing '.' cases used in CK3 title files:
+            #  - If we see a `time` key followed by a '.' token (e.g. "867.1.1.")
+            #    just consume the dot and continue.
+            #  - If we see a two-component `float` key ("YYYY.MM") followed by a
+            #    lone '.' token ("YYYY.MM.") treat that as a date with day=1.
+            if self.pos < len(self.token_data):
+                next_type, next_string, _ = self.token_data[self.pos]
+
+                if token_type == 'time' and next_string == '.':
+                    # consume and ignore the trailing dot after a full time token
+                    self.pos += 1
+                elif token_type == 'float' and re.match(r'^\d+\.\d+$', token_string) and next_string == '.':
+                    # convert "YYYY.MM." -> Time("YYYY.MM.1") and consume the dot
+                    token_string = token_string + '.1'
+                    token_type = 'time'
+                    self.pos += 1
+
             self.key_string = token_string
             self.key = pyradox.token.make_primitive(token_string, token_type)
             self.next = self.process_operator
