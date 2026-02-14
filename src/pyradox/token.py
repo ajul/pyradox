@@ -33,7 +33,7 @@ def make_token_string(value):
         return ('%0.3f' % value).rstrip('0')
     elif isinstance(value, str):
         #quote string if contains non-alphanumerics or is empty
-        if len(value) == 0 or re.search("\W", value):
+        if len(value) == 0 or re.search(r"\W", value):
             return '"%s"' % value
         else:
             return value

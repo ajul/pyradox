@@ -6,14 +6,15 @@ import warnings
 class Color():
     """
     Represents a color.
-    Available colorspaces: hsv (channel values 0.0-1.0) and rgb (channel values 0-255)
+    Available colorspaces: hsv (channel values 0.0-1.0), rgb (channel values 0-255) and hsv360 (channel values 0-360)
     """
-    
-    COLORSPACES = ['hsv', 'rgb']
-    
+
+    COLORSPACES = ['hsv', 'rgb', 'hsv360']
+
     COLORSPACE_DATA_TYPES = {
-        'hsv' : float,
-        'rgb'  : int,
+        'hsv'   : float,
+        'rgb'   : int,
+        'hsv360': int,
     }
     
     CHANNEL_NAMES = [
@@ -28,7 +29,7 @@ class Color():
     def __init__(self, channels, colorspace):
         """
         channels: a tuple
-        colorspace: hsv or rgb
+        colorspace: hsv, rgb or hsv360
         """
         colorspace = colorspace.lower()
         if colorspace not in self.COLORSPACES:
@@ -72,4 +73,8 @@ class Color():
             return Color(self.channels, 'rgb')
         elif self.colorspace == 'hsv':
             channels = pyradox.image.HSVtoRGB(self.channels)
+            return Color(channels, 'rgb')
+        elif self.colorspace == 'hsv360':
+            hsv_channels = [self[0] / 360.0, self[1] / 100.0, self[2] / 100.0]
+            channels = pyradox.image.HSVtoRGB(hsv_channels)
             return Color(channels, 'rgb')

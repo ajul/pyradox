@@ -97,7 +97,8 @@ def parse_walk(dirname, filter_pattern = None, *args, **kwargs):
 token_types = [
     # keysymbols
     ('whitespace', r'\s+'),
-    ('operator', r'<=?|>=?|='),
+    # add more comparator operators used in Paradox scripts (e.g. '!=', '?=')
+    ('operator', r'!=|<=|>=|\?=|<=?|>=?|='),
     ('begin', r'\{'),
     ('end', r'\}'),
     ('comment', r'#.*'),
@@ -193,6 +194,23 @@ class TreeParseState():
         token_type, token_string, token_line_number = self.consume()
         
         if pyradox.token.is_primitive_key_token_type(token_type):
+            # Handle trailing '.' cases used in CK3 title files:
+            #  - If we see a `time` key followed by a '.' token (e.g. "867.1.1.")
+            #    just consume the dot and continue.
+            #  - If we see a two-component `float` key ("YYYY.MM") followed by a
+            #    lone '.' token ("YYYY.MM.") treat that as a date with day=1.
+            if self.pos < len(self.token_data):
+                next_type, next_string, _ = self.token_data[self.pos]
+
+                if token_type == 'time' and next_string == '.':
+                    # consume and ignore the trailing dot after a full time token
+                    self.pos += 1
+                elif token_type == 'float' and re.match(r'^\d+\.\d+$', token_string) and next_string == '.':
+                    # convert "YYYY.MM." -> Time("YYYY.MM.1") and consume the dot
+                    token_string = token_string + '.1'
+                    token_type = 'time'
+                    self.pos += 1
+
             self.key_string = token_string
             self.key = pyradox.token.make_primitive(token_string, token_type)
             self.next = self.process_operator
@@ -250,6 +268,13 @@ class TreeParseState():
             else:
                 self.next = self.process_key
         elif token_type == 'begin':
+            # Try to infer an implicit color block: { x y z }
+            inferred_color, new_pos = self.maybe_infer_color(self.pos)
+            if inferred_color is not None:
+                self.pos = new_pos
+                self.append_to_result(inferred_color)
+                self.next = self.process_key
+                return
             # Value is a tree or group. First, determine whether this is a tree or group.
             lookahead_pos = self.pos
             level = 0
@@ -351,6 +376,44 @@ class TreeParseState():
         
         warnings.warn_explicit('Found colorspace token %s without following color.' % (colorspace_token_string.lower()), ParseWarning, self.filename, colorspace_token_line_number + 1)
         return None
+    
+    def maybe_infer_color(self, start_pos):
+        """
+        Try to infer a color block without an explicit colorspace.
+        Returns (Color, new_pos) or (None, start_pos).
+        Explicitly ignores certain keys like 'mask'.
+        """
+        # If the current key is 'mask', do NOT infer a color
+        if self.key_string and self.key_string.lower() == "mask":
+            return None, start_pos
+
+        channels = []
+        pos = start_pos
+
+        while pos < len(self.token_data):
+            token_type, token_string, _ = self.token_data[pos]
+
+            if token_type in ('int', 'float'):
+                channels.append(pyradox.token.make_primitive(token_string, token_type))
+                pos += 1
+            elif token_type == 'comment':
+                pos += 1
+            elif token_type == 'end':
+                pos += 1
+                break
+            else:
+                return None, start_pos
+
+        if len(channels) != 3:
+            return None, start_pos
+
+        # Infer colorspace
+        if all(isinstance(c, float) and 0.0 <= c <= 1.0 for c in channels):
+            colorspace = 'hsv'
+        else:
+            colorspace = 'rgb'
+
+        return pyradox.Color(channels, colorspace), pos
 
 def parse_tree(token_data, filename, start_pos = 0):
     """Given a list of (token_type, token_string, line_number) from the lexer, produces a Tree."""
